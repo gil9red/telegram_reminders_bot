@@ -78,6 +78,7 @@ class User(BaseModel):
                 username=user.username,
                 language_code=user.language_code,
             )
+            user_db.update_last_activity()
         return user_db
 
 
@@ -111,6 +112,7 @@ class Chat(BaseModel):
                 last_name=chat.last_name,
                 description=chat.description,
             )
+            chat_db.update_last_activity()
         return chat_db
 
 

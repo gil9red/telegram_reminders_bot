@@ -14,6 +14,7 @@ from telegram import Update
 from telegram.ext import CallbackContext
 
 import config
+import db
 
 
 def get_logger(file_name: str, dir_name="logs") -> logging.Logger:
@@ -57,9 +58,13 @@ def log_func(log: logging.Logger):
                 language_code: str | None = None
 
                 if update.effective_chat:
+                    db.Chat.get_from(update.effective_chat).update_last_activity()
+
                     chat_id = update.effective_chat.id
 
                 if update.effective_user:
+                    db.User.get_from(update.effective_user).update_last_activity()
+
                     user_id = update.effective_user.id
                     first_name = update.effective_user.first_name
                     last_name = update.effective_user.last_name
