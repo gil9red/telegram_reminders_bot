@@ -1,0 +1,2 @@
+peewee==3.14.8
+python-telegram-bot==13.9
