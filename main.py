@@ -11,7 +11,7 @@ from datetime import datetime, timedelta
 from threading import Thread
 from typing import Any
 
-from telegram import Bot
+from telegram import Bot, Message
 from telegram.ext import Updater, Defaults
 
 import commands
@@ -46,12 +46,14 @@ def do_checking_reminders():
             for reminder in query:
                 log.info("Send reminder: %s", reminder)
 
-                bot.send_message(
+                rs: Message = bot.send_message(
                     chat_id=reminder.chat_id,
                     text="⌛",
-                    reply_to_message_id=reminder.message_id,
+                    reply_to_message_id=reminder.original_message_id,
                 )
 
+                # TODO: На будущее
+                reminder.last_send_message_id = rs.message_id
                 reminder.is_sent = True
                 reminder.save()
 

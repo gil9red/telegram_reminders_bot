@@ -121,7 +121,7 @@ class Reminder(BaseModel):
     original_message_text = TextField()
     original_message_id = IntegerField()
     # TODO:
-    # last_send_message_id = IntegerField(null=True)
+    last_send_message_id = IntegerField(null=True)
     # TODO:
     target_time = DateTimeField(default=datetime.now)
     is_sent = BooleanField(default=False)
