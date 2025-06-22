@@ -17,14 +17,15 @@ import config
 import db
 
 
-def get_logger(file_name: str, dir_name="logs") -> logging.Logger:
+def get_logger(file_name: str, dir_name: Path = config.DIR / "logs") -> logging.Logger:
     log = logging.getLogger(file_name)
     log.setLevel(logging.DEBUG)
 
-    dir_name = Path(dir_name).resolve()
+    dir_name = dir_name.resolve()
     dir_name.mkdir(parents=True, exist_ok=True)
 
-    file_name = str(dir_name / Path(file_name).resolve().name) + ".log"
+    file_name = Path(file_name).resolve()
+    file_name = dir_name / (file_name.name + ".log")
 
     formatter = logging.Formatter(
         "[%(asctime)s] %(filename)s[LINE:%(lineno)d] %(levelname)-8s %(message)s"
