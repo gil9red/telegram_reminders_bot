@@ -46,10 +46,16 @@ def do_checking_reminders():
             for reminder in query:
                 log.info("Send reminder: %s", reminder)
 
+                # TODO: На будущее
+                if reminder.last_send_message_id is not None:
+                    reply_to_message_id: int = reminder.last_send_message_id
+                else:
+                    reply_to_message_id: int = reminder.original_message_id
+
                 rs: Message = bot.send_message(
                     chat_id=reminder.chat_id,
                     text="⌛",
-                    reply_to_message_id=reminder.original_message_id,
+                    reply_to_message_id=reply_to_message_id,
                 )
 
                 # TODO: На будущее
