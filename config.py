@@ -11,7 +11,10 @@ from pathlib import Path
 DIR: Path = Path(__file__).resolve().parent
 TOKEN_FILE_NAME: Path = DIR / "TOKEN.txt"
 
-TOKEN: str = os.environ.get("TOKEN") or TOKEN_FILE_NAME.read_text("utf-8").strip()
+try:
+    TOKEN: str = os.environ.get("TOKEN") or TOKEN_FILE_NAME.read_text("utf-8").strip()
+except:
+    raise Exception("TOKEN не задан")
 
 ERROR_TEXT: str = (
     "⚠ Возникла какая-то проблема. "
