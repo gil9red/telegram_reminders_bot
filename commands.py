@@ -38,10 +38,10 @@ def on_request(update: Update, _: CallbackContext):
         message.reply_text("Не получилось разобрать команду!")
         return
 
-    finish_time = parse_result.target_time
+    finish_time = parse_result.target_datetime
     Reminder.add(
         original_message=message,
-        target_time=finish_time,
+        target_datetime=finish_time,
         user=update.effective_user,
         chat=update.effective_chat,
     )
@@ -62,7 +62,7 @@ def on_get_reminders(update: Update, _: CallbackContext):
             & (Reminder.user_id == user.id)
             & (Reminder.is_sent == False)
         )
-        .order_by(Reminder.target_time)
+        .order_by(Reminder.target_datetime)
     )
 
     number = query.count()
@@ -70,7 +70,7 @@ def on_get_reminders(update: Update, _: CallbackContext):
     if number:
         text = f"Напоминаний ({number}):\n"
         for x in query:
-            text += "    " + get_pretty_datetime(x.target_time) + "\n"
+            text += "    " + get_pretty_datetime(x.target_datetime) + "\n"
     else:
         text = "Напоминаний нет"
 

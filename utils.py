@@ -6,26 +6,23 @@ __author__ = "ipetrash"
 
 import re
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 
 
+# TODO:
 PATTERN = re.compile(
     r"Напомни через (\d+) (секунд|минут|час|день|дня|дней|неделю|недели|недель)",
     flags=re.IGNORECASE,
 )
 
 
-# TODO:
-"""
-День рождения xxx в dd mmmm. Повтор каждый год. Напоминать за месяц, за неделю, за 3 дня, за день, в тот же день
-День рождения xxx в dd mmmm. Без повтора. Напоминать за месяц, за неделю, за 3 дня, за день, в тот же день
-Праздник xxx в dd mmmm. Повтор каждый год. Напоминать в тот же день
-"""
 @dataclass
 class ParseResult:
     # TODO: Заполнить инфу по разбору из шаблона
-    target_time: datetime
+    target_datetime: datetime
+    # repeat_every: str
+    # reminder_before: list[str] = field(default_factory=list)
 
 
 def parse_command(command: str) -> ParseResult | None:
@@ -51,7 +48,7 @@ def parse_command(command: str) -> ParseResult | None:
         return
 
     return ParseResult(
-        target_time=datetime.now() + timedelta(**data),
+        target_datetime=datetime.now() + timedelta(**data),
     )
 
 
@@ -75,4 +72,4 @@ if __name__ == "__main__":
 
     for command in commands:
         parse_result: ParseResult | None = parse_command(command)
-        print(fmt.format(command, get_pretty_datetime(parse_result.target_time)))
+        print(fmt.format(command, get_pretty_datetime(parse_result.target_datetime)))

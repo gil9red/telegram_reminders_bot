@@ -117,13 +117,13 @@ class Chat(BaseModel):
 
 
 class Reminder(BaseModel):
-    create_time = DateTimeField(default=datetime.now)
+    create_datetime = DateTimeField(default=datetime.now)
     original_message_text = TextField()
     original_message_id = IntegerField()
     # TODO:
     last_send_message_id = IntegerField(null=True)
     # TODO:
-    target_time = DateTimeField(default=datetime.now)
+    target_datetime = DateTimeField(default=datetime.now)
     is_sent = BooleanField(default=False)
     # TODO:
     # is_active = BooleanField(default=True)
@@ -136,14 +136,14 @@ class Reminder(BaseModel):
     def add(
         cls,
         original_message: telegram.Message,
-        target_time: datetime,
+        target_datetime: datetime,
         user: telegram.User,
         chat: telegram.Chat,
     ) -> "Reminder":
         return cls.create(
             original_message_id=original_message.message_id,
             original_message_text=original_message.text,
-            target_time=target_time,
+            target_datetime=target_datetime,
             user=User.get_from(user),
             chat=Chat.get_from(chat),
         )

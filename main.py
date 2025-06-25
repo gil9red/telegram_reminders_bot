@@ -38,9 +38,9 @@ def do_checking_reminders():
                 Reminder.select()
                 .where(
                     (Reminder.is_sent == False)
-                    & (Reminder.target_time <= expected_time)
+                    & (Reminder.target_datetime <= expected_time)
                 )
-                .order_by(Reminder.target_time)
+                .order_by(Reminder.target_datetime)
             )
 
             for reminder in query:
