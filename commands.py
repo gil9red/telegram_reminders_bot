@@ -15,7 +15,7 @@ from telegram.ext import (
 
 from common import log_func, log
 from db import Reminder
-from utils import parse_command, get_pretty_datetime
+from utils import ParseResult, parse_command, get_pretty_datetime
 
 
 @log_func(log)
@@ -33,11 +33,12 @@ def on_request(update: Update, _: CallbackContext):
     command = message.text
     log.debug(f"Command: {command!r}")
 
-    finish_time = parse_command(command)
-    if not finish_time:
+    parse_result: ParseResult | None = parse_command(command)
+    if not parse_result:
         message.reply_text("Не получилось разобрать команду!")
         return
 
+    finish_time = parse_result.target_time
     Reminder.add(
         original_message=message,
         target_time=finish_time,

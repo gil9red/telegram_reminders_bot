@@ -5,6 +5,8 @@ __author__ = "ipetrash"
 
 
 import re
+
+from dataclasses import dataclass
 from datetime import datetime, timedelta
 
 
@@ -14,7 +16,19 @@ PATTERN = re.compile(
 )
 
 
-def parse_command(command: str) -> datetime | None:
+# TODO:
+"""
+День рождения xxx в dd mmmm. Повтор каждый год. Напоминать за месяц, за неделю, за 3 дня, за день, в тот же день
+День рождения xxx в dd mmmm. Без повтора. Напоминать за месяц, за неделю, за 3 дня, за день, в тот же день
+Праздник xxx в dd mmmm. Повтор каждый год. Напоминать в тот же день
+"""
+@dataclass
+class ParseResult:
+    # TODO: Заполнить инфу по разбору из шаблона
+    target_time: datetime
+
+
+def parse_command(command: str) -> ParseResult | None:
     m = PATTERN.search(command)
     if not m:
         return
@@ -36,7 +50,9 @@ def parse_command(command: str) -> datetime | None:
     else:
         return
 
-    return datetime.now() + timedelta(**data)
+    return ParseResult(
+        target_time=datetime.now() + timedelta(**data),
+    )
 
 
 def get_pretty_datetime(finish_time: datetime) -> str:
@@ -58,5 +74,5 @@ if __name__ == "__main__":
     fmt = "{:%s} -> {}" % len(max(commands, key=len))
 
     for command in commands:
-        date_time = parse_command(command)
-        print(fmt.format(command, get_pretty_datetime(date_time)))
+        parse_result: ParseResult | None = parse_command(command)
+        print(fmt.format(command, get_pretty_datetime(parse_result.target_time)))
