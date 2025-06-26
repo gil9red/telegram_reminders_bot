@@ -18,7 +18,7 @@ PATTERN_TARGET_DATETIME = re.compile(
     r"(:?.*?(?P<time>\d{2}:\d{2}))?",
     flags=re.IGNORECASE,
 )
-PATTERN_REPEAT = re.compile(
+PATTERN_REPEAT_EVERY = re.compile(
     r"Повтор (?:раз в|каждый) (?P<unit>день|неделю|месяц|полгода|год)",
     flags=re.IGNORECASE,
 )
@@ -47,7 +47,9 @@ class TimeUnit:
 class ParseResult:
     target: str
     target_datetime: datetime
-    repeat: TimeUnit | None = None
+    repeat_every: TimeUnit | None = None
+    # TODO: Напоминать за месяц, за неделю, за 3 дня, за день, в тот же день
+    #       repeat_before?
 
 
 @dataclass
@@ -56,8 +58,8 @@ class Defaults:
     minutes: int
 
 
-def get_repeat(command: str) -> TimeUnit | None:
-    m = PATTERN_REPEAT.search(command)
+def get_repeat_every(command: str) -> TimeUnit | None:
+    m = PATTERN_REPEAT_EVERY.search(command)
     if not m:
         return
 
@@ -134,7 +136,7 @@ def parse_command(
     return ParseResult(
         target=m.group("target"),
         target_datetime=target_datetime,
-        repeat=get_repeat(command),
+        repeat_every=get_repeat_every(command),
     )
 
 
