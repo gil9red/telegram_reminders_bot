@@ -227,6 +227,6 @@ for line in text.splitlines():
     print(result)
     print(result.target_datetime)
     for time_unit in result.repeat_before:
-        print(result.target_datetime - time_unit.get_timedelta(), time_unit)
+        print(result.target_datetime - time_unit.get_timedelta(), repr(f"{time_unit.number} {time_unit.unit.value}"))
 
     print()
