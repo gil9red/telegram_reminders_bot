@@ -24,7 +24,7 @@ PATTERN_REPEAT_EVERY = re.compile(
     flags=re.IGNORECASE,
 )
 PATTERN_REPEAT_BEFORE = re.compile(
-    r"Напоминать (за .+)",
+    r"Напомнить (за .+)",
     flags=re.IGNORECASE,
 )
 PATTERN_REPEAT_BEFORE_TIME_UNIT = re.compile(
@@ -45,6 +45,19 @@ class TimeUnitEnum(AutoName):
     WEEK = enum.auto()
     DAY = enum.auto()
 
+    def days(self) -> int:
+        match self:
+            case TimeUnitEnum.YEAR:
+                return 365
+            case TimeUnitEnum.MONTH:
+                return 30
+            case TimeUnitEnum.WEEK:
+                return 7
+            case TimeUnitEnum.DAY:
+                return 1
+            case _:
+                raise Exception(f"Unsupported {self}")
+
 
 @dataclass
 class TimeUnit:
@@ -60,12 +73,15 @@ class TimeUnit:
                 return cls(number=6, unit=TimeUnitEnum.MONTH)
             case "месяц" | "месяца" | "месяцев":
                 return cls(number=1, unit=TimeUnitEnum.MONTH)
-            case "неделю" | "недели":
+            case "неделю" | "недели" | "недель":
                 return cls(number=1, unit=TimeUnitEnum.WEEK)
-            case "день" | "дня":
+            case "день" | "дня" | "дней":
                 return cls(number=1, unit=TimeUnitEnum.DAY)
             case _:
                 return
+
+    def __lt__(self, other: "TimeUnit") -> bool:
+        return (self.number * self.unit.days()) < (other.number * other.unit.days())
 
 
 @dataclass
@@ -90,7 +106,6 @@ def get_repeat_every(command: str) -> TimeUnit | None:
     return TimeUnit.parse(m.group("unit"))
 
 
-# TODO: Проверить парсинг
 def parse_repeat_before(command: str) -> list[TimeUnit]:
     items: list[TimeUnit] = []
 
@@ -99,9 +114,6 @@ def parse_repeat_before(command: str) -> list[TimeUnit]:
         return items
 
     for m in PATTERN_REPEAT_BEFORE_TIME_UNIT.finditer(m.group()):
-        # TODO:
-        print(m.groupdict())
-
         number_value: str | None = m.group("number")
         if number_value is not None:
             number: int = int(number_value)
@@ -113,6 +125,8 @@ def parse_repeat_before(command: str) -> list[TimeUnit]:
         time_unit.number = number
 
         items.append(time_unit)
+
+    items.sort(reverse=True)
 
     return items
 
@@ -181,21 +195,23 @@ def parse_command(
 
 # TODO:
 text = """
-День рождения "xxx" 10 февраля. Повтор раз в год. Напоминать за месяц, за неделю, за 3 дня, за день
-День рождения "xxx" 10 февраля. Повтор раз в полгода. Напоминать за месяц, за неделю, за 3 дня, за день
-День рождения "xxx" 10 февраля. Повтор раз в месяц. Напоминать за месяц, за неделю, за 3 дня, за день
-День рождения "xxx" 10 февраля. Повтор раз в месяц. Напоминать за месяц, за 2 недели, за неделю, за 3 дня, за день
-День рождения "xxx" 10 февраля. Повтор раз в неделю. Напоминать за месяц, за неделю, за 3 дня, за день
+День рождения "xxx" 10 февраля. Повтор раз в год. Напомнить за месяц, за неделю, за 3 дня, за день
+День рождения "xxx" 10 февраля. Повтор раз в полгода. Напомнить за месяц, за неделю, за 3 дня, за день
+День рождения "xxx" 10 февраля. Повтор раз в месяц. Напомнить за месяц, за неделю, за 3 дня, за день
+День рождения "xxx" 10 февраля. Повтор раз в месяц. Напомнить за месяц, за 2 недели, за неделю, за 3 дня, за день
+День рождения "xxx" 10 февраля. Повтор раз в неделю. Напомнить за месяц, за неделю, за 3 дня, за день
 День рождения "xxx" 10 февраля. Повтор каждый день
 День рождения "xxx" 10 февраля в 14:55. Повтор каждый день
 День рождения "xxx" 10 февраля 2027 года. Повтор каждый день
 День рождения "xxx" 10 февраля 2027 года в 14:55. Повтор каждый день
-День рождения "xxx" 10 февраля. Напоминать за месяц, за неделю, за 3 дня, за день
-Праздник "xxx" 10 февраля. Повтор каждый год. Напоминать в тот же день
-Праздник "xxx" 10 февраля 2026 года. Повтор каждый год. Напоминать в тот же день
-Напомни о "xxx" 10 февраля. Повтор раз в год. Напоминать за месяц, за неделю, за 3 дня, за день
+Праздник "xxx" 10 февраля. Повтор каждый год
+Праздник "xxx" 10 февраля 2026 года. Повтор каждый год
+Напомни о "xxx" 10 февраля. Повтор раз в год. Напомнить за месяц, за неделю, за 3 дня, за день
 Напомни о "xxx" 10 февраля
-Напомни о "xxx" 10 февраля. Напоминать за неделю, за 3 дня, за день
+Напомни о "xxx" 10 февраля. Напомнить за неделю, за 3 дня, за день
+Напомни о "xxx" 10 февраля. Напомнить за 3 дня, за день
+День рождения "xxx" 10 февраля. Напомнить за месяц, за неделю, за 3 дня, за день
+День рождения "xxx" 10 февраля. Напомнить за день, за неделю, за месяц, за 3 дня 
 """.strip()
 
 
