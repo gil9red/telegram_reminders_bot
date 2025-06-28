@@ -150,15 +150,14 @@ def parse_month(month_value: str) -> int:
 
 def parse_command(
     command: str,
-    default: Defaults = Defaults(hours=11, minutes=0),
+    now: datetime,
+    default: Defaults,
 ) -> ParseResult | None:
     command = command.lower()
 
     m = PATTERN_TARGET_DATETIME.search(command)
     if not m:
         return
-
-    now: datetime = datetime.now()
 
     day: int = int(m.group("day"))
     month: int = parse_month(m.group("month"))
@@ -211,11 +210,15 @@ text = """
 Напомни о "xxx" 10 февраля. Напомнить за неделю, за 3 дня, за день
 Напомни о "xxx" 10 февраля. Напомнить за 3 дня, за день
 День рождения "xxx" 10 февраля. Напомнить за месяц, за неделю, за 3 дня, за день
-День рождения "xxx" 10 февраля. Напомнить за день, за неделю, за месяц, за 3 дня 
+День рождения "xxx" 10 февраля. Напомнить за день, за неделю, за месяц, за 3 дня
+Напомни о "xxx" 29 декабря 
 """.strip()
 
 
+now = datetime.utcnow()
+default = Defaults(hours=11, minutes=0)
+
 for line in text.splitlines():
     print(line)
-    print(parse_command(line))
+    print(parse_command(line, now=now, default=default))
     print()
