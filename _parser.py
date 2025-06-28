@@ -8,7 +8,7 @@ import enum
 import re
 
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Optional
 
 
@@ -80,8 +80,11 @@ class TimeUnit:
             case _:
                 return
 
+    def get_timedelta(self) -> timedelta:
+        return timedelta(days=self.number * self.unit.days())
+
     def __lt__(self, other: "TimeUnit") -> bool:
-        return (self.number * self.unit.days()) < (other.number * other.unit.days())
+        return self.get_timedelta() < other.get_timedelta()
 
 
 @dataclass
@@ -220,5 +223,10 @@ default = Defaults(hours=11, minutes=0)
 
 for line in text.splitlines():
     print(line)
-    print(parse_command(line, now=now, default=default))
+    result = parse_command(line, now=now, default=default)
+    print(result)
+    print(result.target_datetime)
+    for time_unit in result.repeat_before:
+        print(result.target_datetime - time_unit.get_timedelta(), time_unit)
+
     print()
