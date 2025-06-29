@@ -80,6 +80,17 @@ class TimeUnit:
             case _:
                 return
 
+    @classmethod
+    def parse_value(cls, value: str) -> "TimeUnit":
+        number_str, unit_str = value.split()
+        return cls(number=int(number_str), unit=TimeUnitEnum(unit_str))
+
+    def get_value(self) -> str:
+        return f"{self.number} {self.unit.value}"
+
+    def get_datetime(self, dt: datetime) -> datetime:
+        return dt - self.get_timedelta()
+
     def get_timedelta(self) -> timedelta:
         return timedelta(days=self.number * self.unit.days())
 
@@ -195,6 +206,10 @@ def parse_command(
     )
 
 
+assert TimeUnit.parse_value("3 DAY") == TimeUnit(number=3, unit=TimeUnitEnum.DAY)
+assert TimeUnit.parse_value("1 YEAR") == TimeUnit(number=1, unit=TimeUnitEnum.YEAR)
+
+
 # TODO:
 text = """
 День рождения "xxx" 10 февраля. Повтор раз в год. Напомнить за месяц, за неделю, за 3 дня, за день
@@ -227,6 +242,9 @@ for line in text.splitlines():
     print(result)
     print(result.target_datetime)
     for time_unit in result.repeat_before:
-        print(result.target_datetime - time_unit.get_timedelta(), repr(f"{time_unit.number} {time_unit.unit.value}"))
+        print(
+            time_unit.get_datetime(result.target_datetime),
+            repr(time_unit.get_value()),
+        )
 
     print()
