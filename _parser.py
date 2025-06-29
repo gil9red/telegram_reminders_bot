@@ -88,7 +88,7 @@ class TimeUnit:
     def get_value(self) -> str:
         return f"{self.number} {self.unit.value}"
 
-    def get_datetime(self, dt: datetime) -> datetime:
+    def get_prev_datetime(self, dt: datetime) -> datetime:
         return dt - self.get_timedelta()
 
     def get_timedelta(self) -> timedelta:
@@ -243,7 +243,7 @@ for line in text.splitlines():
     print(result.target_datetime)
     for time_unit in result.repeat_before:
         print(
-            time_unit.get_datetime(result.target_datetime),
+            time_unit.get_prev_datetime(result.target_datetime),
             repr(time_unit.get_value()),
         )
 
