@@ -90,6 +90,7 @@ class Chat(BaseModel):
     first_name = TextField(null=True)
     last_name = TextField(null=True)
     description = TextField(null=True)
+    tz = TextField(default="UTC")
     last_activity = DateTimeField(default=datetime.now)
 
     def update_last_activity(self):
