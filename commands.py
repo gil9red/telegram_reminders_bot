@@ -81,6 +81,7 @@ def setup(dp: Dispatcher):
     dp.add_handler(CommandHandler("start", on_start))
     dp.add_handler(CommandHandler("help", on_start))
 
+    dp.add_handler(CommandHandler("liat", on_get_reminders))
     dp.add_handler(MessageHandler(Filters.regex("(?i)^Список$"), on_get_reminders))
 
     dp.add_handler(MessageHandler(Filters.text, on_request))
