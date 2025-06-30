@@ -164,7 +164,7 @@ def parse_month(month_value: str) -> int:
 
 def parse_command(
     command: str,
-    now: datetime,
+    dt: datetime,
     default: Defaults,
 ) -> ParseResult | None:
     command = command.lower()
@@ -180,7 +180,7 @@ def parse_command(
     if year_value is not None:
         year: int = int(year_value)
     else:
-        year: int = now.year
+        year: int = dt.year
 
     time_value: str | None = m.group("time")
     if time_value:
@@ -195,7 +195,7 @@ def parse_command(
         day=day, month=month, year=year, hour=hours, minute=minutes
     )
 
-    if target_datetime < now:
+    if target_datetime < dt:
         target_datetime = target_datetime.replace(year=target_datetime.year + 1)
 
     return ParseResult(
@@ -238,7 +238,7 @@ default = Defaults(hours=11, minutes=0)
 
 for line in text.splitlines():
     print(line)
-    result = parse_command(line, now=now, default=default)
+    result = parse_command(line, dt=now, default=default)
     print(result)
     print(result.target_datetime)
     for time_unit in result.repeat_before:
