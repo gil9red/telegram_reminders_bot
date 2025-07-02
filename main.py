@@ -33,14 +33,14 @@ def do_checking_reminders():
             continue
 
         try:
-            expected_time = datetime.now() - timedelta(seconds=1)
+            expected_time = datetime.utcnow() - timedelta(seconds=1)
             query = (
                 Reminder.select()
                 .where(
                     (Reminder.is_sent == False)
-                    & (Reminder.target_datetime <= expected_time)
+                    & (Reminder.target_datetime_utc <= expected_time)
                 )
-                .order_by(Reminder.target_datetime)
+                .order_by(Reminder.target_datetime_utc)
             )
 
             for reminder in query:

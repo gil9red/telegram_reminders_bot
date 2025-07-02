@@ -26,6 +26,24 @@ def datetime_to_str(dt: datetime) -> str:
     return f"{dt:%d.%m.%Y %H:%M:%S}"
 
 
+def get_tz(value: str) -> tzinfo | None:
+    try:
+        return get_tz_from_offset(value)
+    except Exception:
+        try:
+            return zoneinfo.ZoneInfo(value)
+        except zoneinfo.ZoneInfoNotFoundError:
+            return
+
+
+def convert_tz(dt: datetime, from_tz: tzinfo, to_tz: tzinfo) -> datetime:
+    return (
+        dt.replace(tzinfo=from_tz)  # Указание часового пояса (дата не меняется)
+        .astimezone(to_tz)  # Изменение времени и часового пояса (дата изменилась)
+        .replace(tzinfo=None)  # Удаление часового пояса (дата не меняется)
+    )
+
+
 def get_context_value(context: CallbackContext) -> str | None:
     try:
         # Значение вытаскиваем из регулярки
@@ -36,9 +54,7 @@ def get_context_value(context: CallbackContext) -> str | None:
         return " ".join(context.args)
 
     except:
-        pass
-
-    return
+        return
 
 
 @log_func(log)
@@ -61,6 +77,7 @@ def on_start(update: Update, _: CallbackContext):
 @log_func(log)
 def on_tz(update: Update, context: CallbackContext):
     chat = Chat.get_from(update.effective_chat)
+    message = update.effective_message
 
     context_value: str | None = get_context_value(context)
     if context_value:
@@ -70,36 +87,30 @@ def on_tz(update: Update, context: CallbackContext):
         is_set: bool = False
         value: str = chat.tz
 
-    try:
-        tz: tzinfo = get_tz_from_offset(value)
-    except Exception:
-        try:
-            tz: tzinfo = zoneinfo.ZoneInfo(value)
-        except zoneinfo.ZoneInfoNotFoundError:
-            update.effective_message.reply_text(
-                f"Не удалось найти часовой пояс {value!r}"
-            )
-            return
+    tz_chat: tzinfo | None = get_tz(value)
+    if tz_chat is None:
+        message.reply_text(f"Не удалось найти часовой пояс {value!r}")
+        return
 
     if is_set:
         if chat.tz == value:
-            update.effective_message.reply_text(
-                f"Часовой пояс {value!r} уже был установлен"
-            )
+            message.reply_text(f"Часовой пояс {value!r} уже был установлен")
             return
 
         chat.tz = value
         chat.save()
 
-        update.effective_message.reply_text(f"Установлен часовой пояс {value!r}")
+        message.reply_text(f"Установлен часовой пояс {value!r}")
         return
 
     dt_utc = datetime.utcnow()
+    dt = convert_tz(
+        dt=dt_utc,
+        from_tz=timezone.utc,
+        to_tz=tz_chat,
+    )
 
-    dt = dt_utc.replace(tzinfo=timezone.utc)
-    dt = dt.astimezone(tz)
-
-    update.effective_message.reply_text(
+    message.reply_text(
         f"Часовой пояс {value!r}, время {datetime_to_str(dt)}\n"
         f"Время в UTC: {datetime_to_str(dt_utc)}"
     )
@@ -107,6 +118,7 @@ def on_tz(update: Update, context: CallbackContext):
 
 @log_func(log)
 def on_request(update: Update, _: CallbackContext):
+    chat = Chat.get_from(update.effective_chat)
     message = update.effective_message
 
     command = message.text
@@ -117,39 +129,67 @@ def on_request(update: Update, _: CallbackContext):
         message.reply_text("Не получилось разобрать команду!")
         return
 
+    tz_chat: tzinfo | None = get_tz(chat.tz)
+    if tz_chat is None:
+        message.reply_text(f"Не удалось найти часовой пояс {chat.tz!r}")
+        return
+
+    # Время в часовом поясе пользователя
     finish_time = parse_result.target_datetime
+
+    finish_time_utc = convert_tz(
+        dt=finish_time,
+        from_tz=tz_chat,
+        to_tz=timezone.utc,
+    )
     Reminder.add(
         original_message=message,
-        target_datetime=finish_time,
+        target_datetime_utc=finish_time_utc,
         user=update.effective_user,
         chat=update.effective_chat,
     )
 
-    message.reply_text(f"Напоминание установлено на {get_pretty_datetime(finish_time)}")
+    message.reply_text(
+        f"Напоминание установлено на {get_pretty_datetime(finish_time)}"
+        f" (в UTC {get_pretty_datetime(finish_time_utc)})"
+    )
 
 
 @log_func(log)
 def on_get_reminders(update: Update, _: CallbackContext):
     message = update.effective_message
-    chat = update.effective_chat
-    user = update.effective_user
+    chat = Chat.get_from(update.effective_chat)
+
+    tz_chat: tzinfo | None = get_tz(chat.tz)
+    if tz_chat is None:
+        message.reply_text(f"Не удалось найти часовой пояс {chat.tz!r}")
+        return
 
     query = (
         Reminder.select()
         .where(
             (Reminder.chat_id == chat.id)
-            & (Reminder.user_id == user.id)
+            & (Reminder.user_id == update.effective_user.id)
             & (Reminder.is_sent == False)
         )
-        .order_by(Reminder.target_datetime)
+        .order_by(Reminder.target_datetime_utc)
     )
 
     number = query.count()
 
     if number:
+        # TODO: Пагинация
         text = f"Напоминаний ({number}):\n"
         for x in query:
-            text += "    " + get_pretty_datetime(x.target_datetime) + "\n"
+            target_datetime = convert_tz(
+                dt=x.target_datetime_utc,
+                from_tz=timezone.utc,
+                to_tz=tz_chat,
+            )
+            text += (
+                f"    {get_pretty_datetime(target_datetime)} "
+                f"(в UTC {get_pretty_datetime(x.target_datetime_utc)})\n"
+            )
     else:
         text = "Напоминаний нет"
 
