@@ -121,9 +121,8 @@ class Reminder(BaseModel):
     create_datetime_utc = DateTimeField(default=datetime.utcnow)
     original_message_text = TextField()
     original_message_id = IntegerField()
-    # TODO:
     last_send_message_id = IntegerField(null=True)
-    # TODO:
+    # TODO: last_send_datetime_utc = DateTimeField(null=True)
     target_datetime_utc = DateTimeField(default=datetime.utcnow)
     is_sent = BooleanField(default=False)
     # TODO:
