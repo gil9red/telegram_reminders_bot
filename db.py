@@ -122,7 +122,7 @@ class Reminder(BaseModel):
     original_message_text = TextField()
     original_message_id = IntegerField()
     last_send_message_id = IntegerField(null=True)
-    # TODO: last_send_datetime_utc = DateTimeField(null=True)
+    last_send_datetime_utc = DateTimeField(null=True)
     target_datetime_utc = DateTimeField(default=datetime.utcnow)
     is_sent = BooleanField(default=False)
     # TODO:

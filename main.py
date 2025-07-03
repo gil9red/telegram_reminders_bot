@@ -60,6 +60,7 @@ def do_checking_reminders():
 
                 # TODO: На будущее
                 reminder.last_send_message_id = rs.message_id
+                reminder.last_send_datetime_utc = datetime.utcnow()
                 reminder.is_sent = True
                 reminder.save()
 
