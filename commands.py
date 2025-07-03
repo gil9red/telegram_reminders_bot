@@ -17,7 +17,7 @@ from telegram.ext import (
 )
 
 from common import log_func, log
-from db import Reminder, Chat
+from db import Reminder, Chat, User
 from utils import ParseResult, parse_command, get_pretty_datetime
 from third_party.get_tz_from_offset__zoneinfo import get_tz as get_tz_from_offset
 
@@ -143,10 +143,11 @@ def on_request(update: Update, _: CallbackContext):
         to_tz=timezone.utc,
     )
     Reminder.add(
-        original_message=message,
+        original_message_id=message.message_id,
+        original_message_text=message.text,
         target_datetime_utc=finish_time_utc,
-        user=update.effective_user,
-        chat=update.effective_chat,
+        user=User.get_from(update.effective_user),
+        chat=Chat.get_from(update.effective_chat),
     )
 
     message.reply_text(

@@ -135,17 +135,18 @@ class Reminder(BaseModel):
     @classmethod
     def add(
         cls,
-        original_message: telegram.Message,
+        original_message_id: int,
+        original_message_text: str,
         target_datetime_utc: datetime,
-        user: telegram.User,
-        chat: telegram.Chat,
+        user: User,
+        chat: Chat,
     ) -> "Reminder":
         return cls.create(
-            original_message_id=original_message.message_id,
-            original_message_text=original_message.text,
+            original_message_id=original_message_id,
+            original_message_text=original_message_text,
             target_datetime_utc=target_datetime_utc,
-            user=User.get_from(user),
-            chat=Chat.get_from(chat),
+            user=user,
+            chat=chat,
         )
 
 
