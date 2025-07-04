@@ -14,7 +14,7 @@ from typing import Optional
 
 PATTERN_TARGET_DATETIME = re.compile(
     r"(?:День рождения|Праздник|Напомни о) "
-    r'"(?P<target>\w+)" (?P<day>\d{1,2}) (?P<month>\w+)'
+    r'"(?P<target>.+?)" (?P<day>\d{1,2}) (?P<month>\w+)'
     r"(:?.*?(?P<year>\d{4}))?"
     r"(:?.*?(?P<time>\d{2}:\d{2}))?",
     flags=re.IGNORECASE,
@@ -167,7 +167,7 @@ def parse_command(
     dt: datetime,
     default: Defaults,
 ) -> ParseResult | None:
-    command = command.lower()
+    command = command.strip()
 
     m = PATTERN_TARGET_DATETIME.search(command)
     if not m:
@@ -206,12 +206,12 @@ def parse_command(
     )
 
 
-assert TimeUnit.parse_value("3 DAY") == TimeUnit(number=3, unit=TimeUnitEnum.DAY)
-assert TimeUnit.parse_value("1 YEAR") == TimeUnit(number=1, unit=TimeUnitEnum.YEAR)
+if __name__ == "__main__":
+    assert TimeUnit.parse_value("3 DAY") == TimeUnit(number=3, unit=TimeUnitEnum.DAY)
+    assert TimeUnit.parse_value("1 YEAR") == TimeUnit(number=1, unit=TimeUnitEnum.YEAR)
 
-
-# TODO:
-text = """
+    # TODO:
+    text = """
 День рождения "xxx" 10 февраля. Повтор раз в год. Напомнить за месяц, за неделю, за 3 дня, за день
 День рождения "xxx" 10 февраля. Повтор раз в полгода. Напомнить за месяц, за неделю, за 3 дня, за день
 День рождения "xxx" 10 февраля. Повтор раз в месяц. Напомнить за месяц, за неделю, за 3 дня, за день
@@ -229,22 +229,22 @@ text = """
 Напомни о "xxx" 10 февраля. Напомнить за 3 дня, за день
 День рождения "xxx" 10 февраля. Напомнить за месяц, за неделю, за 3 дня, за день
 День рождения "xxx" 10 февраля. Напомнить за день, за неделю, за месяц, за 3 дня
-Напомни о "xxx" 29 декабря 
-""".strip()
+Напомни о "Звонок другу" 29 декабря 
+    """.strip()
 
+    now = datetime.utcnow()
+    default = Defaults(hours=11, minutes=0)
 
-now = datetime.utcnow()
-default = Defaults(hours=11, minutes=0)
+    for line in text.splitlines():
+        print(line)
 
-for line in text.splitlines():
-    print(line)
-    result = parse_command(line, dt=now, default=default)
-    print(result)
-    print(result.target_datetime)
-    for time_unit in result.repeat_before:
-        print(
-            time_unit.get_prev_datetime(result.target_datetime),
-            repr(time_unit.get_value()),
-        )
+        result = parse_command(line, dt=now, default=default)
+        print(result)
+        print(result.target_datetime)
+        for time_unit in result.repeat_before:
+            print(
+                time_unit.get_prev_datetime(result.target_datetime),
+                repr(time_unit.get_value()),
+            )
 
-    print()
+        print()
