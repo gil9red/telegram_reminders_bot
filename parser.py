@@ -140,6 +140,7 @@ def parse_repeat_before(command: str) -> list[TimeUnit]:
 
         items.append(time_unit)
 
+    # TODO: Убрать дубликаты
     items.sort(reverse=True)
 
     return items
