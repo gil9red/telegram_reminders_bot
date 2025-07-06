@@ -121,11 +121,11 @@ def get_repeat_every(command: str) -> TimeUnit | None:
 
 
 def parse_repeat_before(command: str) -> list[TimeUnit]:
-    items: list[TimeUnit] = []
-
     m = PATTERN_REPEAT_BEFORE.search(command)
     if not m:
-        return items
+        return []
+
+    time_by_unit: dict[timedelta, TimeUnit] = dict()
 
     for m in PATTERN_REPEAT_BEFORE_TIME_UNIT.finditer(m.group()):
         number_value: str | None = m.group("number")
@@ -138,12 +138,9 @@ def parse_repeat_before(command: str) -> list[TimeUnit]:
         time_unit: TimeUnit = TimeUnit.parse(day_value)
         time_unit.number = number
 
-        items.append(time_unit)
+        time_by_unit[time_unit.get_timedelta()] = time_unit
 
-    # TODO: Убрать дубликаты
-    items.sort(reverse=True)
-
-    return items
+    return sorted(time_by_unit.values(), reverse=True)
 
 
 def parse_month(month_value: str) -> int:
