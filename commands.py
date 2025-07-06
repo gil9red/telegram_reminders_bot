@@ -173,11 +173,36 @@ def on_request(update: Update, _: CallbackContext):
         chat=Chat.get_from(update.effective_chat),
     )
 
-    # TODO: Писать о ближайшей дате напоминания - next_send_datetime_utc
-    message.reply_text(
-        f"Напоминание установлено на {datetime_to_str(target_datetime)}"
-        f" (в UTC {datetime_to_str(target_datetime_utc)})"
+    next_send_datetime = convert_tz(
+        dt=next_send_datetime_utc,
+        from_tz=timezone.utc,
+        to_tz=tz_chat,
     )
+
+    lines: list[str] = [
+        f"Напоминание установлено на {datetime_to_str(target_datetime)}"
+        f" (в UTC {datetime_to_str(target_datetime_utc)})",
+        f"Ближайшее: {datetime_to_str(next_send_datetime)} (в UTC {datetime_to_str(next_send_datetime_utc)})",
+        f"Повтор: {parse_result.repeat_every.get_value() if parse_result.repeat_every else 'нет'}",
+    ]
+
+    if not parse_result.repeat_before:
+        lines.append("Без напоминаний")
+    else:
+        lines.append("Напоминаний:")
+
+        for time_unit in parse_result.repeat_before:
+            prev_dt = time_unit.get_prev_datetime(parse_result.target_datetime)
+            prev_dt_utc = convert_tz(
+                dt=prev_dt,
+                from_tz=tz_chat,
+                to_tz=timezone.utc,
+            )
+            lines.append(
+                f"    {time_unit.get_value()}: {prev_dt} (в UTC {datetime_to_str(prev_dt_utc)})"
+            )
+
+    message.reply_text("\n".join(lines))
 
 
 @log_func(log)
@@ -216,6 +241,7 @@ def on_get_reminders(update: Update, _: CallbackContext):
                 from_tz=timezone.utc,
                 to_tz=tz_chat,
             )
+            # TODO: Больше информации
             text += (
                 f"    {datetime_to_str(target_datetime)} (в UTC {datetime_to_str(x.target_datetime_utc)})\n"
                 f"        Ближайшее: {datetime_to_str(next_send_datetime)} (в UTC {datetime_to_str(x.next_send_datetime_utc)})\n\n"
