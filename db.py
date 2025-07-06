@@ -157,7 +157,6 @@ class Reminder(BaseModel):
             next_send_datetime_utc=next_send_datetime_utc,
             repeat_every=repeat_every.get_value() if repeat_every else None,
             repeat_before=(
-                # TODO: Мб вместо json просто разделением по запятой хранить?
                 json.dumps([unit.get_value() for unit in repeat_before])
                 if repeat_before
                 else None
@@ -177,7 +176,7 @@ class Reminder(BaseModel):
         next_send_datetime_utc = self.next_send_datetime_utc
 
         if now >= target_datetime_utc:
-            if self.repeat_every:  # TODO: Другое название?
+            if self.repeat_every:
                 repeat_every: TimeUnit = TimeUnit.parse_value(self.repeat_every)
                 target_datetime_utc += repeat_every.get_timedelta()
             else:
@@ -187,23 +186,18 @@ class Reminder(BaseModel):
 
         if self.is_active:
             # Следующая дата отправки
-            # TODO: Название
-            before_dates: list[datetime] = [target_datetime_utc]
+            next_dates: list[datetime] = [target_datetime_utc]
 
             # Если заданы напоминания до
-            if self.repeat_before:  # TODO: Другое название?
+            if self.repeat_before:
                 for value in json.loads(self.repeat_before):
                     unit = TimeUnit.parse_value(value)
-                    before_dates.append(
+                    next_dates.append(
                         unit.get_prev_datetime(target_datetime_utc)
                     )
 
             # Остаются даты после текущей
-            next_dates: list[datetime] = [
-                d
-                for d in before_dates
-                if d > now
-            ]
+            next_dates = [d for d in next_dates if d > now]
             if next_dates:
                 next_send_datetime_utc = min(next_dates)
 
@@ -222,24 +216,3 @@ time.sleep(0.050)
 
 if __name__ == "__main__":
     BaseModel.print_count_of_tables()
-    print()
-
-    print("Total users:", User.select().count())
-    print("Total chats:", Chat.select().count())
-
-    assert User.get_from(None) is None
-    assert Chat.get_from(None) is None
-
-    print()
-
-    first_user = User.select().first()
-    print("First user:", first_user)
-
-    first_chat = Chat.select().first()
-    print("First chat:", first_chat)
-    print()
-
-    print("Total reminders:", Reminder.select().count())
-    print()
-
-    print("Last reminder:", Reminder.select().order_by(Reminder.id.desc()).first())
