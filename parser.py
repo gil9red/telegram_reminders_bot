@@ -13,8 +13,8 @@ from typing import Optional
 
 
 PATTERN_TARGET_DATETIME = re.compile(
-    r"(?:День рождения|Праздник|Напомни о) "
-    r'"(?P<target>.+?)" (?P<day>\d{1,2}) (?P<month>\w+)'
+    r'(?:День рождения|Праздник|Напомни о) "(?P<target>.+?)" '
+    r"(?P<day>\d{1,2}) (?P<month>\w+)"
     r"(:?.*?(?P<year>\d{4}))?"
     r"(:?.*?(?P<time>\d{2}:\d{2}))?",
     flags=re.IGNORECASE,
@@ -208,7 +208,7 @@ if __name__ == "__main__":
     assert TimeUnit.parse_value("3 DAY") == TimeUnit(number=3, unit=TimeUnitEnum.DAY)
     assert TimeUnit.parse_value("1 YEAR") == TimeUnit(number=1, unit=TimeUnitEnum.YEAR)
 
-    # TODO:
+    # TODO: Перенести в тесты
     text = """
 День рождения "xxx" 10 февраля. Повтор раз в год. Напомнить за месяц, за неделю, за 3 дня, за день
 День рождения "xxx" 10 февраля. Повтор раз в полгода. Напомнить за месяц, за неделю, за 3 дня, за день
