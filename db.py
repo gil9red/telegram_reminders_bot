@@ -192,9 +192,8 @@ class Reminder(BaseModel):
             if self.repeat_before:
                 for value in json.loads(self.repeat_before):
                     unit = TimeUnit.parse_value(value)
-                    next_dates.append(
-                        unit.get_prev_datetime(target_datetime_utc)
-                    )
+                    prev_dt = unit.get_prev_datetime(target_datetime_utc)
+                    next_dates.append(prev_dt)
 
             # Остаются даты после текущей
             next_dates = [d for d in next_dates if d > now]
