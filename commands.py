@@ -18,7 +18,9 @@ from telegram.ext import (
 
 from common import log_func, log
 from db import Reminder, Chat, User
-from utils import ParseResult, parse_command, get_pretty_datetime
+# TODO:
+# from utils import ParseResult, parse_command, get_pretty_datetime
+from parser import ParseResult, Defaults, parse_command
 from third_party.get_tz_from_offset__zoneinfo import get_tz as get_tz_from_offset
 
 
@@ -59,6 +61,7 @@ def get_context_value(context: CallbackContext) -> str | None:
 
 @log_func(log)
 def on_start(update: Update, _: CallbackContext):
+    # TODO: Обновить примеры команд
     update.effective_message.reply_markdown(
         """
 Введите что-нибудь, например: `напомни через 1 час`.
@@ -124,7 +127,10 @@ def on_request(update: Update, _: CallbackContext):
     command = message.text
     log.debug(f"Command: {command!r}")
 
-    parse_result: ParseResult | None = parse_command(command)
+    now = datetime.utcnow()
+    default = Defaults(hours=10, minutes=0)
+
+    parse_result: ParseResult | None = parse_command(command, dt=now, default=default)
     if not parse_result:
         message.reply_text("Не получилось разобрать команду!")
         return
@@ -135,24 +141,42 @@ def on_request(update: Update, _: CallbackContext):
         return
 
     # Время в часовом поясе пользователя
-    finish_time = parse_result.target_datetime
+    target_datetime = parse_result.target_datetime
 
-    finish_time_utc = convert_tz(
-        dt=finish_time,
+    target_datetime_utc = convert_tz(
+        dt=target_datetime,
         from_tz=tz_chat,
         to_tz=timezone.utc,
     )
+
+    # TODO: Дублирует код из do_checking_reminders
+    before_dates: list[datetime] = [
+        unit.get_prev_datetime(target_datetime_utc)
+        for unit in parse_result.repeat_before
+    ]
+    before_dates.append(target_datetime_utc)
+
+    next_dates: list[datetime] = [d for d in before_dates if d > now]
+
+    next_send_datetime_utc = min(next_dates)
+
+    # TODO: Проверка на дубликат команды
     Reminder.add(
         original_message_id=message.message_id,
         original_message_text=message.text,
-        target_datetime_utc=finish_time_utc,
+        target=parse_result.target,
+        target_datetime_utc=target_datetime_utc,
+        next_send_datetime_utc=next_send_datetime_utc,
+        repeat_every=parse_result.repeat_every,
+        repeat_before=parse_result.repeat_before,
         user=User.get_from(update.effective_user),
         chat=Chat.get_from(update.effective_chat),
     )
 
+    # TODO: Писать о ближайшей дате напоминания - next_send_datetime_utc
     message.reply_text(
-        f"Напоминание установлено на {get_pretty_datetime(finish_time)}"
-        f" (в UTC {get_pretty_datetime(finish_time_utc)})"
+        f"Напоминание установлено на {datetime_to_str(target_datetime)}"
+        f" (в UTC {datetime_to_str(target_datetime_utc)})"
     )
 
 
@@ -171,7 +195,7 @@ def on_get_reminders(update: Update, _: CallbackContext):
         .where(
             (Reminder.chat_id == chat.id)
             & (Reminder.user_id == update.effective_user.id)
-            & (Reminder.is_sent == False)
+            & (Reminder.is_active == True)
         )
         .order_by(Reminder.target_datetime_utc)
     )
@@ -187,9 +211,14 @@ def on_get_reminders(update: Update, _: CallbackContext):
                 from_tz=timezone.utc,
                 to_tz=tz_chat,
             )
+            next_send_datetime = convert_tz(
+                dt=x.next_send_datetime_utc,
+                from_tz=timezone.utc,
+                to_tz=tz_chat,
+            )
             text += (
-                f"    {get_pretty_datetime(target_datetime)} "
-                f"(в UTC {get_pretty_datetime(x.target_datetime_utc)})\n"
+                f"    {datetime_to_str(target_datetime)} (в UTC {datetime_to_str(x.target_datetime_utc)})\n"
+                f"        Ближайшее: {datetime_to_str(next_send_datetime)} (в UTC {datetime_to_str(x.next_send_datetime_utc)})\n\n"
             )
     else:
         text = "Напоминаний нет"

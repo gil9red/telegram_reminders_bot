@@ -7,7 +7,7 @@ __author__ = "ipetrash"
 import os
 import time
 
-from datetime import datetime, timedelta
+from datetime import datetime
 from threading import Thread
 from typing import Any
 
@@ -33,12 +33,13 @@ def do_checking_reminders():
             continue
 
         try:
-            expected_time = datetime.utcnow() - timedelta(seconds=1)
+            now = datetime.utcnow()
+
             query = (
                 Reminder.select()
                 .where(
-                    (Reminder.is_sent == False)
-                    & (Reminder.target_datetime_utc <= expected_time)
+                    (Reminder.is_active == True)
+                    & (now >= Reminder.next_send_datetime_utc)
                 )
                 .order_by(Reminder.target_datetime_utc)
             )
@@ -46,23 +47,27 @@ def do_checking_reminders():
             for reminder in query:
                 log.info("Send reminder: %s", reminder)
 
-                # TODO: На будущее
-                if reminder.last_send_message_id is not None:
-                    reply_to_message_id: int = reminder.last_send_message_id
-                else:
-                    reply_to_message_id: int = reminder.original_message_id
+                # Отправка уведомления
+                # Планирование следующей отправки
+                try:
+                    rs: Message = bot.send_message(
+                        chat_id=reminder.chat_id,
+                        text="⌛",  # TODO:
+                        reply_to_message_id=reminder.get_reply_to_message_id(),
+                    )
 
-                rs: Message = bot.send_message(
-                    chat_id=reminder.chat_id,
-                    text="⌛",
-                    reply_to_message_id=reply_to_message_id,
-                )
+                    reminder.process_next_notify(now)
 
-                # TODO: На будущее
-                reminder.last_send_message_id = rs.message_id
-                reminder.last_send_datetime_utc = datetime.utcnow()
-                reminder.is_sent = True
-                reminder.save()
+                    reminder.last_send_message_id = rs.message_id
+                    reminder.last_send_datetime_utc = datetime.utcnow()
+
+                    reminder.save()
+
+                except:
+                    log.exception("")
+
+                finally:
+                    time.sleep(1)
 
         except:
             log.exception("")

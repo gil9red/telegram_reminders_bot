@@ -4,6 +4,7 @@
 __author__ = "ipetrash"
 
 
+import json
 import time
 
 from datetime import datetime
@@ -21,6 +22,7 @@ from playhouse.sqliteq import SqliteQueueDatabase
 
 import telegram
 
+from parser import TimeUnit
 from third_party.db_peewee_meta_model import MetaModel
 
 
@@ -118,17 +120,19 @@ class Chat(BaseModel):
 
 
 class Reminder(BaseModel):
-    create_datetime_utc = DateTimeField(default=datetime.utcnow)
-    original_message_text = TextField()
-    original_message_id = IntegerField()
-    last_send_message_id = IntegerField(null=True)
-    last_send_datetime_utc = DateTimeField(null=True)
-    target_datetime_utc = DateTimeField(default=datetime.utcnow)
-    is_sent = BooleanField(default=False)
-    # TODO:
-    # is_active = BooleanField(default=True)
-    user = ForeignKeyField(User, backref="reminders")
-    chat = ForeignKeyField(Chat, backref="reminders")
+    create_datetime_utc: datetime = DateTimeField(default=datetime.utcnow)
+    original_message_text: str = TextField()
+    original_message_id: int = IntegerField()
+    target: str = TextField()
+    target_datetime_utc: datetime = DateTimeField(default=datetime.utcnow)
+    next_send_datetime_utc: datetime = DateTimeField()
+    repeat_every: str = TextField(null=True)
+    repeat_before: str = TextField(null=True)
+    last_send_message_id: int = IntegerField(null=True)
+    last_send_datetime_utc: datetime = DateTimeField(null=True)
+    is_active: bool = BooleanField(default=True)
+    user: User = ForeignKeyField(User, backref="reminders")
+    chat: Chat = ForeignKeyField(Chat, backref="reminders")
 
     # TODO: Проверка существования
 
@@ -137,17 +141,75 @@ class Reminder(BaseModel):
         cls,
         original_message_id: int,
         original_message_text: str,
+        target: str,
         target_datetime_utc: datetime,
+        next_send_datetime_utc: datetime,
+        repeat_every: TimeUnit | None,
+        repeat_before: list[TimeUnit],
         user: User,
         chat: Chat,
     ) -> "Reminder":
         return cls.create(
             original_message_id=original_message_id,
             original_message_text=original_message_text,
+            target=target,
             target_datetime_utc=target_datetime_utc,
+            next_send_datetime_utc=next_send_datetime_utc,
+            repeat_every=repeat_every.get_value() if repeat_every else None,
+            repeat_before=(
+                # TODO: Мб вместо json просто разделением по запятой хранить?
+                json.dumps([unit.get_value() for unit in repeat_before])
+                if repeat_before
+                else None
+            ),
             user=user,
             chat=chat,
         )
+
+    def get_reply_to_message_id(self) -> int:
+        if self.last_send_message_id is not None:
+            return self.last_send_message_id
+
+        return self.original_message_id
+
+    def process_next_notify(self, now: datetime):
+        target_datetime_utc = self.target_datetime_utc
+        next_send_datetime_utc = self.next_send_datetime_utc
+
+        if now >= target_datetime_utc:
+            if self.repeat_every:  # TODO: Другое название?
+                repeat_every: TimeUnit = TimeUnit.parse_value(self.repeat_every)
+                target_datetime_utc += repeat_every.get_timedelta()
+            else:
+                # TODO: Уведомлять что это последнее напоминание?
+                #       Или наоборот писать когда будет следующее
+                self.is_active = False
+
+        if self.is_active:
+            # Следующая дата отправки
+            # TODO: Название
+            before_dates: list[datetime] = [target_datetime_utc]
+
+            # Если заданы напоминания до
+            if self.repeat_before:  # TODO: Другое название?
+                for value in json.loads(self.repeat_before):
+                    unit = TimeUnit.parse_value(value)
+                    before_dates.append(
+                        unit.get_prev_datetime(target_datetime_utc)
+                    )
+
+            # Остаются даты после текущей
+            next_dates: list[datetime] = [
+                d
+                for d in before_dates
+                if d > now
+            ]
+            if next_dates:
+                next_send_datetime_utc = min(next_dates)
+
+        if self.is_active:
+            self.target_datetime_utc = target_datetime_utc
+            self.next_send_datetime_utc = next_send_datetime_utc
 
 
 db.connect()
