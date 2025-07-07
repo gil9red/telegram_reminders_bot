@@ -9,9 +9,7 @@ import re
 from third_party.regexp import fill_string_pattern
 
 
-PATTERN_REMINDER_PAGE = re.compile(
-    r"^reminder page=(?P<page>\d+)$"
-)
+PATTERN_REMINDER_PAGE = re.compile(r"^reminder page=(?P<page>\d+)$")
 # TODO:
 # PATTERN_DELETE_MESSAGE = "delete_message"
 
