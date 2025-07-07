@@ -8,7 +8,7 @@ import json
 import time
 
 from datetime import datetime
-from typing import Optional
+from typing import Optional, Iterable
 from pathlib import Path
 
 from peewee import (
@@ -163,6 +163,15 @@ class Reminder(BaseModel):
             user=user,
             chat=chat,
         )
+
+    @classmethod
+    def get_by_page(cls, page: int = 1, filters: Iterable | None = None) -> Optional["Reminder"]:
+        items = cls.paginating(
+            page=page,
+            filters=filters,
+            order_by=cls.next_send_datetime_utc,
+        )
+        return items[0] if items else None
 
     def get_reply_to_message_id(self) -> int:
         if self.last_send_message_id is not None:
