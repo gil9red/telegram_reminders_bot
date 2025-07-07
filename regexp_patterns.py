@@ -19,7 +19,7 @@ COMMAND_HELP = "help"
 COMMAND_TZ = "tz"
 
 COMMAND_LIST = "list"
-PATTERN_LIST = "(?i)^Список$"
+PATTERN_LIST = re.compile("^Список$", flags=re.IGNORECASE)
 
 
 if __name__ == "__main__":
