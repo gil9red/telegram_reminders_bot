@@ -130,7 +130,6 @@ class Reminder(BaseModel):
     repeat_before: str = TextField(null=True)
     last_send_message_id: int = IntegerField(null=True)
     last_send_datetime_utc: datetime = DateTimeField(null=True)
-    is_active: bool = BooleanField(default=True)
     user: User = ForeignKeyField(User, backref="reminders")
     chat: Chat = ForeignKeyField(Chat, backref="reminders")
 
@@ -171,7 +170,7 @@ class Reminder(BaseModel):
 
         return self.original_message_id
 
-    def process_next_notify(self, now: datetime):
+    def process_next_notify(self, now: datetime) -> bool:
         target_datetime_utc = self.target_datetime_utc
         next_send_datetime_utc = self.next_send_datetime_utc
 
@@ -182,27 +181,28 @@ class Reminder(BaseModel):
             else:
                 # TODO: Уведомлять что это последнее напоминание?
                 #       Или наоборот писать когда будет следующее
-                self.is_active = False
+                self.delete_instance()
+                return False
 
-        if self.is_active:
-            # Следующая дата отправки
-            next_dates: list[datetime] = [target_datetime_utc]
+        # Следующая дата отправки
+        next_dates: list[datetime] = [target_datetime_utc]
 
-            # Если заданы напоминания до
-            if self.repeat_before:
-                for value in json.loads(self.repeat_before):
-                    unit = TimeUnit.parse_value(value)
-                    prev_dt = unit.get_prev_datetime(target_datetime_utc)
-                    next_dates.append(prev_dt)
+        # Если заданы напоминания до
+        if self.repeat_before:
+            for value in json.loads(self.repeat_before):
+                unit = TimeUnit.parse_value(value)
+                prev_dt = unit.get_prev_datetime(target_datetime_utc)
+                next_dates.append(prev_dt)
 
-            # Остаются даты после текущей
-            next_dates = [d for d in next_dates if d > now]
-            if next_dates:
-                next_send_datetime_utc = min(next_dates)
+        # Остаются даты после текущей
+        next_dates = [d for d in next_dates if d > now]
+        if next_dates:
+            next_send_datetime_utc = min(next_dates)
 
-        if self.is_active:
-            self.target_datetime_utc = target_datetime_utc
-            self.next_send_datetime_utc = next_send_datetime_utc
+        self.target_datetime_utc = target_datetime_utc
+        self.next_send_datetime_utc = next_send_datetime_utc
+
+        return True
 
 
 db.connect()

@@ -37,11 +37,8 @@ def do_checking_reminders():
 
             query = (
                 Reminder.select()
-                .where(
-                    (Reminder.is_active == True)
-                    & (now >= Reminder.next_send_datetime_utc)
-                )
-                .order_by(Reminder.target_datetime_utc)
+                .where(now >= Reminder.next_send_datetime_utc)
+                .order_by(Reminder.next_send_datetime_utc)
             )
 
             for reminder in query:

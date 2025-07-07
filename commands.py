@@ -220,9 +220,8 @@ def on_get_reminders(update: Update, _: CallbackContext):
         .where(
             (Reminder.chat_id == chat.id)
             & (Reminder.user_id == update.effective_user.id)
-            & (Reminder.is_active == True)
         )
-        .order_by(Reminder.target_datetime_utc)
+        .order_by(Reminder.next_send_datetime_utc)
     )
 
     number = query.count()
