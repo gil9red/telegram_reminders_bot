@@ -165,7 +165,11 @@ class Reminder(BaseModel):
         )
 
     @classmethod
-    def get_by_page(cls, page: int = 1, filters: Iterable | None = None) -> Optional["Reminder"]:
+    def get_by_page(
+        cls,
+        page: int = 1,
+        filters: Iterable | None = None,
+    ) -> Optional["Reminder"]:
         items = cls.paginating(
             page=page,
             filters=filters,
