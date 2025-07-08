@@ -128,11 +128,7 @@ def send_reminder(
         to_tz=tz_chat,
     )
 
-    # TODO: Перенести в db.py?
-    if reminder.repeat_every:
-        repeat_every: TimeUnit | None = TimeUnit.parse_value(reminder.repeat_every)
-    else:
-        repeat_every: TimeUnit | None = None
+    repeat_every: TimeUnit | None = reminder.get_repeat_every()
 
     lines: list[str] = [
         f"Напоминание установлено на {datetime_to_str(target_datetime)} (в UTC {datetime_to_str(target_datetime_utc)})",
@@ -140,17 +136,11 @@ def send_reminder(
         f"Повтор: {repeat_every.get_value() if repeat_every else 'нет'}",
     ]
 
-    if not reminder.repeat_before:
+    repeat_before = reminder.get_repeat_before()
+    if not repeat_before:
         lines.append("Без напоминаний")
     else:
         lines.append("Напоминаний:")
-
-        # TODO: Перенести в db.py
-        import json
-
-        repeat_before = [
-            TimeUnit.parse_value(value) for value in json.loads(reminder.repeat_before)
-        ]
 
         for time_unit in repeat_before:
             prev_dt = time_unit.get_prev_datetime(target_datetime)

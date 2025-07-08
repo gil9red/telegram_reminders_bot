@@ -183,13 +183,21 @@ class Reminder(BaseModel):
 
         return self.original_message_id
 
+    def get_repeat_every(self) -> TimeUnit | None:
+        if self.repeat_every:
+            return TimeUnit.parse_value(self.repeat_every)
+        return
+
+    def get_repeat_before(self) -> list[TimeUnit]:
+        return [TimeUnit.parse_value(value) for value in json.loads(self.repeat_before)]
+
     def process_next_notify(self, now: datetime) -> bool:
         target_datetime_utc = self.target_datetime_utc
         next_send_datetime_utc = self.next_send_datetime_utc
 
         if now >= target_datetime_utc:
-            if self.repeat_every:
-                repeat_every: TimeUnit = TimeUnit.parse_value(self.repeat_every)
+            repeat_every: TimeUnit | None = self.get_repeat_every()
+            if repeat_every:
                 target_datetime_utc += repeat_every.get_timedelta()
             else:
                 # TODO: Уведомлять что это последнее напоминание?
@@ -201,11 +209,9 @@ class Reminder(BaseModel):
         next_dates: list[datetime] = [target_datetime_utc]
 
         # Если заданы напоминания до
-        if self.repeat_before:
-            for value in json.loads(self.repeat_before):
-                unit = TimeUnit.parse_value(value)
-                prev_dt = unit.get_prev_datetime(target_datetime_utc)
-                next_dates.append(prev_dt)
+        for unit in self.get_repeat_before():
+            prev_dt = unit.get_prev_datetime(target_datetime_utc)
+            next_dates.append(prev_dt)
 
         # Остаются даты после текущей
         next_dates = [d for d in next_dates if d > now]
