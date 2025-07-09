@@ -189,7 +189,11 @@ class Reminder(BaseModel):
         return
 
     def get_repeat_before(self) -> list[TimeUnit]:
-        return [TimeUnit.parse_value(value) for value in json.loads(self.repeat_before)]
+        if self.repeat_before:
+            return [
+                TimeUnit.parse_value(value) for value in json.loads(self.repeat_before)
+            ]
+        return []
 
     def process_next_notify(self, now: datetime) -> bool:
         target_datetime_utc = self.target_datetime_utc

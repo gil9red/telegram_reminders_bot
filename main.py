@@ -13,6 +13,7 @@ from typing import Any
 
 from telegram import Bot, Message
 from telegram.ext import Updater, Defaults
+from telegram.error import BadRequest
 
 import commands
 from common import log
@@ -47,16 +48,27 @@ def do_checking_reminders():
                 # Отправка уведомления
                 # Планирование следующей отправки
                 try:
-                    rs: Message = bot.send_message(
-                        chat_id=reminder.chat_id,
-                        text="⌛",  # TODO:
-                        reply_to_message_id=reminder.get_reply_to_message_id(),
-                    )
-
                     reminder.process_next_notify(now)
 
-                    reminder.last_send_message_id = rs.message_id
-                    reminder.last_send_datetime_utc = datetime.utcnow()
+                    reply_to_message_id = reminder.get_reply_to_message_id()
+                    while True:
+                        try:
+                            rs: Message = bot.send_message(
+                                chat_id=reminder.chat_id,
+                                text="⌛",  # TODO: Нужен текст, а то не будет контекста
+                                reply_to_message_id=reply_to_message_id,
+                            )
+                            reminder.last_send_message_id = rs.message_id
+                            reminder.last_send_datetime_utc = datetime.utcnow()
+
+                            break
+
+                        except BadRequest as e:
+                            if "Message to be replied not found" in str(e):
+                                reply_to_message_id = None
+                                continue
+
+                            raise e
 
                     reminder.save()
 
