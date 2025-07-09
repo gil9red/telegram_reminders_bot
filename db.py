@@ -16,7 +16,6 @@ from peewee import (
     DateTimeField,
     ForeignKeyField,
     IntegerField,
-    BooleanField,
 )
 from playhouse.sqliteq import SqliteQueueDatabase
 
@@ -56,11 +55,11 @@ class BaseModel(MetaModel):
 
 # SOURCE: https://core.telegram.org/bots/api#user
 class User(BaseModel):
-    first_name = TextField()
-    last_name = TextField(null=True)
-    username = TextField(null=True)
-    language_code = TextField(null=True)
-    last_activity = DateTimeField(default=datetime.now)
+    first_name: str = TextField()
+    last_name: str = TextField(null=True)
+    username: str = TextField(null=True)
+    language_code: str = TextField(null=True)
+    last_activity: datetime = DateTimeField(default=datetime.now)
 
     def update_last_activity(self):
         self.last_activity = datetime.now()
@@ -94,6 +93,14 @@ class Chat(BaseModel):
     description = TextField(null=True)
     tz = TextField(default="UTC")
     last_activity = DateTimeField(default=datetime.now)
+    type: str = TextField()
+    title: str = TextField(null=True)
+    username: str = TextField(null=True)
+    first_name: str = TextField(null=True)
+    last_name: str = TextField(null=True)
+    description: str = TextField(null=True)
+    tz: str = TextField(default="UTC")
+    last_activity: datetime = DateTimeField(default=datetime.now)
 
     def update_last_activity(self):
         self.last_activity = datetime.now()
