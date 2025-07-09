@@ -11,6 +11,7 @@ import sys
 from datetime import datetime
 from logging.handlers import RotatingFileHandler
 from pathlib import Path
+from zoneinfo import ZoneInfoNotFoundError
 
 from telegram import Update
 from telegram.ext import CallbackContext
@@ -104,7 +105,12 @@ def log_func(log: logging.Logger):
 def reply_error(log: logging.Logger, update: Update, context: CallbackContext):
     log.error("Error: %s\nUpdate: %s", context.error, update, exc_info=context.error)
     if update:
-        update.effective_message.reply_text(config.ERROR_TEXT)
+        if isinstance(context.error, ZoneInfoNotFoundError):
+            text = f"Не удалось найти часовой пояс {context.error.args[0]!r}"
+        else:
+            text = config.ERROR_TEXT
+
+        update.effective_message.reply_text(text)
 
 
 def datetime_to_str(dt: datetime) -> str:

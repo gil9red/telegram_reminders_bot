@@ -95,7 +95,7 @@ class Chat(BaseModel):
     tz: str = TextField(default="UTC")
     last_activity: datetime = DateTimeField(default=datetime.now)
 
-    def get_tz(self) -> tzinfo | None:  # TODO: Вместо None кидать ошибку
+    def get_tz(self) -> tzinfo:
         return get_tz(self.tz)
 
     def update_last_activity(self):
