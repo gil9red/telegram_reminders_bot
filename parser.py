@@ -24,7 +24,7 @@ PATTERN_REPEAT_EVERY = re.compile(
     flags=re.IGNORECASE,
 )
 PATTERN_REPEAT_BEFORE = re.compile(
-    r"Напомнить (за .+)",
+    r"Напомни(?:ть)? (за .+)",
     flags=re.IGNORECASE,
 )
 PATTERN_REPEAT_BEFORE_TIME_UNIT = re.compile(
@@ -230,6 +230,7 @@ if __name__ == "__main__":
 Напомни о "Звонок другу" 29 декабря
 Напомни о "Звонок другу" 29 декабря. Напомнить за неделю, за 2 дня, за 7 дней, за 3 дня, за 2 дня, за день
 Напомни о "xxx" 10 февраля в 14:55
+Напомни о "xxx" 12 июля в 17:55. Напомни за неделю, за 3 дня, за 2 дня, за 1 день
     """.strip()
 
     now = datetime.utcnow()
