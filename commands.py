@@ -318,7 +318,7 @@ def on_request(update: Update, _: CallbackContext):
     if not parse_result.repeat_before:
         lines.append("Без напоминаний")
     else:
-        lines.append("Напоминаний:")
+        lines.append("Напоминания:")
 
         for time_unit in parse_result.repeat_before:
             prev_dt = time_unit.get_prev_datetime(parse_result.target_datetime)
