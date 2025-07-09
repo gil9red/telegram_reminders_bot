@@ -26,6 +26,63 @@ DATA: dict[str, Any] = {
 }
 
 
+def process_check_reminders(bot: Bot):
+    now = datetime.utcnow()
+
+    query = (
+        Reminder.select()
+        .where(now >= Reminder.next_send_datetime_utc)
+        .order_by(Reminder.next_send_datetime_utc)
+    )
+
+    for reminder in query:
+        log.info("Send reminder: %s", reminder)
+
+        # Отправка уведомления
+        # Планирование следующей отправки
+        try:
+            has_next: bool = reminder.process_next_notify(now)
+
+            next_send_datetime_utc = reminder.next_send_datetime_utc
+            next_send_datetime = reminder.get_next_send_datetime()
+
+            lines: list[str] = [f"⌛ {reminder.target}"]
+            if has_next:
+                lines.append(
+                    f"Следующее: {datetime_to_str(next_send_datetime)} "
+                    f"(в UTC {datetime_to_str(next_send_datetime_utc)})"
+                )
+            text: str = "\n".join(lines)
+
+            reply_to_message_id: int | None = reminder.get_reply_to_message_id()
+            while True:
+                try:
+                    rs: Message = bot.send_message(
+                        chat_id=reminder.chat_id,
+                        text=text,
+                        reply_to_message_id=reply_to_message_id,
+                    )
+                    reminder.last_send_message_id = rs.message_id
+                    reminder.last_send_datetime_utc = datetime.utcnow()
+
+                    break
+
+                except BadRequest as e:
+                    if "Message to be replied not found" in str(e):
+                        reply_to_message_id = None
+                        continue
+
+                    raise e
+
+            reminder.save()
+
+        except:
+            log.exception("")
+
+        finally:
+            time.sleep(1)
+
+
 def do_checking_reminders():
     while True:
         bot: Bot | None = DATA["BOT"]
@@ -34,61 +91,9 @@ def do_checking_reminders():
             continue
 
         try:
-            now = datetime.utcnow()
-
-            query = (
-                Reminder.select()
-                .where(now >= Reminder.next_send_datetime_utc)
-                .order_by(Reminder.next_send_datetime_utc)
-            )
-
-            for reminder in query:
-                log.info("Send reminder: %s", reminder)
-
-                # Отправка уведомления
-                # Планирование следующей отправки
-                try:
-                    reminder.process_next_notify(now)
-
-                    next_send_datetime_utc = reminder.next_send_datetime_utc
-                    next_send_datetime = reminder.get_next_send_datetime()
-
-                    text: str = (
-                        f"⌛ {reminder.target}\n"
-                        f"Следующее: {datetime_to_str(next_send_datetime)} (в UTC {datetime_to_str(next_send_datetime_utc)})"
-                    )
-
-                    reply_to_message_id: int | None = reminder.get_reply_to_message_id()
-                    while True:
-                        try:
-                            rs: Message = bot.send_message(
-                                chat_id=reminder.chat_id,
-                                text=text,
-                                reply_to_message_id=reply_to_message_id,
-                            )
-                            reminder.last_send_message_id = rs.message_id
-                            reminder.last_send_datetime_utc = datetime.utcnow()
-
-                            break
-
-                        except BadRequest as e:
-                            if "Message to be replied not found" in str(e):
-                                reply_to_message_id = None
-                                continue
-
-                            raise e
-
-                    reminder.save()
-
-                except:
-                    log.exception("")
-
-                finally:
-                    time.sleep(1)
-
+            process_check_reminders(bot)
         except:
             log.exception("")
-
         finally:
             time.sleep(1)
 
