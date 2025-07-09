@@ -7,7 +7,7 @@ __author__ = "ipetrash"
 import json
 import time
 
-from datetime import datetime
+from datetime import datetime, tzinfo, timezone
 from typing import Optional, Iterable
 from pathlib import Path
 
@@ -21,6 +21,7 @@ from playhouse.sqliteq import SqliteQueueDatabase
 
 import telegram
 
+from tz_utils import convert_tz, get_tz
 from parser import TimeUnit
 from third_party.db_peewee_meta_model import MetaModel
 
@@ -85,14 +86,6 @@ class User(BaseModel):
 
 # SOURCE: https://core.telegram.org/bots/api#chat
 class Chat(BaseModel):
-    type = TextField()
-    title = TextField(null=True)
-    username = TextField(null=True)
-    first_name = TextField(null=True)
-    last_name = TextField(null=True)
-    description = TextField(null=True)
-    tz = TextField(default="UTC")
-    last_activity = DateTimeField(default=datetime.now)
     type: str = TextField()
     title: str = TextField(null=True)
     username: str = TextField(null=True)
@@ -101,6 +94,9 @@ class Chat(BaseModel):
     description: str = TextField(null=True)
     tz: str = TextField(default="UTC")
     last_activity: datetime = DateTimeField(default=datetime.now)
+
+    def get_tz(self) -> tzinfo | None:  # TODO: Вместо None кидать ошибку
+        return get_tz(self.tz)
 
     def update_last_activity(self):
         self.last_activity = datetime.now()
@@ -201,6 +197,20 @@ class Reminder(BaseModel):
                 TimeUnit.parse_value(value) for value in json.loads(self.repeat_before)
             ]
         return []
+
+    def get_target_datetime(self) -> datetime:
+        return convert_tz(
+            dt=self.target_datetime_utc,
+            from_tz=timezone.utc,
+            to_tz=self.chat.get_tz(),
+        )
+
+    def get_next_send_datetime(self) -> datetime:
+        return convert_tz(
+            dt=self.next_send_datetime_utc,
+            from_tz=timezone.utc,
+            to_tz=self.chat.get_tz(),
+        )
 
     def process_next_notify(self, now: datetime) -> bool:
         target_datetime_utc = self.target_datetime_utc

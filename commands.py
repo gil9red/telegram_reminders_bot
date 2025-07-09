@@ -5,10 +5,9 @@ __author__ = "ipetrash"
 
 
 import re
-import zoneinfo
 from datetime import datetime, tzinfo, timezone
 
-from telegram import Update, InlineKeyboardButton, Bot
+from telegram import Update, Bot
 from telegram.ext import (
     CallbackContext,
     CallbackQueryHandler,
@@ -20,7 +19,8 @@ from telegram.ext import (
 from telegram.error import BadRequest
 
 from config import MESS_MAX_LENGTH
-from common import log_func, log, reply_error
+from common import log_func, log, reply_error, datetime_to_str
+from tz_utils import convert_tz, get_tz
 from db import Reminder, Chat, User
 
 # TODO:
@@ -37,7 +37,6 @@ from regexp_patterns import (
     fill_string_pattern,
 )
 from third_party.telegram_bot_pagination import InlineKeyboardPaginator
-from third_party.get_tz_from_offset__zoneinfo import get_tz as get_tz_from_offset
 from third_party.is_equal_inline_keyboards import is_equal_inline_keyboards
 
 
@@ -48,28 +47,6 @@ from third_party.is_equal_inline_keyboards import is_equal_inline_keyboards
 # INLINE_BUTTON_DELETE = InlineKeyboardButton(
 #     INLINE_BUTTON_TEXT_DELETE, callback_data=PATTERN_DELETE_MESSAGE
 # )
-
-
-def datetime_to_str(dt: datetime) -> str:
-    return f"{dt:%d.%m.%Y %H:%M:%S}"
-
-
-def get_tz(value: str) -> tzinfo | None:
-    try:
-        return get_tz_from_offset(value)
-    except Exception:
-        try:
-            return zoneinfo.ZoneInfo(value)
-        except zoneinfo.ZoneInfoNotFoundError:
-            return
-
-
-def convert_tz(dt: datetime, from_tz: tzinfo, to_tz: tzinfo) -> datetime:
-    return (
-        dt.replace(tzinfo=from_tz)  # Указание часового пояса (дата не меняется)
-        .astimezone(to_tz)  # Изменение времени и часового пояса (дата изменилась)
-        .replace(tzinfo=None)  # Удаление часового пояса (дата не меняется)
-    )
 
 
 def get_context_value(context: CallbackContext) -> str | None:
@@ -106,7 +83,8 @@ def send_reminder(
 ):
     chat_id: int = chat.id
 
-    tz_chat: tzinfo | None = get_tz(chat.tz)
+    # TODO: Ловить ошибку из Chat.get_tz
+    tz_chat: tzinfo | None = chat.get_tz()
     if tz_chat is None:
         bot.send_message(
             chat_id=chat_id,
@@ -115,18 +93,10 @@ def send_reminder(
         return
 
     target_datetime_utc = reminder.target_datetime_utc
-    target_datetime = convert_tz(
-        dt=target_datetime_utc,
-        from_tz=timezone.utc,
-        to_tz=tz_chat,
-    )
+    target_datetime = reminder.get_target_datetime()
 
     next_send_datetime_utc = reminder.next_send_datetime_utc
-    next_send_datetime = convert_tz(
-        dt=next_send_datetime_utc,
-        from_tz=timezone.utc,
-        to_tz=tz_chat,
-    )
+    next_send_datetime = reminder.get_next_send_datetime()
 
     repeat_every: TimeUnit | None = reminder.get_repeat_every()
 

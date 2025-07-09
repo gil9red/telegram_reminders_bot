@@ -16,7 +16,7 @@ from telegram.ext import Updater, Defaults
 from telegram.error import BadRequest
 
 import commands
-from common import log
+from common import datetime_to_str, log
 from config import TOKEN
 from db import Reminder
 
@@ -50,12 +50,20 @@ def do_checking_reminders():
                 try:
                     reminder.process_next_notify(now)
 
-                    reply_to_message_id = reminder.get_reply_to_message_id()
+                    next_send_datetime_utc = reminder.next_send_datetime_utc
+                    next_send_datetime = reminder.get_next_send_datetime()
+
+                    text: str = (
+                        f"⌛ {reminder.target}\n"
+                        f"Следующее: {datetime_to_str(next_send_datetime)} (в UTC {datetime_to_str(next_send_datetime_utc)})"
+                    )
+
+                    reply_to_message_id: int | None = reminder.get_reply_to_message_id()
                     while True:
                         try:
                             rs: Message = bot.send_message(
                                 chat_id=reminder.chat_id,
-                                text="⌛",  # TODO: Нужен текст, а то не будет контекста
+                                text=text,
                                 reply_to_message_id=reply_to_message_id,
                             )
                             reminder.last_send_message_id = rs.message_id

@@ -7,6 +7,8 @@ __author__ = "ipetrash"
 import functools
 import logging
 import sys
+
+from datetime import datetime
 from logging.handlers import RotatingFileHandler
 from pathlib import Path
 
@@ -103,6 +105,10 @@ def reply_error(log: logging.Logger, update: Update, context: CallbackContext):
     log.error("Error: %s\nUpdate: %s", context.error, update, exc_info=context.error)
     if update:
         update.effective_message.reply_text(config.ERROR_TEXT)
+
+
+def datetime_to_str(dt: datetime) -> str:
+    return f"{dt:%d.%m.%Y %H:%M:%S}"
 
 
 log = get_logger(__file__)
