@@ -221,8 +221,6 @@ class Reminder(BaseModel):
             if repeat_every:
                 target_datetime_utc += repeat_every.get_timedelta()
             else:
-                # TODO: Уведомлять что это последнее напоминание?
-                #       Или наоборот писать когда будет следующее
                 self.delete_instance()
                 return False
 
