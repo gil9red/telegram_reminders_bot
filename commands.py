@@ -258,10 +258,10 @@ def on_request(update: Update, _: CallbackContext):
     command = message.text
     log.debug(f"Command: {command!r}")
 
-    now = datetime.utcnow()
+    now_utc = datetime.utcnow()
     default = Defaults(hours=10, minutes=0)
 
-    parse_result: ParseResult | None = parse_command(command, dt=now, default=default)
+    parse_result: ParseResult | None = parse_command(command, dt=now_utc, default=default)
     if not parse_result:
         message.reply_text("Не получилось разобрать команду!")
         return
@@ -269,27 +269,23 @@ def on_request(update: Update, _: CallbackContext):
     tz_chat: tzinfo = get_tz(chat.tz)
 
     # Время в часовом поясе пользователя
-    target_datetime = parse_result.target_datetime
+    target_datetime: datetime = parse_result.target_datetime
 
-    target_datetime_utc = convert_tz(
+    target_datetime_utc: datetime = convert_tz(
         dt=target_datetime,
         from_tz=tz_chat,
         to_tz=timezone.utc,
     )
 
-    # TODO: Дублирует код из do_checking_reminders
-    before_dates: list[datetime] = [
-        unit.get_prev_datetime(target_datetime_utc)
-        for unit in parse_result.repeat_before
-    ]
-    before_dates.append(target_datetime_utc)
-
-    next_dates: list[datetime] = [d for d in before_dates if d > now]
-
-    next_send_datetime_utc = min(next_dates)
+    # Следующая дата отправки
+    next_send_datetime_utc: datetime = Reminder.cals_next_send_datetime_utc(
+        target_datetime_utc=target_datetime_utc,
+        repeat_before=parse_result.repeat_before,
+        now_utc=now_utc,
+    )
 
     # TODO: Проверка на дубликат команды
-    Reminder.add(
+    reminder = Reminder.add(
         original_message_id=message.message_id,
         original_message_text=message.text,
         target=parse_result.target,
@@ -301,11 +297,7 @@ def on_request(update: Update, _: CallbackContext):
         chat=Chat.get_from(update.effective_chat),
     )
 
-    next_send_datetime = convert_tz(
-        dt=next_send_datetime_utc,
-        from_tz=timezone.utc,
-        to_tz=tz_chat,
-    )
+    next_send_datetime: datetime = reminder.get_next_send_datetime()
 
     # TODO: Дублирует send_reminder
     lines: list[str] = [

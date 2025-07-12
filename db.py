@@ -212,11 +212,31 @@ class Reminder(BaseModel):
             to_tz=self.chat.get_tz(),
         )
 
-    def process_next_notify(self, now: datetime) -> bool:
-        target_datetime_utc = self.target_datetime_utc
-        next_send_datetime_utc = self.next_send_datetime_utc
+    @staticmethod
+    def cals_next_send_datetime_utc(
+        now_utc: datetime,
+        target_datetime_utc: datetime,
+        repeat_before: list[TimeUnit],
+    ) -> datetime:
+        # Следующая дата отправки
+        next_dates: list[datetime] = [target_datetime_utc]
 
-        if now >= target_datetime_utc:
+        # Если заданы напоминания до
+        for unit in repeat_before:
+            prev_dt = unit.get_prev_datetime(target_datetime_utc)
+            next_dates.append(prev_dt)
+
+        # Остаются даты после текущей
+        next_dates = [d for d in next_dates if d > now_utc]
+        if not next_dates:
+            raise Exception(f"Не удалось рассчитать дату следующего напоминания")
+
+        return min(next_dates)
+
+    def process_next_notify(self, now_utc: datetime) -> bool:
+        target_datetime_utc: datetime = self.target_datetime_utc
+
+        if now_utc >= target_datetime_utc:
             repeat_every: TimeUnit | None = self.get_repeat_every()
             if repeat_every:
                 target_datetime_utc += repeat_every.get_timedelta()
@@ -224,21 +244,14 @@ class Reminder(BaseModel):
                 self.delete_instance()
                 return False
 
-        # Следующая дата отправки
-        next_dates: list[datetime] = [target_datetime_utc]
-
-        # Если заданы напоминания до
-        for unit in self.get_repeat_before():
-            prev_dt = unit.get_prev_datetime(target_datetime_utc)
-            next_dates.append(prev_dt)
-
-        # Остаются даты после текущей
-        next_dates = [d for d in next_dates if d > now]
-        if next_dates:
-            next_send_datetime_utc = min(next_dates)
-
         self.target_datetime_utc = target_datetime_utc
-        self.next_send_datetime_utc = next_send_datetime_utc
+
+        # Следующая дата отправки
+        self.next_send_datetime_utc = self.cals_next_send_datetime_utc(
+            now_utc=now_utc,
+            target_datetime_utc=self.target_datetime_utc,
+            repeat_before=self.get_repeat_before(),
+        )
 
         return True
 
