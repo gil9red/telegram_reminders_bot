@@ -27,11 +27,11 @@ DATA: dict[str, Any] = {
 
 
 def process_check_reminders(bot: Bot):
-    now = datetime.utcnow()
+    now_utc = datetime.utcnow()
 
     query = (
         Reminder.select()
-        .where(now >= Reminder.next_send_datetime_utc)
+        .where(now_utc >= Reminder.next_send_datetime_utc)
         .order_by(Reminder.next_send_datetime_utc)
     )
 
@@ -41,7 +41,7 @@ def process_check_reminders(bot: Bot):
         # Отправка уведомления
         # Планирование следующей отправки
         try:
-            has_next: bool = reminder.process_next_notify(now)
+            has_next: bool = reminder.process_next_notify(now_utc)
 
             next_send_datetime_utc = reminder.next_send_datetime_utc
             next_send_datetime = reminder.get_next_send_datetime()
