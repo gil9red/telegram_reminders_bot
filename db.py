@@ -239,7 +239,7 @@ class Reminder(BaseModel):
         if now_utc >= target_datetime_utc:
             repeat_every: TimeUnit | None = self.get_repeat_every()
             if repeat_every:
-                target_datetime_utc += repeat_every.get_timedelta()
+                target_datetime_utc = repeat_every.get_next_datetime(target_datetime_utc)
             else:
                 self.delete_instance()
                 return False

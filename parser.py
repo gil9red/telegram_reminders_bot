@@ -91,6 +91,9 @@ class TimeUnit:
     def get_prev_datetime(self, dt: datetime) -> datetime:
         return dt - self.get_timedelta()
 
+    def get_next_datetime(self, dt: datetime) -> datetime:
+        return dt + self.get_timedelta()
+
     def get_timedelta(self) -> timedelta:
         return timedelta(days=self.number * self.unit.days())
 
