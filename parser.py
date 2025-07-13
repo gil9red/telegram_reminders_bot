@@ -9,7 +9,7 @@ import re
 
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
-from typing import Optional
+from typing import Optional, Type
 
 
 PATTERN_TARGET_DATETIME = re.compile(
@@ -20,7 +20,9 @@ PATTERN_TARGET_DATETIME = re.compile(
     flags=re.IGNORECASE,
 )
 PATTERN_REPEAT_EVERY = re.compile(
-    r"Повтор (?:раз в|каждый) (?P<unit>день|неделю|месяц|полгода|год)",
+    r"Повтор (?:раз в|каждый) "
+    r"(?P<unit>день|неделю|месяц|полгода|год"
+    r"|понедельник|вторник|среду|четверг|пятницу|суббота|воскресенье)",
     flags=re.IGNORECASE,
 )
 PATTERN_REPEAT_BEFORE = re.compile(
@@ -59,13 +61,62 @@ class TimeUnitEnum(AutoName):
                 raise Exception(f"Unsupported {self}")
 
 
+class TimeUnitWeekDayEnum(enum.IntEnum):
+    MONDAY = 1
+    TUESDAY = 2
+    WEDNESDAY = 3
+    THURSDAY = 4
+    FRIDAY = 5
+    SATURDAY = 6
+    SUNDAY = 7
+
+
+@dataclass
+class TimeUnitWeekDayUnit:
+    unit: TimeUnitWeekDayEnum
+
+    @classmethod
+    def parse_text(cls, value: str) -> Optional["TimeUnitWeekDayUnit"]:
+        match value:
+            case "понедельник":
+                return cls(unit=TimeUnitWeekDayEnum.MONDAY)
+            case "вторник":
+                return cls(unit=TimeUnitWeekDayEnum.TUESDAY)
+            case "среду":
+                return cls(unit=TimeUnitWeekDayEnum.WEDNESDAY)
+            case "четверг":
+                return cls(unit=TimeUnitWeekDayEnum.THURSDAY)
+            case "пятницу":
+                return cls(unit=TimeUnitWeekDayEnum.FRIDAY)
+            case "суббота":
+                return cls(unit=TimeUnitWeekDayEnum.SATURDAY)
+            case "воскресенье":
+                return cls(unit=TimeUnitWeekDayEnum.SUNDAY)
+            case _:
+                return
+
+    @classmethod
+    def parse_value(cls, value: str) -> "TimeUnitWeekDayUnit":
+        return cls(unit=TimeUnitWeekDayEnum[value])
+
+    def get_value(self) -> str:
+        return self.unit.name
+
+    def get_next_datetime(self, dt: datetime) -> datetime:
+        while True:
+            dt += timedelta(days=1)
+            if dt.isoweekday() == self.unit.value:
+                break
+        return dt
+
+
 @dataclass
 class TimeUnit:
     number: int
     unit: TimeUnitEnum
 
     @classmethod
-    def parse(cls, value: str) -> Optional["TimeUnit"]:
+    def parse_text(cls, value: str) -> Optional["TimeUnit"]:
         match value:
             case "год" | "года":
                 return cls(number=1, unit=TimeUnitEnum.YEAR)
@@ -102,10 +153,42 @@ class TimeUnit:
 
 
 @dataclass
+class RepeatEvery:
+    unit: TimeUnit | TimeUnitWeekDayUnit
+
+    @classmethod
+    def get_unit_classes(cls) -> list[Type[TimeUnit] | Type[TimeUnitWeekDayUnit]]:
+        return [TimeUnit, TimeUnitWeekDayUnit]
+
+    @classmethod
+    def parse_text(cls, value: str) -> Optional["RepeatEvery"]:
+        for unit_cls in cls.get_unit_classes():
+            if unit := unit_cls.parse_text(value):
+                return cls(unit=unit)
+        return
+
+    @classmethod
+    def parse_value(cls, value: str) -> Optional["RepeatEvery"]:
+        for unit_cls in cls.get_unit_classes():
+            try:
+                if unit := unit_cls.parse_value(value):
+                    return cls(unit=unit)
+            except Exception:
+                pass
+        return
+
+    def get_value(self) -> str:
+        return self.unit.get_value()
+
+    def get_next_datetime(self, dt: datetime) -> datetime:
+        return self.unit.get_next_datetime(dt)
+
+
+@dataclass
 class ParseResult:
     target: str
     target_datetime: datetime
-    repeat_every: TimeUnit | None = None
+    repeat_every: RepeatEvery | None = None
     repeat_before: list[TimeUnit] = field(default_factory=list)
 
 
@@ -115,12 +198,12 @@ class Defaults:
     minutes: int
 
 
-def get_repeat_every(command: str) -> TimeUnit | None:
+def get_repeat_every(command: str) -> RepeatEvery | None:
     m = PATTERN_REPEAT_EVERY.search(command)
     if not m:
         return
 
-    return TimeUnit.parse(m.group("unit"))
+    return RepeatEvery.parse_text(m.group("unit"))
 
 
 def parse_repeat_before(command: str) -> list[TimeUnit]:
@@ -138,7 +221,7 @@ def parse_repeat_before(command: str) -> list[TimeUnit]:
             number: int = 1
 
         day_value: str = m.group("day")
-        time_unit: TimeUnit = TimeUnit.parse(day_value)
+        time_unit: TimeUnit = TimeUnit.parse_text(day_value)
         time_unit.number = number
 
         time_by_unit[time_unit.get_timedelta()] = time_unit
@@ -208,6 +291,26 @@ def parse_command(
 
 
 if __name__ == "__main__":
+    now = datetime.now()
+
+    repeat_every_month = RepeatEvery.parse_text("месяц")
+    print(repeat_every_month)
+    print(repeat_every_month.get_value())
+    print(RepeatEvery.parse_value(repeat_every_month.get_value()))
+    assert repeat_every_month == RepeatEvery.parse_value(repeat_every_month.get_value())
+    print(repeat_every_month.get_next_datetime(now))
+    print()
+
+    repeat_every_thursday = RepeatEvery.parse_text("четверг")
+    print(repeat_every_thursday)
+    print(repeat_every_thursday.get_value())
+    print(RepeatEvery.parse_value(repeat_every_thursday.get_value()))
+    assert repeat_every_thursday == RepeatEvery.parse_value(
+        repeat_every_thursday.get_value()
+    )
+    print(repeat_every_thursday.get_next_datetime(now))
+    print()
+
     assert TimeUnit.parse_value("3 DAY") == TimeUnit(number=3, unit=TimeUnitEnum.DAY)
     assert TimeUnit.parse_value("1 YEAR") == TimeUnit(number=1, unit=TimeUnitEnum.YEAR)
 
@@ -234,6 +337,7 @@ if __name__ == "__main__":
 Напомни о "Звонок другу" 29 декабря. Напомнить за неделю, за 2 дня, за 7 дней, за 3 дня, за 2 дня, за день
 Напомни о "xxx" 10 февраля в 14:55
 Напомни о "xxx" 12 июля в 17:55. Напомни за неделю, за 3 дня, за 2 дня, за 1 день
+Напомни о "Чатик 🍕" 17 июля в 12:00. Повтор каждый четверг
     """.strip()
 
     now = datetime.utcnow()
@@ -244,7 +348,13 @@ if __name__ == "__main__":
 
         result = parse_command(line, dt=now, default=default)
         print(result)
-        print(result.target_datetime)
+        print("Целевая дата:", result.target_datetime)
+        print(
+            "Следующая целевая дата:",
+            result.repeat_every.get_next_datetime(result.target_datetime)
+            if result.repeat_every
+            else "Нет",
+        )
         for time_unit in result.repeat_before:
             print(
                 time_unit.get_prev_datetime(result.target_datetime),

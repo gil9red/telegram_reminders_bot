@@ -22,7 +22,7 @@ from playhouse.sqliteq import SqliteQueueDatabase
 import telegram
 
 from tz_utils import convert_tz, get_tz
-from parser import TimeUnit
+from parser import TimeUnit, RepeatEvery
 from third_party.db_peewee_meta_model import MetaModel
 
 
@@ -146,7 +146,7 @@ class Reminder(BaseModel):
         target: str,
         target_datetime_utc: datetime,
         next_send_datetime_utc: datetime,
-        repeat_every: TimeUnit | None,
+        repeat_every: RepeatEvery | None,
         repeat_before: list[TimeUnit],
         user: User,
         chat: Chat,
@@ -186,9 +186,9 @@ class Reminder(BaseModel):
 
         return self.original_message_id
 
-    def get_repeat_every(self) -> TimeUnit | None:
+    def get_repeat_every(self) -> RepeatEvery | None:
         if self.repeat_every:
-            return TimeUnit.parse_value(self.repeat_every)
+            return RepeatEvery.parse_value(self.repeat_every)
         return
 
     def get_repeat_before(self) -> list[TimeUnit]:
@@ -237,7 +237,7 @@ class Reminder(BaseModel):
         target_datetime_utc: datetime = self.target_datetime_utc
 
         if now_utc >= target_datetime_utc:
-            repeat_every: TimeUnit | None = self.get_repeat_every()
+            repeat_every: RepeatEvery | None = self.get_repeat_every()
             if repeat_every:
                 target_datetime_utc = repeat_every.get_next_datetime(target_datetime_utc)
             else:

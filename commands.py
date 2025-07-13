@@ -25,7 +25,7 @@ from db import Reminder, Chat, User
 
 # TODO:
 # from utils import ParseResult, parse_command, get_pretty_datetime
-from parser import ParseResult, Defaults, TimeUnit, parse_command
+from parser import ParseResult, Defaults, RepeatEvery, parse_command
 from regexp_patterns import (
     COMMAND_START,
     COMMAND_HELP,
@@ -89,7 +89,7 @@ def send_reminder(
     next_send_datetime_utc = reminder.next_send_datetime_utc
     next_send_datetime = reminder.get_next_send_datetime()
 
-    repeat_every: TimeUnit | None = reminder.get_repeat_every()
+    repeat_every: RepeatEvery | None = reminder.get_repeat_every()
 
     lines: list[str] = [
         f"Напоминание установлено на {datetime_to_str(target_datetime)} (в UTC {datetime_to_str(target_datetime_utc)})",
