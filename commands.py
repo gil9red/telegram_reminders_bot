@@ -92,7 +92,8 @@ def send_reminder(
     repeat_every: RepeatEvery | None = reminder.get_repeat_every()
 
     lines: list[str] = [
-        f"Напоминание установлено на {datetime_to_str(target_datetime)} (в UTC {datetime_to_str(target_datetime_utc)})",
+        f"Напоминание: {reminder.target}",
+        f"Установлено на {datetime_to_str(target_datetime)} (в UTC {datetime_to_str(target_datetime_utc)})",
         f"Ближайшее: {datetime_to_str(next_send_datetime)} (в UTC {datetime_to_str(next_send_datetime_utc)})",
         f"Повтор: {repeat_every.get_value() if repeat_every else 'нет'}",
     ]
