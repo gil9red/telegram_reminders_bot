@@ -110,7 +110,7 @@ def reply_error(log: logging.Logger, update: Update, context: CallbackContext):
         else:
             text = config.ERROR_TEXT
 
-        update.effective_message.reply_text(text)
+        update.effective_message.reply_text(text, quote=True)
 
 
 def datetime_to_str(dt: datetime) -> str:

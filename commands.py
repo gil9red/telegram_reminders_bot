@@ -155,7 +155,7 @@ def get_reminders(update: Update, context: CallbackContext):
     reminder: Reminder | None = Reminder.get_by_page(page=page, filters=filters)
     if not reminder:
         text = "Напоминаний нет"
-        message.reply_text(text)
+        message.reply_text(text, quote=True)
         return
 
     total = Reminder.count(filters)
@@ -228,13 +228,13 @@ def on_tz(update: Update, context: CallbackContext):
 
     if is_set:
         if chat.tz == value:
-            message.reply_text(f"Часовой пояс {value!r} уже был установлен")
+            message.reply_text(f"Часовой пояс {value!r} уже был установлен", quote=True)
             return
 
         chat.tz = value
         chat.save()
 
-        message.reply_text(f"Установлен часовой пояс {value!r}")
+        message.reply_text(f"Установлен часовой пояс {value!r}", quote=True)
         return
 
     dt_utc = datetime.utcnow()
@@ -246,7 +246,8 @@ def on_tz(update: Update, context: CallbackContext):
 
     message.reply_text(
         f"Часовой пояс {value!r}, время {datetime_to_str(dt)}\n"
-        f"Время в UTC: {datetime_to_str(dt_utc)}"
+        f"Время в UTC: {datetime_to_str(dt_utc)}",
+        quote=True
     )
 
 
@@ -263,7 +264,7 @@ def on_request(update: Update, _: CallbackContext):
 
     parse_result: ParseResult | None = parse_command(command, dt=now_utc, default=default)
     if not parse_result:
-        message.reply_text("Не получилось разобрать команду!")
+        message.reply_text("Не получилось разобрать команду!", quote=True)
         return
 
     tz_chat: tzinfo = get_tz(chat.tz)
@@ -323,7 +324,7 @@ def on_request(update: Update, _: CallbackContext):
                 f"    {time_unit.get_value()}: {prev_dt} (в UTC {datetime_to_str(prev_dt_utc)})"
             )
 
-    message.reply_text("\n".join(lines))
+    message.reply_text("\n".join(lines), quote=True)
 
 
 @log_func(log)
