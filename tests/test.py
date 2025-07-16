@@ -5,6 +5,7 @@ __author__ = "ipetrash"
 
 
 import unittest
+
 # TODO:
 from datetime import datetime
 
@@ -16,7 +17,13 @@ from db import (
     Reminder,
     db,
 )
-from parser import TimeUnitEnum, TimeUnitWeekDayEnum, RepeatEvery, TimeUnit, TimeUnitWeekDayUnit
+from parser import (
+    TimeUnitEnum,
+    TimeUnitWeekDayEnum,
+    RepeatEvery,
+    TimeUnit,
+    TimeUnitWeekDayUnit,
+)
 
 
 # NOTE: https://docs.peewee-orm.com/en/latest/peewee/database.html#testing-peewee-applications
@@ -74,54 +81,80 @@ class TestCaseParserCommon(unittest.TestCase):
 
 class TestCaseTimeUnit(unittest.TestCase):
     def test_parse_text(self):
-        1/0
+        for text_list, unit in [
+            (
+                ["год", "года"],
+                TimeUnit(number=1, unit=TimeUnitEnum.YEAR),
+            ),
+            (
+                ["полгода"],
+                TimeUnit(number=6, unit=TimeUnitEnum.MONTH),
+            ),
+            (
+                ["месяц", "месяца", "месяцев"],
+                TimeUnit(number=1, unit=TimeUnitEnum.MONTH),
+            ),
+            (
+                ["неделю", "недели", "недель"],
+                TimeUnit(number=1, unit=TimeUnitEnum.WEEK),
+            ),
+            (
+                ["день", "дня", "дней"],
+                TimeUnit(number=1, unit=TimeUnitEnum.DAY),
+            ),
+        ]:
+            with self.subTest(text_list=text_list, unit=unit):
+                for text in text_list:
+                    self.assertEqual(unit, TimeUnit.parse_text(text))
 
     def test_parse_value(self):
-        1/0
+        1 / 0
 
     def test_get_value(self):
-        1/0
+        1 / 0
 
     def test_get_prev_datetime(self):
-        1/0
+        1 / 0
 
     def test_get_next_datetime(self):
-        1/0
+        1 / 0
 
     def test_get_timedelta(self):
-        1/0
+        1 / 0
 
 
 class TestCaseTimeUnitWeekDayUnit(unittest.TestCase):
     def test_parse_text(self):
-        1/0
+        1 / 0
 
     def test_parse_value(self):
-        1/0
+        1 / 0
 
     def test_get_value(self):
-        1/0
+        1 / 0
 
     def test_get_next_datetime(self):
-        1/0
+        1 / 0
 
 
 # TODO:
 class TestCaseParserRepeatEvery(unittest.TestCase):
     def test_get_unit_classes(self):
-        self.assertEqual([TimeUnit, TimeUnitWeekDayUnit], RepeatEvery.get_unit_classes())
+        self.assertEqual(
+            [TimeUnit, TimeUnitWeekDayUnit], RepeatEvery.get_unit_classes()
+        )
 
     def test_parse_text(self):
-        1/0
+        1 / 0
 
     def test_parse_value(self):
-        1/0
+        1 / 0
 
     def test_get_value(self):
-        1/0
+        1 / 0
 
     def test_get_next_datetime(self):
-        1/0
+        1 / 0
 
 
 if __name__ == "__main__":
