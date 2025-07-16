@@ -16,7 +16,7 @@ from db import (
     Reminder,
     db,
 )
-from parser import TimeUnitEnum, TimeUnitWeekDayEnum
+from parser import TimeUnitEnum, TimeUnitWeekDayEnum, RepeatEvery, TimeUnit, TimeUnitWeekDayUnit
 
 
 # NOTE: https://docs.peewee-orm.com/en/latest/peewee/database.html#testing-peewee-applications
@@ -37,7 +37,7 @@ class TestCaseDb(unittest.TestCase):
 
 
 # TODO:
-class TestCaseParser(unittest.TestCase):
+class TestCaseParserCommon(unittest.TestCase):
     def test_TimeUnitEnum_days(self):
         self.assertEqual(365, TimeUnitEnum.YEAR.days())
         self.assertEqual(30, TimeUnitEnum.MONTH.days())
@@ -70,6 +70,24 @@ class TestCaseParser(unittest.TestCase):
                 self.assertEqual(value, enum_value.value)
                 self.assertEqual(enum_value, TimeUnitWeekDayEnum(value))
                 self.assertEqual(enum_value, TimeUnitWeekDayEnum[enum_value.name])
+
+
+# TODO:
+class TestCaseParserRepeatEvery(unittest.TestCase):
+    def test_get_unit_classes(self):
+        self.assertEqual([TimeUnit, TimeUnitWeekDayUnit], RepeatEvery.get_unit_classes())
+
+    def test_parse_text(self):
+        1/0
+
+    def test_parse_value(self):
+        1/0
+
+    def test_get_value(self):
+        1/0
+
+    def test_get_next_datetime(self):
+        1/0
 
 
 if __name__ == "__main__":
