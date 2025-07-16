@@ -72,45 +72,6 @@ class TimeUnitWeekDayEnum(enum.IntEnum):
 
 
 @dataclass
-class TimeUnitWeekDayUnit:
-    unit: TimeUnitWeekDayEnum
-
-    @classmethod
-    def parse_text(cls, value: str) -> Optional["TimeUnitWeekDayUnit"]:
-        match value:
-            case "понедельник":
-                return cls(unit=TimeUnitWeekDayEnum.MONDAY)
-            case "вторник":
-                return cls(unit=TimeUnitWeekDayEnum.TUESDAY)
-            case "среду":
-                return cls(unit=TimeUnitWeekDayEnum.WEDNESDAY)
-            case "четверг":
-                return cls(unit=TimeUnitWeekDayEnum.THURSDAY)
-            case "пятницу":
-                return cls(unit=TimeUnitWeekDayEnum.FRIDAY)
-            case "суббота":
-                return cls(unit=TimeUnitWeekDayEnum.SATURDAY)
-            case "воскресенье":
-                return cls(unit=TimeUnitWeekDayEnum.SUNDAY)
-            case _:
-                return
-
-    @classmethod
-    def parse_value(cls, value: str) -> "TimeUnitWeekDayUnit":
-        return cls(unit=TimeUnitWeekDayEnum[value])
-
-    def get_value(self) -> str:
-        return self.unit.name
-
-    def get_next_datetime(self, dt: datetime) -> datetime:
-        while True:
-            dt += timedelta(days=1)
-            if dt.isoweekday() == self.unit.value:
-                break
-        return dt
-
-
-@dataclass
 class TimeUnit:
     number: int
     unit: TimeUnitEnum
@@ -150,6 +111,45 @@ class TimeUnit:
 
     def __lt__(self, other: "TimeUnit") -> bool:
         return self.get_timedelta() < other.get_timedelta()
+
+
+@dataclass
+class TimeUnitWeekDayUnit:
+    unit: TimeUnitWeekDayEnum
+
+    @classmethod
+    def parse_text(cls, value: str) -> Optional["TimeUnitWeekDayUnit"]:
+        match value:
+            case "понедельник":
+                return cls(unit=TimeUnitWeekDayEnum.MONDAY)
+            case "вторник":
+                return cls(unit=TimeUnitWeekDayEnum.TUESDAY)
+            case "среду":
+                return cls(unit=TimeUnitWeekDayEnum.WEDNESDAY)
+            case "четверг":
+                return cls(unit=TimeUnitWeekDayEnum.THURSDAY)
+            case "пятницу":
+                return cls(unit=TimeUnitWeekDayEnum.FRIDAY)
+            case "суббота":
+                return cls(unit=TimeUnitWeekDayEnum.SATURDAY)
+            case "воскресенье":
+                return cls(unit=TimeUnitWeekDayEnum.SUNDAY)
+            case _:
+                return
+
+    @classmethod
+    def parse_value(cls, value: str) -> "TimeUnitWeekDayUnit":
+        return cls(unit=TimeUnitWeekDayEnum[value])
+
+    def get_value(self) -> str:
+        return self.unit.name
+
+    def get_next_datetime(self, dt: datetime) -> datetime:
+        while True:
+            dt += timedelta(days=1)
+            if dt.isoweekday() == self.unit.value:
+                break
+        return dt
 
 
 @dataclass
