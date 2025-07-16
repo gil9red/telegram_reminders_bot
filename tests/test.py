@@ -118,17 +118,18 @@ class TestCaseTimeUnit(unittest.TestCase):
                 self.assertEqual(unit, TimeUnit.parse_value(value))
 
     def test_get_value(self):
-        self.assertEqual("1 DAY", TimeUnit(number=1, unit=TimeUnitEnum.DAY).get_value())
-        self.assertEqual("10 DAY", TimeUnit(number=10, unit=TimeUnitEnum.DAY).get_value())
-
-        self.assertEqual("1 WEEK", TimeUnit(number=1, unit=TimeUnitEnum.WEEK).get_value())
-        self.assertEqual("2 WEEK", TimeUnit(number=2, unit=TimeUnitEnum.WEEK).get_value())
-
-        self.assertEqual("1 MONTH", TimeUnit(number=1, unit=TimeUnitEnum.MONTH).get_value())
-        self.assertEqual("3 MONTH", TimeUnit(number=3, unit=TimeUnitEnum.MONTH).get_value())
-
-        self.assertEqual("1 YEAR", TimeUnit(number=1, unit=TimeUnitEnum.YEAR).get_value())
-        self.assertEqual("2 YEAR", TimeUnit(number=2, unit=TimeUnitEnum.YEAR).get_value())
+        for value, unit in [
+            ("1 DAY", TimeUnit(number=1, unit=TimeUnitEnum.DAY)),
+            ("10 DAY", TimeUnit(number=10, unit=TimeUnitEnum.DAY)),
+            ("1 WEEK", TimeUnit(number=1, unit=TimeUnitEnum.WEEK)),
+            ("2 WEEK", TimeUnit(number=2, unit=TimeUnitEnum.WEEK)),
+            ("1 MONTH", TimeUnit(number=1, unit=TimeUnitEnum.MONTH)),
+            ("3 MONTH", TimeUnit(number=3, unit=TimeUnitEnum.MONTH)),
+            ("1 YEAR", TimeUnit(number=1, unit=TimeUnitEnum.YEAR)),
+            ("2 YEAR", TimeUnit(number=2, unit=TimeUnitEnum.YEAR)),
+        ]:
+            with self.subTest(value=value, unit=unit):
+                self.assertEqual(value, unit.get_value())
 
     def test_get_prev_datetime(self):
         1 / 0
