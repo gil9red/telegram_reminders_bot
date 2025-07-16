@@ -80,8 +80,9 @@ class TestCaseParserCommon(unittest.TestCase):
 
 
 class TestCaseTimeUnit(unittest.TestCase):
-    def test_parse_text(self):
-        for text_list, unit in [
+    @classmethod
+    def get_test_data(cls) -> list[tuple[list[str], TimeUnit]]:
+        return [
             (
                 ["год", "года"],
                 TimeUnit(number=1, unit=TimeUnitEnum.YEAR),
@@ -102,13 +103,19 @@ class TestCaseTimeUnit(unittest.TestCase):
                 ["день", "дня", "дней"],
                 TimeUnit(number=1, unit=TimeUnitEnum.DAY),
             ),
-        ]:
+        ]
+
+    def test_parse_text(self):
+        for text_list, unit in self.get_test_data():
             with self.subTest(text_list=text_list, unit=unit):
                 for text in text_list:
                     self.assertEqual(unit, TimeUnit.parse_text(text))
 
     def test_parse_value(self):
-        1 / 0
+        for _, unit in self.get_test_data():
+            with self.subTest(unit=unit):
+                value = unit.get_value()
+                self.assertEqual(unit, TimeUnit.parse_value(value))
 
     def test_get_value(self):
         1 / 0
