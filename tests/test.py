@@ -72,6 +72,40 @@ class TestCaseParserCommon(unittest.TestCase):
                 self.assertEqual(enum_value, TimeUnitWeekDayEnum[enum_value.name])
 
 
+class TestCaseTimeUnit(unittest.TestCase):
+    def test_parse_text(self):
+        1/0
+
+    def test_parse_value(self):
+        1/0
+
+    def test_get_value(self):
+        1/0
+
+    def test_get_prev_datetime(self):
+        1/0
+
+    def test_get_next_datetime(self):
+        1/0
+
+    def test_get_timedelta(self):
+        1/0
+
+
+class TestCaseTimeUnitWeekDayUnit(unittest.TestCase):
+    def test_parse_text(self):
+        1/0
+
+    def test_parse_value(self):
+        1/0
+
+    def test_get_value(self):
+        1/0
+
+    def test_get_next_datetime(self):
+        1/0
+
+
 # TODO:
 class TestCaseParserRepeatEvery(unittest.TestCase):
     def test_get_unit_classes(self):
