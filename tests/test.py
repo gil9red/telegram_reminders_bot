@@ -81,8 +81,20 @@ class TestCaseParserCommon(unittest.TestCase):
 
 class TestCaseTimeUnit(unittest.TestCase):
     @classmethod
-    def get_test_data(cls) -> list[tuple[list[str], TimeUnit]]:
+    def get_test_data(cls) -> list[tuple[str, TimeUnit]]:
         return [
+            ("1 DAY", TimeUnit(number=1, unit=TimeUnitEnum.DAY)),
+            ("10 DAY", TimeUnit(number=10, unit=TimeUnitEnum.DAY)),
+            ("1 WEEK", TimeUnit(number=1, unit=TimeUnitEnum.WEEK)),
+            ("2 WEEK", TimeUnit(number=2, unit=TimeUnitEnum.WEEK)),
+            ("1 MONTH", TimeUnit(number=1, unit=TimeUnitEnum.MONTH)),
+            ("3 MONTH", TimeUnit(number=3, unit=TimeUnitEnum.MONTH)),
+            ("1 YEAR", TimeUnit(number=1, unit=TimeUnitEnum.YEAR)),
+            ("2 YEAR", TimeUnit(number=2, unit=TimeUnitEnum.YEAR)),
+        ]
+
+    def test_parse_text(self):
+        for text_list, unit in [
             (
                 ["год", "года"],
                 TimeUnit(number=1, unit=TimeUnitEnum.YEAR),
@@ -103,10 +115,7 @@ class TestCaseTimeUnit(unittest.TestCase):
                 ["день", "дня", "дней"],
                 TimeUnit(number=1, unit=TimeUnitEnum.DAY),
             ),
-        ]
-
-    def test_parse_text(self):
-        for text_list, unit in self.get_test_data():
+        ]:
             with self.subTest(text_list=text_list, unit=unit):
                 for text in text_list:
                     self.assertEqual(unit, TimeUnit.parse_text(text))
@@ -118,21 +127,16 @@ class TestCaseTimeUnit(unittest.TestCase):
                 self.assertEqual(unit, TimeUnit.parse_value(value))
 
     def test_get_value(self):
-        for value, unit in [
-            ("1 DAY", TimeUnit(number=1, unit=TimeUnitEnum.DAY)),
-            ("10 DAY", TimeUnit(number=10, unit=TimeUnitEnum.DAY)),
-            ("1 WEEK", TimeUnit(number=1, unit=TimeUnitEnum.WEEK)),
-            ("2 WEEK", TimeUnit(number=2, unit=TimeUnitEnum.WEEK)),
-            ("1 MONTH", TimeUnit(number=1, unit=TimeUnitEnum.MONTH)),
-            ("3 MONTH", TimeUnit(number=3, unit=TimeUnitEnum.MONTH)),
-            ("1 YEAR", TimeUnit(number=1, unit=TimeUnitEnum.YEAR)),
-            ("2 YEAR", TimeUnit(number=2, unit=TimeUnitEnum.YEAR)),
-        ]:
+        for value, unit in self.get_test_data():
             with self.subTest(value=value, unit=unit):
                 self.assertEqual(value, unit.get_value())
 
     def test_get_prev_datetime(self):
-        1 / 0
+        dt = datetime(year=2020, month=1, day=1, hour=10, minute=0, second=0)
+
+        for _, unit in self.get_test_data():
+            with self.subTest(unit=unit):
+                self.assertEqual(dt - unit.get_timedelta(), unit.get_prev_datetime(dt))
 
     def test_get_next_datetime(self):
         1 / 0
@@ -166,7 +170,13 @@ class TestCaseParserRepeatEvery(unittest.TestCase):
         )
 
     def test_parse_text(self):
-        1 / 0
+        # TODO: Все варианты
+        for text in ["месяц", "четверг"]:
+            with self.subTest(text=text):
+                repeat_every_month = RepeatEvery.parse_text(text)
+                self.assertIsNotNone(repeat_every_month)
+
+        # TODO: Вариант с невалидным
 
     def test_parse_value(self):
         1 / 0
