@@ -139,7 +139,11 @@ class TestCaseTimeUnit(unittest.TestCase):
                 self.assertEqual(dt - unit.get_timedelta(), unit.get_prev_datetime(dt))
 
     def test_get_next_datetime(self):
-        1 / 0
+        dt = datetime(year=2020, month=1, day=1, hour=10, minute=0, second=0)
+
+        for _, unit in self.get_test_data():
+            with self.subTest(unit=unit):
+                self.assertEqual(dt + unit.get_timedelta(), unit.get_next_datetime(dt))
 
     def test_get_timedelta(self):
         for _, unit in self.get_test_data():
