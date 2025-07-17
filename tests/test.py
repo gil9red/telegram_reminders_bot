@@ -7,7 +7,7 @@ __author__ = "ipetrash"
 import unittest
 
 # TODO:
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from peewee import SqliteDatabase
 
@@ -138,7 +138,10 @@ class TestCaseTimeUnit(unittest.TestCase):
         1 / 0
 
     def test_get_timedelta(self):
-        1 / 0
+        for _, unit in self.get_test_data():
+            with self.subTest(unit=unit):
+                days = unit.number * unit.unit.days()
+                self.assertEqual(timedelta(days=days), unit.get_timedelta())
 
 
 class TestCaseTimeUnitWeekDayUnit(unittest.TestCase):
