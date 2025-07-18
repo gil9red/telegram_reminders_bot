@@ -13,7 +13,7 @@ from typing import Any
 
 from telegram import Bot, Message
 from telegram.ext import Updater, Defaults
-from telegram.error import BadRequest
+from telegram.error import BadRequest, Unauthorized
 
 import commands
 from common import datetime_to_str, log
@@ -64,6 +64,7 @@ def process_check_reminders(bot: Bot):
                     )
                     reminder.last_send_message_id = rs.message_id
                     reminder.last_send_datetime_utc = datetime.utcnow()
+                    reminder.save()
 
                     break
 
@@ -74,7 +75,10 @@ def process_check_reminders(bot: Bot):
 
                     raise e
 
-            reminder.save()
+                except Unauthorized:
+                    log.exception(f"Нет доступа к чату #{reminder.chat_id}. Напоминание будет удалено")
+                    reminder.delete_instance()
+                    break
 
         except:
             log.exception("")
