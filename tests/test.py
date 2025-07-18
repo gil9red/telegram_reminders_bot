@@ -154,7 +154,38 @@ class TestCaseTimeUnit(unittest.TestCase):
 
 class TestCaseTimeUnitWeekDayUnit(unittest.TestCase):
     def test_parse_text(self):
-        1 / 0
+        for text, unit in [
+            (
+                "понедельник",
+                TimeUnitWeekDayUnit(unit=TimeUnitWeekDayEnum.MONDAY),
+            ),
+            (
+                "вторник",
+                TimeUnitWeekDayUnit(unit=TimeUnitWeekDayEnum.TUESDAY),
+            ),
+            (
+                "среду",
+                TimeUnitWeekDayUnit(unit=TimeUnitWeekDayEnum.WEDNESDAY),
+            ),
+            (
+                "четверг",
+                TimeUnitWeekDayUnit(unit=TimeUnitWeekDayEnum.THURSDAY),
+            ),
+            (
+                "пятницу",
+                TimeUnitWeekDayUnit(unit=TimeUnitWeekDayEnum.FRIDAY),
+            ),
+            (
+                "суббота",
+                TimeUnitWeekDayUnit(unit=TimeUnitWeekDayEnum.SATURDAY),
+            ),
+            (
+                "воскресенье",
+                TimeUnitWeekDayUnit(unit=TimeUnitWeekDayEnum.SUNDAY),
+            ),
+        ]:
+            with self.subTest(text=text, unit=unit):
+                self.assertEqual(unit, TimeUnitWeekDayUnit.parse_text(text))
 
     def test_parse_value(self):
         1 / 0
