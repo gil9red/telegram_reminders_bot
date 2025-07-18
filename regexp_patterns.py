@@ -16,6 +16,8 @@ PATTERN_REMINDER_PAGE = re.compile(r"^reminder page=(?P<page>\d+)$")
 COMMAND_START = "start"
 COMMAND_HELP = "help"
 
+COMMAND_ADD = "add"
+
 COMMAND_TZ = "tz"
 
 COMMAND_LIST = "list"

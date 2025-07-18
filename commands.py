@@ -29,6 +29,7 @@ from parser import ParseResult, Defaults, RepeatEvery, parse_command
 from regexp_patterns import (
     COMMAND_START,
     COMMAND_HELP,
+    COMMAND_ADD,
     COMMAND_TZ,
     COMMAND_LIST,
     PATTERN_LIST,
@@ -195,7 +196,7 @@ def get_reminders(update: Update, context: CallbackContext):
 
 @log_func(log)
 def on_start(update: Update, _: CallbackContext):
-    # TODO: Обновить примеры команд
+    # TODO: Обновить примеры команд добавить про команду /add или тоже самое, если написать
     update.effective_message.reply_markdown(
         """
 Введите что-нибудь, например: `напомни через 1 час`.
@@ -248,22 +249,22 @@ def on_tz(update: Update, context: CallbackContext):
     message.reply_text(
         f"Часовой пояс {value!r}, время {datetime_to_str(dt)}\n"
         f"Время в UTC: {datetime_to_str(dt_utc)}",
-        quote=True
+        quote=True,
     )
 
 
-@log_func(log)
-def on_request(update: Update, _: CallbackContext):
+def add_reminder(command: str, update: Update):
+    log.debug(f"Command: {command!r}")
+
     chat = Chat.get_from(update.effective_chat)
     message = update.effective_message
-
-    command = message.text
-    log.debug(f"Command: {command!r}")
 
     now_utc = datetime.utcnow()
     default = Defaults(hours=10, minutes=0)
 
-    parse_result: ParseResult | None = parse_command(command, dt=now_utc, default=default)
+    parse_result: ParseResult | None = parse_command(
+        command, dt=now_utc, default=default
+    )
     if not parse_result:
         message.reply_text("Не получилось разобрать команду!", quote=True)
         return
@@ -329,6 +330,22 @@ def on_request(update: Update, _: CallbackContext):
 
 
 @log_func(log)
+def on_add(update: Update, context: CallbackContext):
+    add_reminder(
+        command=get_context_value(context),
+        update=update,
+    )
+
+
+@log_func(log)
+def on_request(update: Update, _: CallbackContext):
+    add_reminder(
+        command=update.effective_message.text,
+        update=update,
+    )
+
+
+@log_func(log)
 def on_get_reminders(update: Update, context: CallbackContext):
     get_reminders(update, context)
 
@@ -381,6 +398,7 @@ def setup(dp: Dispatcher):
         CallbackQueryHandler(on_change_reminder_page, pattern=PATTERN_REMINDER_PAGE)
     )
 
+    dp.add_handler(CommandHandler(COMMAND_ADD, on_add))
     dp.add_handler(MessageHandler(Filters.text, on_request))
 
     dp.add_error_handler(on_error)
