@@ -153,8 +153,9 @@ class TestCaseTimeUnit(unittest.TestCase):
 
 
 class TestCaseTimeUnitWeekDayUnit(unittest.TestCase):
-    def test_parse_text(self):
-        for text, unit in [
+    @classmethod
+    def get_test_data(cls) -> list[tuple[str, TimeUnitWeekDayUnit]]:
+        return [
             (
                 "понедельник",
                 TimeUnitWeekDayUnit(unit=TimeUnitWeekDayEnum.MONDAY),
@@ -183,12 +184,18 @@ class TestCaseTimeUnitWeekDayUnit(unittest.TestCase):
                 "воскресенье",
                 TimeUnitWeekDayUnit(unit=TimeUnitWeekDayEnum.SUNDAY),
             ),
-        ]:
+        ]
+
+    def test_parse_text(self):
+        for text, unit in self.get_test_data():
             with self.subTest(text=text, unit=unit):
                 self.assertEqual(unit, TimeUnitWeekDayUnit.parse_text(text))
 
     def test_parse_value(self):
-        1 / 0
+        for _, unit in self.get_test_data():
+            with self.subTest(unit=unit):
+                value = unit.get_value()
+                self.assertEqual(unit, TimeUnitWeekDayUnit.parse_value(value))
 
     def test_get_value(self):
         1 / 0
