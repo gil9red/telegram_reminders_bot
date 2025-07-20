@@ -198,7 +198,38 @@ class TestCaseTimeUnitWeekDayUnit(unittest.TestCase):
                 self.assertEqual(unit, TimeUnitWeekDayUnit.parse_value(value))
 
     def test_get_value(self):
-        1 / 0
+        for value, unit in [
+            (
+                "MONDAY",
+                TimeUnitWeekDayUnit(unit=TimeUnitWeekDayEnum.MONDAY),
+            ),
+            (
+                "TUESDAY",
+                TimeUnitWeekDayUnit(unit=TimeUnitWeekDayEnum.TUESDAY),
+            ),
+            (
+                "WEDNESDAY",
+                TimeUnitWeekDayUnit(unit=TimeUnitWeekDayEnum.WEDNESDAY),
+            ),
+            (
+                "THURSDAY",
+                TimeUnitWeekDayUnit(unit=TimeUnitWeekDayEnum.THURSDAY),
+            ),
+            (
+                "FRIDAY",
+                TimeUnitWeekDayUnit(unit=TimeUnitWeekDayEnum.FRIDAY),
+            ),
+            (
+                "SATURDAY",
+                TimeUnitWeekDayUnit(unit=TimeUnitWeekDayEnum.SATURDAY),
+            ),
+            (
+                "SUNDAY",
+                TimeUnitWeekDayUnit(unit=TimeUnitWeekDayEnum.SUNDAY),
+            ),
+        ]:
+            with self.subTest(value=value, unit=unit):
+                self.assertEqual(value, unit.get_value())
 
     def test_get_next_datetime(self):
         1 / 0
