@@ -228,27 +228,35 @@ def on_tz(update: Update, context: CallbackContext):
     # Получение и проверка часового пояса
     tz_chat: tzinfo = get_tz(value)
 
+    dt_utc: datetime = datetime.utcnow()
+    dt: datetime = convert_tz(
+        dt=dt_utc,
+        from_tz=timezone.utc,
+        to_tz=tz_chat,
+    )
+    date_info: str = (
+        f"Время: {datetime_to_str(dt)}\n" f"Время в UTC: {datetime_to_str(dt_utc)}"
+    )
+
     if is_set:
         if chat.tz == value:
-            message.reply_text(f"Часовой пояс {value!r} уже был установлен", quote=True)
+            message.reply_text(
+                f"Часовой пояс {value!r} уже был установлен.\n{date_info}",
+                quote=True,
+            )
             return
 
         chat.tz = value
         chat.save()
 
-        message.reply_text(f"Установлен часовой пояс {value!r}", quote=True)
+        message.reply_text(
+            f"Установлен часовой пояс {value!r}.\n{date_info}",
+            quote=True,
+        )
         return
 
-    dt_utc = datetime.utcnow()
-    dt = convert_tz(
-        dt=dt_utc,
-        from_tz=timezone.utc,
-        to_tz=tz_chat,
-    )
-
     message.reply_text(
-        f"Часовой пояс {value!r}, время {datetime_to_str(dt)}\n"
-        f"Время в UTC: {datetime_to_str(dt_utc)}",
+        f"Часовой пояс {value!r}.\n{date_info}",
         quote=True,
     )
 
