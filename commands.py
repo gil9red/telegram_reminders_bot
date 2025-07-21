@@ -235,12 +235,12 @@ def on_tz(update: Update, context: CallbackContext):
         to_tz=tz_chat,
     )
     date_info: str = (
-        f"Время: {datetime_to_str(dt)}\n" f"Время в UTC: {datetime_to_str(dt_utc)}"
+        f"\nВремя: {datetime_to_str(dt)}\nВремя в UTC: {datetime_to_str(dt_utc)}"
     )
 
     if is_set:
         if chat.tz == value:
-            message.reply_text(
+            message.reply_markdown(
                 f"Часовой пояс `{value}` уже был установлен.\n{date_info}",
                 quote=True,
             )
@@ -249,13 +249,13 @@ def on_tz(update: Update, context: CallbackContext):
         chat.tz = value
         chat.save()
 
-        message.reply_text(
+        message.reply_markdown(
             f"Установлен часовой пояс `{value}`.\n{date_info}",
             quote=True,
         )
         return
 
-    message.reply_text(
+    message.reply_markdown(
         f"Часовой пояс `{value}`.\n{date_info}",
         quote=True,
     )
