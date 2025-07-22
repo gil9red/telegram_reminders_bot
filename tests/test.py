@@ -151,6 +151,31 @@ class TestCaseTimeUnit(unittest.TestCase):
                 days = unit.number * unit.unit.days()
                 self.assertEqual(timedelta(days=days), unit.get_timedelta())
 
+    def test_sorting(self):
+        data: list[TimeUnit] = [
+            TimeUnit(number=1, unit=TimeUnitEnum.DAY),
+            TimeUnit(number=10, unit=TimeUnitEnum.DAY),
+            TimeUnit(number=1, unit=TimeUnitEnum.WEEK),
+            TimeUnit(number=2, unit=TimeUnitEnum.WEEK),
+            TimeUnit(number=1, unit=TimeUnitEnum.MONTH),
+            TimeUnit(number=3, unit=TimeUnitEnum.MONTH),
+            TimeUnit(number=1, unit=TimeUnitEnum.YEAR),
+            TimeUnit(number=2, unit=TimeUnitEnum.YEAR),
+        ]
+        data_sorted: list[TimeUnit] = [
+            TimeUnit(number=1, unit=TimeUnitEnum.DAY),
+            TimeUnit(number=1, unit=TimeUnitEnum.WEEK),
+            TimeUnit(number=10, unit=TimeUnitEnum.DAY),
+            TimeUnit(number=2, unit=TimeUnitEnum.WEEK),
+            TimeUnit(number=1, unit=TimeUnitEnum.MONTH),
+            TimeUnit(number=3, unit=TimeUnitEnum.MONTH),
+            TimeUnit(number=1, unit=TimeUnitEnum.YEAR),
+            TimeUnit(number=2, unit=TimeUnitEnum.YEAR),
+        ]
+
+        self.assertEqual(data_sorted, sorted(data))
+        self.assertEqual(data_sorted[::-1], sorted(data, reverse=True))
+
 
 class TestCaseTimeUnitWeekDayUnit(unittest.TestCase):
     @classmethod
