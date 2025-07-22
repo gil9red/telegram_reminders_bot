@@ -232,7 +232,40 @@ class TestCaseTimeUnitWeekDayUnit(unittest.TestCase):
                 self.assertEqual(value, unit.get_value())
 
     def test_get_next_datetime(self):
-        1 / 0
+        dt = datetime(year=2025, month=7, day=1, hour=10, minute=0, second=0)
+
+        for value, unit in [
+            (
+                datetime(year=2025, month=7, day=7, hour=10, minute=0, second=0),
+                TimeUnitWeekDayUnit(unit=TimeUnitWeekDayEnum.MONDAY),
+            ),
+            (
+                datetime(year=2025, month=7, day=8, hour=10, minute=0, second=0),
+                TimeUnitWeekDayUnit(unit=TimeUnitWeekDayEnum.TUESDAY),
+            ),
+            (
+                datetime(year=2025, month=7, day=2, hour=10, minute=0, second=0),
+                TimeUnitWeekDayUnit(unit=TimeUnitWeekDayEnum.WEDNESDAY),
+            ),
+            (
+                datetime(year=2025, month=7, day=3, hour=10, minute=0, second=0),
+                TimeUnitWeekDayUnit(unit=TimeUnitWeekDayEnum.THURSDAY),
+            ),
+            (
+                datetime(year=2025, month=7, day=4, hour=10, minute=0, second=0),
+                TimeUnitWeekDayUnit(unit=TimeUnitWeekDayEnum.FRIDAY),
+            ),
+            (
+                datetime(year=2025, month=7, day=5, hour=10, minute=0, second=0),
+                TimeUnitWeekDayUnit(unit=TimeUnitWeekDayEnum.SATURDAY),
+            ),
+            (
+                datetime(year=2025, month=7, day=6, hour=10, minute=0, second=0),
+                TimeUnitWeekDayUnit(unit=TimeUnitWeekDayEnum.SUNDAY),
+            ),
+        ]:
+            with self.subTest(value=value, unit=unit):
+                self.assertEqual(value, unit.get_next_datetime(dt))
 
 
 # TODO:
