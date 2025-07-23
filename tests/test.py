@@ -115,6 +115,10 @@ class TestCaseTimeUnit(unittest.TestCase):
                 ["день", "дня", "дней"],
                 TimeUnit(number=1, unit=TimeUnitEnum.DAY),
             ),
+            (
+                ["sfsdfsdfsdfsd"],
+                None,
+            ),
         ]:
             with self.subTest(text_list=text_list, unit=unit):
                 for text in text_list:
@@ -212,7 +216,13 @@ class TestCaseTimeUnitWeekDayUnit(unittest.TestCase):
         ]
 
     def test_parse_text(self):
-        for text, unit in self.get_test_data():
+        for text, unit in self.get_test_data() + [
+            # Invalid
+            (
+                ["sfsdfsdfsdfsd"],
+                None,
+            ),
+        ]:
             with self.subTest(text=text, unit=unit):
                 self.assertEqual(unit, TimeUnitWeekDayUnit.parse_text(text))
 
@@ -301,13 +311,69 @@ class TestCaseParserRepeatEvery(unittest.TestCase):
         )
 
     def test_parse_text(self):
-        # TODO: Все варианты
-        for text in ["месяц", "четверг"]:
-            with self.subTest(text=text):
-                repeat_every_month = RepeatEvery.parse_text(text)
-                self.assertIsNotNone(repeat_every_month)
-
-        # TODO: Вариант с невалидным
+        for text_list, repeat_every in [
+            (
+                ["год", "года"],
+                RepeatEvery(unit=TimeUnit(number=1, unit=TimeUnitEnum.YEAR)),
+            ),
+            (
+                ["полгода"],
+                RepeatEvery(unit=TimeUnit(number=6, unit=TimeUnitEnum.MONTH)),
+            ),
+            (
+                ["месяц", "месяца", "месяцев"],
+                RepeatEvery(unit=TimeUnit(number=1, unit=TimeUnitEnum.MONTH)),
+            ),
+            (
+                ["неделю", "недели", "недель"],
+                RepeatEvery(unit=TimeUnit(number=1, unit=TimeUnitEnum.WEEK)),
+            ),
+            (
+                ["день", "дня", "дней"],
+                RepeatEvery(unit=TimeUnit(number=1, unit=TimeUnitEnum.DAY)),
+            ),
+            (
+                ["понедельник"],
+                RepeatEvery(unit=TimeUnitWeekDayUnit(unit=TimeUnitWeekDayEnum.MONDAY)),
+            ),
+            (
+                ["вторник"],
+                RepeatEvery(unit=TimeUnitWeekDayUnit(unit=TimeUnitWeekDayEnum.TUESDAY)),
+            ),
+            (
+                ["среду"],
+                RepeatEvery(
+                    unit=TimeUnitWeekDayUnit(unit=TimeUnitWeekDayEnum.WEDNESDAY)
+                ),
+            ),
+            (
+                ["четверг"],
+                RepeatEvery(
+                    unit=TimeUnitWeekDayUnit(unit=TimeUnitWeekDayEnum.THURSDAY)
+                ),
+            ),
+            (
+                ["пятницу"],
+                RepeatEvery(unit=TimeUnitWeekDayUnit(unit=TimeUnitWeekDayEnum.FRIDAY)),
+            ),
+            (
+                ["суббота"],
+                RepeatEvery(
+                    unit=TimeUnitWeekDayUnit(unit=TimeUnitWeekDayEnum.SATURDAY)
+                ),
+            ),
+            (
+                ["воскресенье"],
+                RepeatEvery(unit=TimeUnitWeekDayUnit(unit=TimeUnitWeekDayEnum.SUNDAY)),
+            ),
+            (
+                ["sfsdfsdfsdfsd"],
+                None,
+            ),
+        ]:
+            with self.subTest(text_list=text_list, repeat_every=repeat_every):
+                for text in text_list:
+                    self.assertEqual(repeat_every, RepeatEvery.parse_text(text))
 
     def test_parse_value(self):
         1 / 0
