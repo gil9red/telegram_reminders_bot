@@ -303,7 +303,6 @@ class TestCaseTimeUnitWeekDayUnit(unittest.TestCase):
                 self.assertEqual(value, unit.get_next_datetime(dt))
 
 
-# TODO:
 class TestCaseParserRepeatEvery(unittest.TestCase):
     @classmethod
     def get_test_data(cls) -> list[tuple[str, RepeatEvery]]:
@@ -349,7 +348,7 @@ class TestCaseParserRepeatEvery(unittest.TestCase):
             (
                 "SUNDAY",
                 RepeatEvery(unit=TimeUnitWeekDayUnit(unit=TimeUnitWeekDayEnum.SUNDAY)),
-            )
+            ),
         ]
 
     def test_get_unit_classes(self):
@@ -439,7 +438,78 @@ class TestCaseParserRepeatEvery(unittest.TestCase):
                 self.assertEqual(value, RepeatEvery.parse_value(value).get_value())
 
     def test_get_next_datetime(self):
-        1 / 0
+        dt = datetime(year=2025, month=7, day=1, hour=10, minute=0, second=0)
+
+        for value, repeat_every in [
+            (
+                datetime(year=2025, month=7, day=2, hour=10, minute=0, second=0),
+                RepeatEvery(unit=TimeUnit(number=1, unit=TimeUnitEnum.DAY)),
+            ),
+            (
+                datetime(year=2025, month=7, day=11, hour=10, minute=0, second=0),
+                RepeatEvery(unit=TimeUnit(number=10, unit=TimeUnitEnum.DAY)),
+            ),
+            (
+                datetime(year=2025, month=7, day=8, hour=10, minute=0, second=0),
+                RepeatEvery(unit=TimeUnit(number=1, unit=TimeUnitEnum.WEEK)),
+            ),
+            (
+                datetime(year=2025, month=7, day=15, hour=10, minute=0, second=0),
+                RepeatEvery(unit=TimeUnit(number=2, unit=TimeUnitEnum.WEEK)),
+            ),
+            (
+                datetime(year=2025, month=7, day=31, hour=10, minute=0, second=0),
+                RepeatEvery(unit=TimeUnit(number=1, unit=TimeUnitEnum.MONTH)),
+            ),
+            (
+                datetime(year=2025, month=9, day=29, hour=10, minute=0, second=0),
+                RepeatEvery(unit=TimeUnit(number=3, unit=TimeUnitEnum.MONTH)),
+            ),
+            (
+                datetime(year=2026, month=7, day=1, hour=10, minute=0, second=0),
+                RepeatEvery(unit=TimeUnit(number=1, unit=TimeUnitEnum.YEAR)),
+            ),
+            (
+                datetime(year=2027, month=7, day=1, hour=10, minute=0, second=0),
+                RepeatEvery(unit=TimeUnit(number=2, unit=TimeUnitEnum.YEAR)),
+            ),
+            (
+                datetime(year=2025, month=7, day=7, hour=10, minute=0, second=0),
+                RepeatEvery(unit=TimeUnitWeekDayUnit(unit=TimeUnitWeekDayEnum.MONDAY)),
+            ),
+            (
+                datetime(year=2025, month=7, day=8, hour=10, minute=0, second=0),
+                RepeatEvery(unit=TimeUnitWeekDayUnit(unit=TimeUnitWeekDayEnum.TUESDAY)),
+            ),
+            (
+                datetime(year=2025, month=7, day=2, hour=10, minute=0, second=0),
+                RepeatEvery(
+                    unit=TimeUnitWeekDayUnit(unit=TimeUnitWeekDayEnum.WEDNESDAY)
+                ),
+            ),
+            (
+                datetime(year=2025, month=7, day=3, hour=10, minute=0, second=0),
+                RepeatEvery(
+                    unit=TimeUnitWeekDayUnit(unit=TimeUnitWeekDayEnum.THURSDAY)
+                ),
+            ),
+            (
+                datetime(year=2025, month=7, day=4, hour=10, minute=0, second=0),
+                RepeatEvery(unit=TimeUnitWeekDayUnit(unit=TimeUnitWeekDayEnum.FRIDAY)),
+            ),
+            (
+                datetime(year=2025, month=7, day=5, hour=10, minute=0, second=0),
+                RepeatEvery(
+                    unit=TimeUnitWeekDayUnit(unit=TimeUnitWeekDayEnum.SATURDAY)
+                ),
+            ),
+            (
+                datetime(year=2025, month=7, day=6, hour=10, minute=0, second=0),
+                RepeatEvery(unit=TimeUnitWeekDayUnit(unit=TimeUnitWeekDayEnum.SUNDAY)),
+            ),
+        ]:
+            with self.subTest(value=value, repeat_every=repeat_every):
+                self.assertEqual(value, repeat_every.get_next_datetime(dt))
 
 
 if __name__ == "__main__":
