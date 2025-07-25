@@ -351,7 +351,7 @@ class TestCaseParserRepeatEvery(unittest.TestCase):
                 RepeatEvery(unit=TimeUnitWeekDayUnit(unit=TimeUnitWeekDayEnum.SUNDAY)),
             ),
             (
-                ["sfsdfsdfsdfsd"],
+                "sfsdfsdfsdfsd",
                 None,
             ),
         ]
@@ -432,7 +432,13 @@ class TestCaseParserRepeatEvery(unittest.TestCase):
                 self.assertEqual(repeat_every, RepeatEvery.parse_value(value))
 
     def test_get_value(self):
-        1 / 0
+        for value, repeat_every in self.get_test_data():
+            # NOTE: В этом тесте это не нужно проверять
+            if not value or not repeat_every:
+                continue
+
+            with self.subTest(value=value, repeat_every=repeat_every):
+                self.assertEqual(value, RepeatEvery.parse_value(value).get_value())
 
     def test_get_next_datetime(self):
         1 / 0
