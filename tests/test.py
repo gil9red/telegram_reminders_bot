@@ -305,6 +305,57 @@ class TestCaseTimeUnitWeekDayUnit(unittest.TestCase):
 
 # TODO:
 class TestCaseParserRepeatEvery(unittest.TestCase):
+    @classmethod
+    def get_test_data(cls) -> list[tuple[str, RepeatEvery]]:
+        return [
+            ("1 DAY", RepeatEvery(unit=TimeUnit(number=1, unit=TimeUnitEnum.DAY))),
+            ("10 DAY", RepeatEvery(unit=TimeUnit(number=10, unit=TimeUnitEnum.DAY))),
+            ("1 WEEK", RepeatEvery(unit=TimeUnit(number=1, unit=TimeUnitEnum.WEEK))),
+            ("2 WEEK", RepeatEvery(unit=TimeUnit(number=2, unit=TimeUnitEnum.WEEK))),
+            ("1 MONTH", RepeatEvery(unit=TimeUnit(number=1, unit=TimeUnitEnum.MONTH))),
+            ("3 MONTH", RepeatEvery(unit=TimeUnit(number=3, unit=TimeUnitEnum.MONTH))),
+            ("1 YEAR", RepeatEvery(unit=TimeUnit(number=1, unit=TimeUnitEnum.YEAR))),
+            ("2 YEAR", RepeatEvery(unit=TimeUnit(number=2, unit=TimeUnitEnum.YEAR))),
+            (
+                "MONDAY",
+                RepeatEvery(unit=TimeUnitWeekDayUnit(unit=TimeUnitWeekDayEnum.MONDAY)),
+            ),
+            (
+                "TUESDAY",
+                RepeatEvery(unit=TimeUnitWeekDayUnit(unit=TimeUnitWeekDayEnum.TUESDAY)),
+            ),
+            (
+                "WEDNESDAY",
+                RepeatEvery(
+                    unit=TimeUnitWeekDayUnit(unit=TimeUnitWeekDayEnum.WEDNESDAY)
+                ),
+            ),
+            (
+                "THURSDAY",
+                RepeatEvery(
+                    unit=TimeUnitWeekDayUnit(unit=TimeUnitWeekDayEnum.THURSDAY)
+                ),
+            ),
+            (
+                "FRIDAY",
+                RepeatEvery(unit=TimeUnitWeekDayUnit(unit=TimeUnitWeekDayEnum.FRIDAY)),
+            ),
+            (
+                "SATURDAY",
+                RepeatEvery(
+                    unit=TimeUnitWeekDayUnit(unit=TimeUnitWeekDayEnum.SATURDAY)
+                ),
+            ),
+            (
+                "SUNDAY",
+                RepeatEvery(unit=TimeUnitWeekDayUnit(unit=TimeUnitWeekDayEnum.SUNDAY)),
+            ),
+            (
+                ["sfsdfsdfsdfsd"],
+                None,
+            ),
+        ]
+
     def test_get_unit_classes(self):
         self.assertEqual(
             [TimeUnit, TimeUnitWeekDayUnit], RepeatEvery.get_unit_classes()
@@ -376,7 +427,9 @@ class TestCaseParserRepeatEvery(unittest.TestCase):
                     self.assertEqual(repeat_every, RepeatEvery.parse_text(text))
 
     def test_parse_value(self):
-        1 / 0
+        for value, repeat_every in self.get_test_data():
+            with self.subTest(value=value, repeat_every=repeat_every):
+                self.assertEqual(repeat_every, RepeatEvery.parse_value(value))
 
     def test_get_value(self):
         1 / 0
