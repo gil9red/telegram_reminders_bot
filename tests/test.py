@@ -40,7 +40,7 @@ class TestCaseDb(unittest.TestCase):
 
     def test_TODO(self):
         # TODO:
-        pass
+        1 / 0
 
 
 # TODO:
@@ -78,6 +78,24 @@ class TestCaseParserCommon(unittest.TestCase):
                 self.assertEqual(enum_value, TimeUnitWeekDayEnum(value))
                 self.assertEqual(enum_value, TimeUnitWeekDayEnum[enum_value.name])
 
+    def test_ParseResult(self):
+        1 / 0
+
+    def test_Defaults(self):
+        1 / 0
+
+    def test_get_repeat_every(self):
+        1 / 0
+
+    def test_parse_repeat_before(self):
+        1 / 0
+
+    def test_parse_month(self):
+        1 / 0
+
+    def test_parse_command(self):
+        1 / 0
+
 
 class TestCaseTimeUnit(unittest.TestCase):
     @classmethod
@@ -94,7 +112,7 @@ class TestCaseTimeUnit(unittest.TestCase):
         ]
 
     def test_parse_text(self):
-        for text_list, unit in [
+        for values, unit in [
             (
                 ["год", "года"],
                 TimeUnit(number=1, unit=TimeUnitEnum.YEAR),
@@ -120,8 +138,8 @@ class TestCaseTimeUnit(unittest.TestCase):
                 None,
             ),
         ]:
-            with self.subTest(text_list=text_list, unit=unit):
-                for text in text_list:
+            with self.subTest(values=values, unit=unit):
+                for text in values:
                     self.assertEqual(unit, TimeUnit.parse_text(text))
 
     def test_parse_value(self):
@@ -357,7 +375,7 @@ class TestCaseParserRepeatEvery(unittest.TestCase):
         )
 
     def test_parse_text(self):
-        for text_list, repeat_every in [
+        for values, repeat_every in [
             (
                 ["год", "года"],
                 RepeatEvery(unit=TimeUnit(number=1, unit=TimeUnitEnum.YEAR)),
@@ -417,8 +435,8 @@ class TestCaseParserRepeatEvery(unittest.TestCase):
                 None,
             ),
         ]:
-            with self.subTest(text_list=text_list, repeat_every=repeat_every):
-                for text in text_list:
+            with self.subTest(values=values, repeat_every=repeat_every):
+                for text in values:
                     self.assertEqual(repeat_every, RepeatEvery.parse_text(text))
 
     def test_parse_value(self):
