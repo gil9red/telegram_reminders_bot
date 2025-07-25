@@ -349,11 +349,7 @@ class TestCaseParserRepeatEvery(unittest.TestCase):
             (
                 "SUNDAY",
                 RepeatEvery(unit=TimeUnitWeekDayUnit(unit=TimeUnitWeekDayEnum.SUNDAY)),
-            ),
-            (
-                "sfsdfsdfsdfsd",
-                None,
-            ),
+            )
         ]
 
     def test_get_unit_classes(self):
@@ -427,16 +423,18 @@ class TestCaseParserRepeatEvery(unittest.TestCase):
                     self.assertEqual(repeat_every, RepeatEvery.parse_text(text))
 
     def test_parse_value(self):
-        for value, repeat_every in self.get_test_data():
+        for value, repeat_every in self.get_test_data() + [
+            # Invalid
+            (
+                ["sfsdfsdfsdfsd"],
+                None,
+            ),
+        ]:
             with self.subTest(value=value, repeat_every=repeat_every):
                 self.assertEqual(repeat_every, RepeatEvery.parse_value(value))
 
     def test_get_value(self):
         for value, repeat_every in self.get_test_data():
-            # NOTE: В этом тесте это не нужно проверять
-            if not value or not repeat_every:
-                continue
-
             with self.subTest(value=value, repeat_every=repeat_every):
                 self.assertEqual(value, RepeatEvery.parse_value(value).get_value())
 
