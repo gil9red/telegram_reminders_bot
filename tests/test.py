@@ -97,6 +97,7 @@ class TestCaseParserCommon(unittest.TestCase):
     def test_parse_month(self):
         for number, month in [
             (1, "января"),
+            (1, "Января"),
             (2, "февраля"),
             (3, "марта"),
             (4, "апреля"),
@@ -105,6 +106,7 @@ class TestCaseParserCommon(unittest.TestCase):
             (7, "июля"),
             (8, "августа"),
             (9, "сентября"),
+            (9, "СЕНТЯБРЯ"),
             (10, "октября"),
             (11, "ноября"),
             (12, "декабря"),

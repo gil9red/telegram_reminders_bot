@@ -230,6 +230,10 @@ def parse_repeat_before(command: str) -> list[TimeUnit]:
 
 
 def parse_month(month_value: str) -> int | None:
+    if not month_value:
+        return
+
+    month_value: str = month_value.lower()
     try:
         return [
             "января",
