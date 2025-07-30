@@ -229,21 +229,24 @@ def parse_repeat_before(command: str) -> list[TimeUnit]:
     return sorted(time_by_unit.values(), reverse=True)
 
 
-def parse_month(month_value: str) -> int:
-    return [
-        "января",
-        "февраля",
-        "марта",
-        "апреля",
-        "мая",
-        "июня",
-        "июля",
-        "августа",
-        "сентября",
-        "октября",
-        "ноября",
-        "декабря",
-    ].index(month_value) + 1
+def parse_month(month_value: str) -> int | None:
+    try:
+        return [
+            "января",
+            "февраля",
+            "марта",
+            "апреля",
+            "мая",
+            "июня",
+            "июля",
+            "августа",
+            "сентября",
+            "октября",
+            "ноября",
+            "декабря",
+        ].index(month_value) + 1
+    except:
+        return
 
 
 def parse_command(
@@ -258,7 +261,11 @@ def parse_command(
         return
 
     day: int = int(m.group("day"))
-    month: int = parse_month(m.group("month"))
+
+    month: str = m.group("month")
+    month_num: int | None = parse_month(month)
+    if month_num is None:
+        raise Exception(f"Не удалось определить месяц {month!r}")
 
     year_value: str | None = m.group("year")
     if year_value is not None:
@@ -276,7 +283,7 @@ def parse_command(
 
     # TODO: Проверить високосные даты
     target_datetime = datetime(
-        day=day, month=month, year=year, hour=hours, minute=minutes
+        day=day, month=month_num, year=year, hour=hours, minute=minutes
     )
 
     if target_datetime < dt:
