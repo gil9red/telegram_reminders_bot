@@ -23,6 +23,7 @@ from parser import (
     RepeatEvery,
     TimeUnit,
     TimeUnitWeekDayUnit,
+    Defaults,
 )
 
 
@@ -82,7 +83,9 @@ class TestCaseParserCommon(unittest.TestCase):
         1 / 0
 
     def test_Defaults(self):
-        1 / 0
+        defaults = Defaults(hours=10, minutes=30)
+        self.assertEqual(10, defaults.hours)
+        self.assertEqual(30, defaults.minutes)
 
     def test_get_repeat_every(self):
         1 / 0
