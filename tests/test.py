@@ -24,6 +24,7 @@ from parser import (
     TimeUnit,
     TimeUnitWeekDayUnit,
     Defaults,
+    parse_month,
 )
 
 
@@ -94,7 +95,24 @@ class TestCaseParserCommon(unittest.TestCase):
         1 / 0
 
     def test_parse_month(self):
-        1 / 0
+        for number, month in [
+            (1, "января"),
+            (2, "февраля"),
+            (3, "марта"),
+            (4, "апреля"),
+            (5, "мая"),
+            (6, "июня"),
+            (7, "июля"),
+            (8, "августа"),
+            (9, "сентября"),
+            (10, "октября"),
+            (11, "ноября"),
+            (12, "декабря"),
+            (None, "None"),
+            (None, None),
+        ]:
+            with self.subTest(number=number, month=month):
+                self.assertEqual(number, parse_month(month))
 
     def test_parse_command(self):
         1 / 0
