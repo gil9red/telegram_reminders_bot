@@ -12,10 +12,17 @@ from datetime import datetime, timedelta
 from typing import Optional, Type
 
 
+class ParserException(Exception):
+    pass
+
+
 PATTERN_TARGET_DATETIME = re.compile(
-    r'(?:День рождения|Праздник|Напомни о) "(?P<target>.+?)" '
-    r"(?P<day>\d{1,2}) (?P<month>\w+)"
-    r"(:?.*?(?P<year>\d{4}))?"
+    r'(?:День\s*рождения|Праздник|Напомни\s*о)\s*"(?P<target>.+?)"\s*'
+    "("
+    r"(?P<day>\d{1,2})\s*(?P<month>\w+)(:?.*?(?P<year>\d{4}))?"
+    "|"
+    r"(?P<relative_day>сегодня|завтра|послезавтра)"
+    ")"
     r"(:?.*?(?P<time>\d{2}:\d{2}))?",
     flags=re.IGNORECASE,
 )
@@ -58,7 +65,7 @@ class TimeUnitEnum(AutoName):
             case TimeUnitEnum.DAY:
                 return 1
             case _:
-                raise Exception(f"Unsupported {self}")
+                raise ParserException(f"Неподдерживаемый элемент {self}")
 
 
 class TimeUnitWeekDayEnum(enum.IntEnum):
@@ -253,6 +260,7 @@ def parse_month(month_value: str) -> int | None:
         return
 
 
+# TODO: Вместо None можно исключение кидать
 def parse_command(
     command: str,
     dt: datetime,
@@ -264,18 +272,34 @@ def parse_command(
     if not m:
         return
 
-    day: int = int(m.group("day"))
+    relative_day: str | None = m.group("relative_day")
+    if relative_day:
+        new_dt: datetime = dt
 
-    month: str = m.group("month")
-    month_num: int | None = parse_month(month)
-    if month_num is None:
-        raise Exception(f"Не удалось определить месяц {month!r}")
+        match relative_day.lower():
+            case "сегодня":
+                pass
+            case "завтра":
+                new_dt += timedelta(days=1)
+            case "послезавтра":
+                new_dt += timedelta(days=2)
+            case _:
+                raise ParserException(f"Unsupported {relative_day!r}")
 
-    year_value: str | None = m.group("year")
-    if year_value is not None:
-        year: int = int(year_value)
+        day = new_dt.day
+        month = new_dt.month
+        year = new_dt.year
+
     else:
-        year: int = dt.year
+        day: int = int(m.group("day"))
+
+        month_str: str = m.group("month")
+        month: int | None = parse_month(month_str)
+        if month is None:
+            raise ParserException(f"Не удалось определить месяц {month_str!r}")
+
+        year_value: str | None = m.group("year")
+        year: int = int(year_value) if year_value else dt.year
 
     time_value: str | None = m.group("time")
     if time_value:
@@ -287,11 +311,15 @@ def parse_command(
 
     # TODO: Проверить високосные даты
     target_datetime = datetime(
-        day=day, month=month_num, year=year, hour=hours, minute=minutes
+        day=day, month=month, year=year, hour=hours, minute=minutes
     )
 
+    # TODO: Тут нужно внимательнее проверить - мб не на год продлевать, а на повтор
     if target_datetime < dt:
-        target_datetime = target_datetime.replace(year=target_datetime.year + 1)
+        if relative_day == "сегодня":  # TODO:
+            target_datetime += timedelta(days=1)
+        else:
+            target_datetime = target_datetime.replace(year=target_datetime.year + 1)
 
     return ParseResult(
         target=m.group("target"),
@@ -320,10 +348,11 @@ if __name__ == "__main__":
         repeat_every_thursday.get_value()
     )
     print(repeat_every_thursday.get_next_datetime(now))
-    print()
 
     assert TimeUnit.parse_value("3 DAY") == TimeUnit(number=3, unit=TimeUnitEnum.DAY)
     assert TimeUnit.parse_value("1 YEAR") == TimeUnit(number=1, unit=TimeUnitEnum.YEAR)
+
+    print("\n" + "-" * 100 + "\n")
 
     # TODO: Перенести в тесты
     text = """
@@ -349,15 +378,21 @@ if __name__ == "__main__":
 Напомни о "xxx" 10 февраля в 14:55
 Напомни о "xxx" 12 июля в 17:55. Напомни за неделю, за 3 дня, за 2 дня, за 1 день
 Напомни о "Чатик 🍕" 17 июля в 12:00. Повтор каждый четверг
+Напомни о "Покупки" сегодня в 18:00
+Напомни о "Покупки" завтра в 11:00
+Напомни о "Покупки" послезавтра в 11:00
     """.strip()
 
-    now = datetime.utcnow()
+    now_utc = datetime.utcnow()
+    print(f"now_utc: {now_utc}")
+    print()
+
     default = Defaults(hours=11, minutes=0)
 
     for line in text.splitlines():
         print(line)
 
-        result = parse_command(line, dt=now, default=default)
+        result = parse_command(line, dt=now_utc, default=default)
         print(result)
         print("Целевая дата:", result.target_datetime)
         print(
