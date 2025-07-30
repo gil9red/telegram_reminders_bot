@@ -415,7 +415,7 @@ if __name__ == "__main__":
 
         result = parse_command(line, dt=now_utc, default=default)
         print(result)
-        print("Целевая дата:", result.target_datetime)
+        print(f"Целевая дата: {result.target_datetime}")
         print(
             "Следующая целевая дата:",
             result.repeat_every.get_next_datetime(result.target_datetime)
