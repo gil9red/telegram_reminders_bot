@@ -85,7 +85,10 @@ class TimeUnit:
 
     @classmethod
     def parse_text(cls, value: str) -> Optional["TimeUnit"]:
-        match value:
+        if not value:
+            return
+
+        match value.lower():
             case "год" | "года":
                 return cls(number=1, unit=TimeUnitEnum.YEAR)
             case "полгода":
@@ -126,7 +129,10 @@ class TimeUnitWeekDayUnit:
 
     @classmethod
     def parse_text(cls, value: str) -> Optional["TimeUnitWeekDayUnit"]:
-        match value:
+        if not value:
+            return
+
+        match value.lower():
             case "понедельник":
                 return cls(unit=TimeUnitWeekDayEnum.MONDAY)
             case "вторник":

@@ -137,27 +137,27 @@ class TestCaseTimeUnit(unittest.TestCase):
     def test_parse_text(self):
         for values, unit in [
             (
-                ["год", "года"],
+                ["год", "года", "ГОДА"],
                 TimeUnit(number=1, unit=TimeUnitEnum.YEAR),
             ),
             (
-                ["полгода"],
+                ["полгода", "полГОДА"],
                 TimeUnit(number=6, unit=TimeUnitEnum.MONTH),
             ),
             (
-                ["месяц", "месяца", "месяцев"],
+                ["месяц", "месяца", "месяцев", "МЕСЯЦа"],
                 TimeUnit(number=1, unit=TimeUnitEnum.MONTH),
             ),
             (
-                ["неделю", "недели", "недель"],
+                ["неделю", "недели", "недель", "НЕДЕЛЬ"],
                 TimeUnit(number=1, unit=TimeUnitEnum.WEEK),
             ),
             (
-                ["день", "дня", "дней"],
+                ["день", "дня", "дней", "ДНЯ"],
                 TimeUnit(number=1, unit=TimeUnitEnum.DAY),
             ),
             (
-                ["sfsdfsdfsdfsd"],
+                ["None", None],
                 None,
             ),
         ]:
@@ -231,7 +231,15 @@ class TestCaseTimeUnitWeekDayUnit(unittest.TestCase):
                 TimeUnitWeekDayUnit(unit=TimeUnitWeekDayEnum.MONDAY),
             ),
             (
+                "ПОНЕДЕЛЬНИК",
+                TimeUnitWeekDayUnit(unit=TimeUnitWeekDayEnum.MONDAY),
+            ),
+            (
                 "вторник",
+                TimeUnitWeekDayUnit(unit=TimeUnitWeekDayEnum.TUESDAY),
+            ),
+            (
+                "вторНИК",
                 TimeUnitWeekDayUnit(unit=TimeUnitWeekDayEnum.TUESDAY),
             ),
             (
@@ -259,10 +267,8 @@ class TestCaseTimeUnitWeekDayUnit(unittest.TestCase):
     def test_parse_text(self):
         for text, unit in self.get_test_data() + [
             # Invalid
-            (
-                ["sfsdfsdfsdfsd"],
-                None,
-            ),
+            ("None", None),
+            (None, None),
         ]:
             with self.subTest(text=text, unit=unit):
                 self.assertEqual(unit, TimeUnitWeekDayUnit.parse_text(text))
@@ -400,61 +406,61 @@ class TestCaseParserRepeatEvery(unittest.TestCase):
     def test_parse_text(self):
         for values, repeat_every in [
             (
-                ["год", "года"],
+                ["год", "года", "ГОДА"],
                 RepeatEvery(unit=TimeUnit(number=1, unit=TimeUnitEnum.YEAR)),
             ),
             (
-                ["полгода"],
+                ["полгода", "полГОДа"],
                 RepeatEvery(unit=TimeUnit(number=6, unit=TimeUnitEnum.MONTH)),
             ),
             (
-                ["месяц", "месяца", "месяцев"],
+                ["месяц", "месяца", "месяцев", "МЕСЯЦев"],
                 RepeatEvery(unit=TimeUnit(number=1, unit=TimeUnitEnum.MONTH)),
             ),
             (
-                ["неделю", "недели", "недель"],
+                ["неделю", "недели", "недель", "НЕДель"],
                 RepeatEvery(unit=TimeUnit(number=1, unit=TimeUnitEnum.WEEK)),
             ),
             (
-                ["день", "дня", "дней"],
+                ["день", "дня", "дней", "дНЕЙ"],
                 RepeatEvery(unit=TimeUnit(number=1, unit=TimeUnitEnum.DAY)),
             ),
             (
-                ["понедельник"],
+                ["понедельник", "ПОНЕДЕЛЬНИК"],
                 RepeatEvery(unit=TimeUnitWeekDayUnit(unit=TimeUnitWeekDayEnum.MONDAY)),
             ),
             (
-                ["вторник"],
+                ["вторник", "вторНИК"],
                 RepeatEvery(unit=TimeUnitWeekDayUnit(unit=TimeUnitWeekDayEnum.TUESDAY)),
             ),
             (
-                ["среду"],
+                ["среду", "СРЕДУ"],
                 RepeatEvery(
                     unit=TimeUnitWeekDayUnit(unit=TimeUnitWeekDayEnum.WEDNESDAY)
                 ),
             ),
             (
-                ["четверг"],
+                ["четверг", "четВЕРГ"],
                 RepeatEvery(
                     unit=TimeUnitWeekDayUnit(unit=TimeUnitWeekDayEnum.THURSDAY)
                 ),
             ),
             (
-                ["пятницу"],
+                ["пятницу", "ПЯТницу"],
                 RepeatEvery(unit=TimeUnitWeekDayUnit(unit=TimeUnitWeekDayEnum.FRIDAY)),
             ),
             (
-                ["суббота"],
+                ["суббота", "СУБбота"],
                 RepeatEvery(
                     unit=TimeUnitWeekDayUnit(unit=TimeUnitWeekDayEnum.SATURDAY)
                 ),
             ),
             (
-                ["воскресенье"],
+                ["воскресенье", "ВОСКРЕСЕНЬЕ"],
                 RepeatEvery(unit=TimeUnitWeekDayUnit(unit=TimeUnitWeekDayEnum.SUNDAY)),
             ),
             (
-                ["sfsdfsdfsdfsd"],
+                ["None", None],
                 None,
             ),
         ]:
