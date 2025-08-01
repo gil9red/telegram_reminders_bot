@@ -25,6 +25,7 @@ from parser import (
     ParseResult,
     parse_month,
     get_repeat_every,
+    parse_repeat_before,
 )
 
 
@@ -131,7 +132,72 @@ class TestCaseParserCommon(unittest.TestCase):
                         )
 
     def test_parse_repeat_before(self):
-        1 / 0
+        for text, units in [
+            (
+                "Напомнить за месяц, за неделю, за 3 дня, за день",
+                [
+                    TimeUnit(number=1, unit=TimeUnitEnum.MONTH),
+                    TimeUnit(number=1, unit=TimeUnitEnum.WEEK),
+                    TimeUnit(number=3, unit=TimeUnitEnum.DAY),
+                    TimeUnit(number=1, unit=TimeUnitEnum.DAY),
+                ],
+            ),
+            (
+                "Напомнить за день, за неделю, за месяц, за 3 дня",
+                [
+                    TimeUnit(number=1, unit=TimeUnitEnum.MONTH),
+                    TimeUnit(number=1, unit=TimeUnitEnum.WEEK),
+                    TimeUnit(number=3, unit=TimeUnitEnum.DAY),
+                    TimeUnit(number=1, unit=TimeUnitEnum.DAY),
+                ],
+            ),
+            (
+                "Напомнить за месяц, за 2 недели, за неделю, за 3 дня, за день",
+                [
+                    TimeUnit(number=1, unit=TimeUnitEnum.MONTH),
+                    TimeUnit(number=2, unit=TimeUnitEnum.WEEK),
+                    TimeUnit(number=1, unit=TimeUnitEnum.WEEK),
+                    TimeUnit(number=3, unit=TimeUnitEnum.DAY),
+                    TimeUnit(number=1, unit=TimeUnitEnum.DAY),
+                ],
+            ),
+            (
+                "Напомнить за неделю, за 3 дня, за день",
+                [
+                    TimeUnit(number=1, unit=TimeUnitEnum.WEEK),
+                    TimeUnit(number=3, unit=TimeUnitEnum.DAY),
+                    TimeUnit(number=1, unit=TimeUnitEnum.DAY),
+                ],
+            ),
+            (
+                "Напомнить за 3 дня, за день",
+                [
+                    TimeUnit(number=3, unit=TimeUnitEnum.DAY),
+                    TimeUnit(number=1, unit=TimeUnitEnum.DAY),
+                ],
+            ),
+            (
+                "Напомнить за 2 дня",
+                [TimeUnit(number=2, unit=TimeUnitEnum.DAY)],
+            ),
+            (
+                "Напомнить за день",
+                [TimeUnit(number=1, unit=TimeUnitEnum.DAY)],
+            ),
+            (
+                "Напомнить за неделю, за 2 дня, за 7 дней, за 3 дня, за 2 дня, за день",
+                [
+                    TimeUnit(number=7, unit=TimeUnitEnum.DAY),
+                    TimeUnit(number=3, unit=TimeUnitEnum.DAY),
+                    TimeUnit(number=2, unit=TimeUnitEnum.DAY),
+                    TimeUnit(number=1, unit=TimeUnitEnum.DAY),
+                ],
+            ),
+            (None, []),
+            ("None", []),
+        ]:
+            with self.subTest(text=text, units=units):
+                self.assertEqual(units, parse_repeat_before(text))
 
     def test_parse_month(self):
         for number, month in [
@@ -150,6 +216,7 @@ class TestCaseParserCommon(unittest.TestCase):
             (11, "ноября"),
             (12, "декабря"),
             (None, "None"),
+            (None, ""),
             (None, None),
         ]:
             with self.subTest(number=number, month=month):
@@ -196,7 +263,7 @@ class TestCaseTimeUnit(unittest.TestCase):
                 TimeUnit(number=1, unit=TimeUnitEnum.DAY),
             ),
             (
-                ["None", None],
+                ["None", "", None],
                 None,
             ),
         ]:
@@ -307,6 +374,7 @@ class TestCaseTimeUnitWeekDayUnit(unittest.TestCase):
         for text, unit in self.get_test_data() + [
             # Invalid
             ("None", None),
+            ("", None),
             (None, None),
         ]:
             with self.subTest(text=text, unit=unit):
@@ -495,7 +563,7 @@ class TestCaseParserRepeatEvery(unittest.TestCase):
                 RepeatEvery(unit=TimeUnitWeekDayUnit(unit=TimeUnitWeekDayEnum.SUNDAY)),
             ),
             (
-                ["None", None],
+                ["None", "", None],
                 None,
             ),
         ]
@@ -516,6 +584,10 @@ class TestCaseParserRepeatEvery(unittest.TestCase):
             # Invalid
             (
                 "None",
+                None,
+            ),
+            (
+                "",
                 None,
             ),
             (
