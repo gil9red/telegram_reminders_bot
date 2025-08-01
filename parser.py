@@ -40,7 +40,7 @@ PATTERN_TARGET_DATETIME = re.compile(
 
 PATTERN_REPEAT_EVERY = re.compile(
     r"Повтор\s*(?:раз\s*в|каждый)\s*"
-    r"(?P<unit>день|неделю|месяц|полгода|год"
+    r"(?P<unit>день|дн.{1,2}|недел.|месяц|полгода|год"
     r"|понедельник|вторник|среду|четверг|пятницу|суббота|воскресенье)",
     flags=re.IGNORECASE,
 )
