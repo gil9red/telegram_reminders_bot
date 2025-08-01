@@ -232,6 +232,9 @@ def get_repeat_every(command: str) -> RepeatEvery | None:
 
 
 def parse_repeat_before(command: str) -> list[TimeUnit]:
+    if not command:
+        return []
+
     m = PATTERN_REPEAT_BEFORE.search(command)
     if not m:
         return []
