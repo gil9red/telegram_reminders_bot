@@ -40,7 +40,7 @@ PATTERN_TARGET_DATETIME = re.compile(
 
 PATTERN_REPEAT_EVERY = re.compile(
     r"Повтор\s*(?:раз\s*в|каждый)\s*"
-    r"(?P<unit>день|дн.{1,2}|недел.|месяц|полгода|год"
+    r"(?P<unit>день|дн\w{1,2}|недел\w|месяц|полгода|год"
     r"|понедельник|вторник|среду|четверг|пятницу|суббота|воскресенье)",
     flags=re.IGNORECASE,
 )
@@ -49,7 +49,7 @@ PATTERN_REPEAT_BEFORE = re.compile(
     flags=re.IGNORECASE,
 )
 PATTERN_REPEAT_BEFORE_TIME_UNIT = re.compile(
-    r"за\s*((:?(?P<number>\d+)\s*)?)(?P<day>дн\w+|день|недел\w|месяц\w?)",
+    r"за\s*((?P<number>\d+)\s*)?(?P<day>дн\w+|день|недел\w|месяц\w?)",
     flags=re.IGNORECASE,
 )
 
