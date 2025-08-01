@@ -5,8 +5,6 @@ __author__ = "ipetrash"
 
 
 import unittest
-
-# TODO:
 from datetime import datetime, timedelta
 
 from peewee import SqliteDatabase
@@ -427,13 +425,9 @@ class TestCaseParserRepeatEvery(unittest.TestCase):
             ),
         ]
 
-    def test_get_unit_classes(self):
-        self.assertEqual(
-            [TimeUnit, TimeUnitWeekDayUnit], RepeatEvery.get_unit_classes()
-        )
-
-    def test_parse_text(self):
-        for values, repeat_every in [
+    @classmethod
+    def get_test_text(cls) -> list[tuple[list[str], RepeatEvery | None]]:
+        return [
             (
                 ["год", "года", "ГОДА"],
                 RepeatEvery(unit=TimeUnit(number=1, unit=TimeUnitEnum.YEAR)),
@@ -492,7 +486,15 @@ class TestCaseParserRepeatEvery(unittest.TestCase):
                 ["None", None],
                 None,
             ),
-        ]:
+        ]
+
+    def test_get_unit_classes(self):
+        self.assertEqual(
+            [TimeUnit, TimeUnitWeekDayUnit], RepeatEvery.get_unit_classes()
+        )
+
+    def test_parse_text(self):
+        for values, repeat_every in self.get_test_text():
             with self.subTest(values=values, repeat_every=repeat_every):
                 for text in values:
                     self.assertEqual(repeat_every, RepeatEvery.parse_text(text))
@@ -501,7 +503,11 @@ class TestCaseParserRepeatEvery(unittest.TestCase):
         for value, repeat_every in self.get_test_data() + [
             # Invalid
             (
-                ["sfsdfsdfsdfsd"],
+                "None",
+                None,
+            ),
+            (
+                None,
                 None,
             ),
         ]:
