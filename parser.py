@@ -16,19 +16,6 @@ class ParserException(Exception):
     pass
 
 
-# TODO: Удалить после проверки PATTERN_TARGET_DATETIME
-PATTERN_TARGET_DATETIME_OLD = re.compile(
-    r'(?:День\s*рождения|Праздник|Напомни\s*о)\s*"(?P<target>.+?)"\s*'
-    "("
-        r"(?P<day>\d{1,2})\s*(?P<month>\w+)(:?.*?(?P<year>\d{4}))?"
-        "|"
-        r"(?:в\s*следующ..\s*)?(?P<relative_day>"
-            r"сегодня|завтра|послезавтра|понедельник|вторник|среду|четверг|пятницу|субботу|воскресенье"
-        r")"
-    ")"
-    r"(:?.*?(?P<time>\d{2}:\d{2}))?",
-    flags=re.IGNORECASE,
-)
 PATTERN_TARGET_DATETIME = re.compile(
     r"""
     (День\s*рождения|Праздник|Напомни\s*о)\s*
@@ -419,23 +406,22 @@ if __name__ == "__main__":
 Напомни о "Покупки" послезавтра в 11:00
 Напомни о "Покупки" в следующий понедельник в 11:00
 Напомни о "Покупки" в следующий вторник в 11:00
-Напомни о "Покупки" в следующую среду в 11:00м
+Напомни о "Покупки" в следующую среду в 11:00
 Напомни о "Покупки" в следующий четверг в 11:00
 Напомни о "Покупки" в следующую пятницу в 11:00
 Напомни о "Покупки" в следующую субботу в 11:00
 Напомни о "Покупки" в следующее воскресенье в 11:00
     """.strip()
 
-    now_utc = datetime.utcnow()
-    print(f"now_utc: {now_utc}")
-    print()
+    now = datetime.now()
 
     default = Defaults(hours=11, minutes=0)
 
     for line in text.splitlines():
         print(line)
 
-        result = parse_command(line, dt=now_utc, default=default)
+        result = parse_command(line, dt=now, default=default)
+        print(f"dt: {now}")
         print(result)
         print(f"Целевая дата: {result.target_datetime}")
         print(
