@@ -24,6 +24,7 @@ from parser import (
     TimeUnit,
     TimeUnitWeekDayUnit,
     Defaults,
+    ParseResult,
     parse_month,
 )
 
@@ -81,7 +82,35 @@ class TestCaseParserCommon(unittest.TestCase):
                 self.assertEqual(enum_value, TimeUnitWeekDayEnum[enum_value.name])
 
     def test_ParseResult(self):
-        1 / 0
+        target = "target"
+        target_datetime = datetime.now()
+
+        result: ParseResult = ParseResult(
+            target=target,
+            target_datetime=target_datetime,
+        )
+        self.assertEqual(target, result.target)
+        self.assertEqual(target_datetime, result.target_datetime)
+        self.assertIsNone(result.repeat_every)
+        self.assertEqual([], result.repeat_before)
+
+        repeat_every = RepeatEvery(unit=TimeUnit(number=10, unit=TimeUnitEnum.DAY))
+        repeat_before = [
+            TimeUnit(number=1, unit=TimeUnitEnum.DAY),
+            TimeUnit(number=2, unit=TimeUnitEnum.DAY),
+            TimeUnit(number=3, unit=TimeUnitEnum.DAY),
+        ]
+
+        result: ParseResult = ParseResult(
+            target=target,
+            target_datetime=target_datetime,
+            repeat_every=repeat_every,
+            repeat_before=repeat_before,
+        )
+        self.assertEqual(target, result.target)
+        self.assertEqual(target_datetime, result.target_datetime)
+        self.assertEqual(repeat_every, result.repeat_every)
+        self.assertEqual(repeat_before, result.repeat_before)
 
     def test_Defaults(self):
         defaults = Defaults(hours=10, minutes=30)
