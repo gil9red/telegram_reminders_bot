@@ -24,6 +24,7 @@ from parser import (
     Defaults,
     ParseResult,
     parse_month,
+    get_repeat_every,
 )
 
 
@@ -116,7 +117,18 @@ class TestCaseParserCommon(unittest.TestCase):
         self.assertEqual(30, defaults.minutes)
 
     def test_get_repeat_every(self):
-        1 / 0
+        for prefix in ["Повтор раз в", "Повтор каждый"]:
+            for values, repeat_every in TestCaseParserRepeatEvery.get_test_text():
+                with self.subTest(
+                    prefix=prefix, values=values, repeat_every=repeat_every
+                ):
+                    for value in values:
+                        text = f"{prefix} {value}"
+                        self.assertEqual(
+                            repeat_every,
+                            get_repeat_every(text),
+                            msg=f"Проблема парсинга {text!r}",
+                        )
 
     def test_parse_repeat_before(self):
         1 / 0
