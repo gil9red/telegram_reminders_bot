@@ -16,8 +16,8 @@ class ParserException(Exception):
     pass
 
 
-# TODO: re.VERBOSE
-PATTERN_TARGET_DATETIME = re.compile(
+# TODO: Удалить после проверки PATTERN_TARGET_DATETIME
+PATTERN_TARGET_DATETIME_OLD = re.compile(
     r'(?:День\s*рождения|Праздник|Напомни\s*о)\s*"(?P<target>.+?)"\s*'
     "("
         r"(?P<day>\d{1,2})\s*(?P<month>\w+)(:?.*?(?P<year>\d{4}))?"
@@ -29,6 +29,28 @@ PATTERN_TARGET_DATETIME = re.compile(
     r"(:?.*?(?P<time>\d{2}:\d{2}))?",
     flags=re.IGNORECASE,
 )
+PATTERN_TARGET_DATETIME = re.compile(
+    r"""
+    (День\s*рождения|Праздник|Напомни\s*о)\s*
+    # Причина
+    "(?P<target>.+?)"\s*
+    (
+        # День месяц год в DD MMM YYYY, MMM - название месяца, а не номер
+        (?P<day>\d{1,2})\s*(?P<month>\w+)(.*?(?P<year>\d{4}))?
+        |
+        # Относительные дни
+        (?:в\s*следующ..\s*)?
+        (?P<relative_day>
+            сегодня|завтра|послезавтра
+            |понедельник|вторник|среду|четверг|пятницу|субботу|воскресенье
+        )
+    )
+    # Время в HH:MM
+    (.*?(?P<time>\d{2}:\d{2}))?
+    """,
+    flags=re.IGNORECASE | re.VERBOSE,
+)
+
 PATTERN_REPEAT_EVERY = re.compile(
     r"Повтор (?:раз в|каждый) "
     r"(?P<unit>день|неделю|месяц|полгода|год"
