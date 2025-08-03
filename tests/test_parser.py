@@ -10,6 +10,7 @@ from datetime import datetime, timedelta
 from parser import (
     TimeUnitEnum,
     TimeUnitWeekDayEnum,
+    # ParserException,  # TODO:
     RepeatEvery,
     TimeUnit,
     TimeUnitWeekDayUnit,
@@ -197,9 +198,83 @@ class TestCaseParserCommon(unittest.TestCase):
             with self.subTest(number=number, month=month):
                 self.assertEqual(number, parse_month(month))
 
-    def test_parse_command(self):
-        # TODO:
-        1 / 0
+
+# TODO: Проверить все тесты и варианты значений
+class TestParseCommand(unittest.TestCase):
+    def setUp(self):
+        self.now = datetime(2025, 4, 15, 10, 0)
+        self.default = Defaults(hours=11, minutes=0)
+
+    def test_parse_absolute_date(self):
+        command = 'День рождения "Иван" 10 февраля'
+        result = parse_command(command, self.now, self.default)
+        self.assertIsInstance(result, ParseResult)
+        self.assertEqual(result.target, "Иван")
+        self.assertEqual(result.target_datetime.day, 10)
+        self.assertEqual(result.target_datetime.month, 2)
+        self.assertEqual(result.target_datetime.year, 2026)
+        self.assertEqual(result.target_datetime.hour, 11)
+        self.assertEqual(result.target_datetime.minute, 0)
+
+    def test_parse_relative_today(self):
+        command = 'Напомни о "Задача" сегодня'
+        result = parse_command(command, self.now, self.default)
+        self.assertEqual(result.target_datetime.day, self.now.day)
+        self.assertEqual(result.target_datetime.month, self.now.month)
+        self.assertEqual(result.target_datetime.year, self.now.year)
+        self.assertEqual(result.target_datetime.hour, 11)
+        self.assertEqual(result.target_datetime.minute, 0)
+
+    def test_parse_relative_tomorrow(self):
+        command = 'Напомни о "Собрание" завтра'
+        result = parse_command(command, self.now, self.default)
+        expected_date = self.now + timedelta(days=1)
+        self.assertEqual(result.target_datetime.day, expected_date.day)
+        self.assertEqual(result.target_datetime.month, expected_date.month)
+        self.assertEqual(result.target_datetime.year, expected_date.year)
+        self.assertEqual(result.target_datetime.hour, 11)
+        self.assertEqual(result.target_datetime.minute, 0)
+
+    def test_parse_relative_next_weekday(self):
+        command = 'Напомни о "Мероприятие" в следующий понедельник'
+        result = parse_command(command, self.now, self.default)
+        unit = TimeUnitWeekDayUnit.parse_text("понедельник")
+        next_monday = unit.get_next_datetime(self.now)
+        self.assertEqual(result.target_datetime.day, next_monday.day)
+        self.assertEqual(result.target_datetime.month, next_monday.month)
+        self.assertEqual(result.target_datetime.year, next_monday.year)
+        self.assertEqual(result.target_datetime.hour, 11)
+        self.assertEqual(result.target_datetime.minute, 0)
+
+    def test_parse_with_time(self):
+        command = 'Напомни о "Встреча" 10 февраля в 14:55'
+        result = parse_command(command, self.now, self.default)
+        self.assertEqual(result.target_datetime.hour, 14)
+        self.assertEqual(result.target_datetime.minute, 55)
+
+    def test_parse_with_repeat_every(self):
+        command = 'День рождения "Иван" 10 февраля. Повтор раз в год'
+        result = parse_command(command, self.now, self.default)
+        self.assertIsInstance(result.repeat_every, RepeatEvery)
+        self.assertEqual(result.repeat_every.get_value(), "1 YEAR")
+
+    def test_parse_with_repeat_before(self):
+        command = 'День рождения "Иван" 10 февраля. Напомнить за неделю, за 3 дня, за день'
+        result = parse_command(command, self.now, self.default)
+        self.assertEqual(len(result.repeat_before), 3)
+        # TODO: Проверить, что все значения в result.repeat_before в порядке убывания
+        self.assertTrue(any(t.get_value() == "1 WEEK" for t in result.repeat_before))
+        self.assertTrue(any(t.get_value() == "3 DAY" for t in result.repeat_before))
+        self.assertTrue(any(t.get_value() == "1 DAY" for t in result.repeat_before))
+
+    def test_invalid_input(self):
+        # TODO: При неправильном вводе должно быть выброшено исключение, а не просто None
+        # TODO: Поддержка вместе с обновлением бота при работе с parse_command
+        # with self.assertRaises(ParserException):
+        #     parse_command("Некорректная команда", self.now, self.default)
+        self.assertIsNone(
+            parse_command("Некорректная команда", self.now, self.default)
+        )
 
 
 class TestCaseTimeUnit(unittest.TestCase):
