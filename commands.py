@@ -23,9 +23,7 @@ from common import log_func, log, reply_error, datetime_to_str
 from tz_utils import convert_tz, get_tz
 from db import Reminder, Chat, User
 
-# TODO:
-# from utils import ParseResult, parse_command, get_pretty_datetime
-from parser import ParseResult, Defaults, RepeatEvery, parse_command
+from parser import ParserException, ParseResult, Defaults, RepeatEvery, parse_command
 from regexp_patterns import (
     COMMAND_START,
     COMMAND_HELP,
@@ -270,10 +268,9 @@ def add_reminder(command: str, update: Update):
     now_utc = datetime.utcnow()
     default = Defaults(hours=10, minutes=0)
 
-    parse_result: ParseResult | None = parse_command(
-        command, dt=now_utc, default=default
-    )
-    if not parse_result:
+    try:
+        parse_result: ParseResult = parse_command(command, dt=now_utc, default=default)
+    except ParserException:
         message.reply_text("Не получилось разобрать команду!", quote=True)
         return
 

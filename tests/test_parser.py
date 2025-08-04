@@ -10,7 +10,6 @@ from datetime import datetime, timedelta
 from parser import (
     TimeUnitEnum,
     TimeUnitWeekDayEnum,
-    # ParserException,  # TODO:
     RepeatEvery,
     TimeUnit,
     TimeUnitWeekDayUnit,
@@ -20,6 +19,7 @@ from parser import (
     get_repeat_every,
     parse_repeat_before,
     parse_command,
+    ParserException,
 )
 
 
@@ -259,7 +259,9 @@ class TestParseCommand(unittest.TestCase):
         self.assertEqual(result.repeat_every.get_value(), "1 YEAR")
 
     def test_parse_with_repeat_before(self):
-        command = 'День рождения "Иван" 10 февраля. Напомнить за неделю, за 3 дня, за день'
+        command = (
+            'День рождения "Иван" 10 февраля. Напомнить за неделю, за 3 дня, за день'
+        )
         result = parse_command(command, self.now, self.default)
         self.assertEqual(len(result.repeat_before), 3)
         # TODO: Проверить, что все значения в result.repeat_before в порядке убывания
@@ -268,13 +270,8 @@ class TestParseCommand(unittest.TestCase):
         self.assertTrue(any(t.get_value() == "1 DAY" for t in result.repeat_before))
 
     def test_invalid_input(self):
-        # TODO: При неправильном вводе должно быть выброшено исключение, а не просто None
-        # TODO: Поддержка вместе с обновлением бота при работе с parse_command
-        # with self.assertRaises(ParserException):
-        #     parse_command("Некорректная команда", self.now, self.default)
-        self.assertIsNone(
+        with self.assertRaises(ParserException):
             parse_command("Некорректная команда", self.now, self.default)
-        )
 
 
 class TestCaseTimeUnit(unittest.TestCase):

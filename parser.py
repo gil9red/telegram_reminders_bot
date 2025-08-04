@@ -281,17 +281,16 @@ def parse_month(month_value: str) -> int | None:
         return
 
 
-# TODO: Вместо None можно исключение кидать
 def parse_command(
     command: str,
     dt: datetime,
     default: Defaults,
-) -> ParseResult | None:
+) -> ParseResult:
     command = command.strip()
 
     m = PATTERN_TARGET_DATETIME.search(command)
     if not m:
-        return
+        raise ParserException(f"Не удалось разобраться команду {command!r}")
 
     relative_day: str | None = m.group("relative_day")
     if relative_day:
