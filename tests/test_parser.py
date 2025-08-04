@@ -202,8 +202,8 @@ class TestCaseParserCommon(unittest.TestCase):
 # TODO: Проверить все тесты и варианты значений
 class TestParseCommand(unittest.TestCase):
     def setUp(self):
-        self.now = datetime(2025, 4, 15, 10, 0)
-        self.default = Defaults(hours=11, minutes=0)
+        self.now: datetime = datetime(year=2025, month=4, day=15, hour=10, minute=0)
+        self.default: Defaults = Defaults(hours=11, minutes=0)
 
     def test_parse_absolute_date(self):
         command = 'День рождения "Иван" 10 февраля'
@@ -213,8 +213,8 @@ class TestParseCommand(unittest.TestCase):
         self.assertEqual(result.target_datetime.day, 10)
         self.assertEqual(result.target_datetime.month, 2)
         self.assertEqual(result.target_datetime.year, 2026)
-        self.assertEqual(result.target_datetime.hour, 11)
-        self.assertEqual(result.target_datetime.minute, 0)
+        self.assertEqual(result.target_datetime.hour, self.default.hours)
+        self.assertEqual(result.target_datetime.minute, self.default.minutes)
 
     def test_parse_relative_today(self):
         command = 'Напомни о "Задача" сегодня'
@@ -222,8 +222,8 @@ class TestParseCommand(unittest.TestCase):
         self.assertEqual(result.target_datetime.day, self.now.day)
         self.assertEqual(result.target_datetime.month, self.now.month)
         self.assertEqual(result.target_datetime.year, self.now.year)
-        self.assertEqual(result.target_datetime.hour, 11)
-        self.assertEqual(result.target_datetime.minute, 0)
+        self.assertEqual(result.target_datetime.hour, self.default.hours)
+        self.assertEqual(result.target_datetime.minute, self.default.minutes)
 
     def test_parse_relative_tomorrow(self):
         command = 'Напомни о "Собрание" завтра'
@@ -232,8 +232,8 @@ class TestParseCommand(unittest.TestCase):
         self.assertEqual(result.target_datetime.day, expected_date.day)
         self.assertEqual(result.target_datetime.month, expected_date.month)
         self.assertEqual(result.target_datetime.year, expected_date.year)
-        self.assertEqual(result.target_datetime.hour, 11)
-        self.assertEqual(result.target_datetime.minute, 0)
+        self.assertEqual(result.target_datetime.hour, self.default.hours)
+        self.assertEqual(result.target_datetime.minute, self.default.minutes)
 
     def test_parse_relative_next_weekday(self):
         command = 'Напомни о "Мероприятие" в следующий понедельник'
@@ -243,8 +243,8 @@ class TestParseCommand(unittest.TestCase):
         self.assertEqual(result.target_datetime.day, next_monday.day)
         self.assertEqual(result.target_datetime.month, next_monday.month)
         self.assertEqual(result.target_datetime.year, next_monday.year)
-        self.assertEqual(result.target_datetime.hour, 11)
-        self.assertEqual(result.target_datetime.minute, 0)
+        self.assertEqual(result.target_datetime.hour, self.default.hours)
+        self.assertEqual(result.target_datetime.minute, self.default.minutes)
 
     def test_parse_with_time(self):
         command = 'Напомни о "Встреча" 10 февраля в 14:55'
@@ -259,15 +259,90 @@ class TestParseCommand(unittest.TestCase):
         self.assertEqual(result.repeat_every.get_value(), "1 YEAR")
 
     def test_parse_with_repeat_before(self):
-        command = (
-            'День рождения "Иван" 10 февраля. Напомнить за неделю, за 3 дня, за день'
-        )
-        result = parse_command(command, self.now, self.default)
-        self.assertEqual(len(result.repeat_before), 3)
-        # TODO: Проверить, что все значения в result.repeat_before в порядке убывания
-        self.assertTrue(any(t.get_value() == "1 WEEK" for t in result.repeat_before))
-        self.assertTrue(any(t.get_value() == "3 DAY" for t in result.repeat_before))
-        self.assertTrue(any(t.get_value() == "1 DAY" for t in result.repeat_before))
+        for command, units in [
+            (
+                'День рождения "Иван" 10 февраля. Напомнить за неделю, за 3 дня, за день',
+                [
+                    TimeUnit(number=1, unit=TimeUnitEnum.WEEK),
+                    TimeUnit(number=3, unit=TimeUnitEnum.DAY),
+                    TimeUnit(number=1, unit=TimeUnitEnum.DAY),
+                ],
+            ),
+            (
+                'День рождения "Иван" 10 февраля. Напомнить за день, за 3 дня, за неделю',
+                [
+                    TimeUnit(number=1, unit=TimeUnitEnum.WEEK),
+                    TimeUnit(number=3, unit=TimeUnitEnum.DAY),
+                    TimeUnit(number=1, unit=TimeUnitEnum.DAY),
+                ],
+            ),
+            (
+                'День рождения "Иван" 10 февраля. Напомнить за месяц, за неделю, за 3 дня, за день',
+                [
+                    TimeUnit(number=1, unit=TimeUnitEnum.MONTH),
+                    TimeUnit(number=1, unit=TimeUnitEnum.WEEK),
+                    TimeUnit(number=3, unit=TimeUnitEnum.DAY),
+                    TimeUnit(number=1, unit=TimeUnitEnum.DAY),
+                ],
+            ),
+            (
+                'День рождения "Иван" 10 февраля. Напомнить за день, за неделю, за месяц, за 3 дня',
+                [
+                    TimeUnit(number=1, unit=TimeUnitEnum.MONTH),
+                    TimeUnit(number=1, unit=TimeUnitEnum.WEEK),
+                    TimeUnit(number=3, unit=TimeUnitEnum.DAY),
+                    TimeUnit(number=1, unit=TimeUnitEnum.DAY),
+                ],
+            ),
+            (
+                'День рождения "Иван" 10 февраля. Напомнить за месяц, за 2 недели, за неделю, за 3 дня, за день',
+                [
+                    TimeUnit(number=1, unit=TimeUnitEnum.MONTH),
+                    TimeUnit(number=2, unit=TimeUnitEnum.WEEK),
+                    TimeUnit(number=1, unit=TimeUnitEnum.WEEK),
+                    TimeUnit(number=3, unit=TimeUnitEnum.DAY),
+                    TimeUnit(number=1, unit=TimeUnitEnum.DAY),
+                ],
+            ),
+            (
+                'День рождения "Иван" 10 февраля. Напомнить за неделю, за 3 дня, за день',
+                [
+                    TimeUnit(number=1, unit=TimeUnitEnum.WEEK),
+                    TimeUnit(number=3, unit=TimeUnitEnum.DAY),
+                    TimeUnit(number=1, unit=TimeUnitEnum.DAY),
+                ],
+            ),
+            (
+                'День рождения "Иван" 10 февраля. Напомнить за 3 дня, за день',
+                [
+                    TimeUnit(number=3, unit=TimeUnitEnum.DAY),
+                    TimeUnit(number=1, unit=TimeUnitEnum.DAY),
+                ],
+            ),
+            (
+                'День рождения "Иван" 10 февраля. Напомнить за 2 дня',
+                [TimeUnit(number=2, unit=TimeUnitEnum.DAY)],
+            ),
+            (
+                'День рождения "Иван" 10 февраля. Напомнить за день',
+                [TimeUnit(number=1, unit=TimeUnitEnum.DAY)],
+            ),
+            (
+                'День рождения "Иван" 10 февраля. Напомнить за неделю, за 2 дня, '
+                'за 7 дней, за 3 дня, за 2 дня, за день',
+                [
+                    TimeUnit(number=7, unit=TimeUnitEnum.DAY),
+                    TimeUnit(number=3, unit=TimeUnitEnum.DAY),
+                    TimeUnit(number=2, unit=TimeUnitEnum.DAY),
+                    TimeUnit(number=1, unit=TimeUnitEnum.DAY),
+                ],
+            ),
+            ('День рождения "Иван" 10 февраля', []),
+            ('День рождения "Иван" 10 февраля.', []),
+        ]:
+            with self.subTest(command=command, units=units):
+                result = parse_command(command, self.now, self.default)
+                self.assertEqual(result.repeat_before, units)
 
     def test_invalid_input(self):
         with self.assertRaises(ParserException):
