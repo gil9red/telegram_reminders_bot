@@ -307,7 +307,7 @@ def parse_command(
             case _:
                 unit: TimeUnitWeekDayUnit | None = TimeUnitWeekDayUnit.parse_text(value)
                 if not unit:
-                    raise ParserException(f"Unsupported {relative_day!r}")
+                    raise ParserException(f"Неподдерживаемый элемент {relative_day!r}")
 
                 new_dt = unit.get_next_datetime(new_dt)
 
