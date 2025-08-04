@@ -128,9 +128,8 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-.idea/
-
 # For current project
+.*/
 TOKEN.txt
 database/
 logs/
