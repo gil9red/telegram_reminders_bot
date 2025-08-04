@@ -270,8 +270,12 @@ def add_reminder(command: str, update: Update):
 
     try:
         parse_result: ParseResult = parse_command(command, dt=now_utc, default=default)
-    except ParserException:
-        message.reply_text("Не получилось разобрать команду!", quote=True)
+    except ParserException as e:
+        log.exception("Error on parse_command:")
+        message.reply_markdown(
+            text=f"Не получилось разобрать команду!\nПричина:\n```{e}```",
+            quote=True,
+        )
         return
 
     tz_chat: tzinfo = get_tz(chat.tz)

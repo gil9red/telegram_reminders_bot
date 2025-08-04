@@ -290,7 +290,7 @@ def parse_command(
 
     m = PATTERN_TARGET_DATETIME.search(command)
     if not m:
-        raise ParserException(f"Не удалось разобраться команду {command!r}")
+        raise ParserException(f"Команда {command!r} не соответствует шаблону")
 
     relative_day: str | None = m.group("relative_day")
     if relative_day:
