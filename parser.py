@@ -18,7 +18,7 @@ class ParserException(Exception):
 
 PATTERN_TARGET_DATETIME = re.compile(
     r"""
-    (День\s*рождения|Праздник|Напомни\s*о)\s*
+    .+?
     # Причина
     "(?P<target>.+?)"\s*
     (
