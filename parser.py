@@ -355,30 +355,6 @@ def parse_command(
 
 
 if __name__ == "__main__":
-    now = datetime.now()
-
-    repeat_every_month = RepeatEvery.parse_text("месяц")
-    print(repeat_every_month)
-    print(repeat_every_month.get_value())
-    print(RepeatEvery.parse_value(repeat_every_month.get_value()))
-    assert repeat_every_month == RepeatEvery.parse_value(repeat_every_month.get_value())
-    print(repeat_every_month.get_next_datetime(now))
-    print()
-
-    repeat_every_thursday = RepeatEvery.parse_text("четверг")
-    print(repeat_every_thursday)
-    print(repeat_every_thursday.get_value())
-    print(RepeatEvery.parse_value(repeat_every_thursday.get_value()))
-    assert repeat_every_thursday == RepeatEvery.parse_value(
-        repeat_every_thursday.get_value()
-    )
-    print(repeat_every_thursday.get_next_datetime(now))
-
-    assert TimeUnit.parse_value("3 DAY") == TimeUnit(number=3, unit=TimeUnitEnum.DAY)
-    assert TimeUnit.parse_value("1 YEAR") == TimeUnit(number=1, unit=TimeUnitEnum.YEAR)
-
-    print("\n" + "-" * 100 + "\n")
-
     # TODO: Перенести в тесты
     text = """
 День рождения "xxx" 10 февраля. Повтор раз в год. Напомнить за месяц, за неделю, за 3 дня, за день
