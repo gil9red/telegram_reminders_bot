@@ -269,7 +269,7 @@ def add_reminder(command: str, update: Update):
     default = Defaults(hours=10, minutes=0)
 
     try:
-        parse_result: ParseResult = parse_command(command, dt=now_utc, default=default)
+        parse_result: ParseResult = parse_command(command, dt=now_utc, defaults=default)
     except ParserException as e:
         log.exception("Error on parse_command:")
         message.reply_markdown(

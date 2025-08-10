@@ -284,7 +284,7 @@ def parse_month(month_value: str) -> int | None:
 def parse_command(
     command: str,
     dt: datetime,
-    default: Defaults,
+    defaults: Defaults,
 ) -> ParseResult:
     command = command.strip()
 
@@ -331,8 +331,8 @@ def parse_command(
         parts = time_value.split(":")
         hours, minutes = map(int, parts)
     else:
-        hours = default.hours
-        minutes = default.minutes
+        hours = defaults.hours
+        minutes = defaults.minutes
 
     # TODO: Проверить високосные даты
     target_datetime = datetime(
@@ -401,7 +401,7 @@ if __name__ == "__main__":
     for line in text.splitlines():
         print(line)
 
-        result = parse_command(line, dt=now, default=default)
+        result = parse_command(line, dt=now, defaults=default)
         print(f"dt: {now}")
         print(result)
         print(f"Целевая дата: {result.target_datetime}")
