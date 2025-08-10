@@ -38,6 +38,8 @@ PATTERN_TARGET_DATETIME = re.compile(
     flags=re.IGNORECASE | re.VERBOSE,
 )
 
+# TODO: Парсить даты с указанием количества
+# TODO: Поддерживать тесты с указанием количества
 PATTERN_REPEAT_EVERY = re.compile(
     r"Повтор\s*(?:раз\s*в|кажд\w{1,2})\s*"
     r"(?P<unit>день|дн\w{1,2}|недел\w|месяц|полгода|год"
