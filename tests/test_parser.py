@@ -110,18 +110,18 @@ class TestCaseParserCommon(unittest.TestCase):
     def test_parse_repeat_before(self):
         for text, units in [
             (
-                    "Напомнить за 3 года, за год, за полгода, за 3 месяца, за месяц, за 10 дней, за неделю, за 3 дня, за день",
-                    [
-                        TimeUnit(number=3, unit=TimeUnitEnum.YEAR),
-                        TimeUnit(number=1, unit=TimeUnitEnum.YEAR),
-                        TimeUnit(number=6, unit=TimeUnitEnum.MONTH),
-                        TimeUnit(number=3, unit=TimeUnitEnum.MONTH),
-                        TimeUnit(number=1, unit=TimeUnitEnum.MONTH),
-                        TimeUnit(number=10, unit=TimeUnitEnum.DAY),
-                        TimeUnit(number=1, unit=TimeUnitEnum.WEEK),
-                        TimeUnit(number=3, unit=TimeUnitEnum.DAY),
-                        TimeUnit(number=1, unit=TimeUnitEnum.DAY),
-                    ],
+                "Напомнить за 3 года, за год, за полгода, за 3 месяца, за месяц, за 10 дней, за неделю, за 3 дня, за день",
+                [
+                    TimeUnit(number=3, unit=TimeUnitEnum.YEAR),
+                    TimeUnit(number=1, unit=TimeUnitEnum.YEAR),
+                    TimeUnit(number=6, unit=TimeUnitEnum.MONTH),
+                    TimeUnit(number=3, unit=TimeUnitEnum.MONTH),
+                    TimeUnit(number=1, unit=TimeUnitEnum.MONTH),
+                    TimeUnit(number=10, unit=TimeUnitEnum.DAY),
+                    TimeUnit(number=1, unit=TimeUnitEnum.WEEK),
+                    TimeUnit(number=3, unit=TimeUnitEnum.DAY),
+                    TimeUnit(number=1, unit=TimeUnitEnum.DAY),
+                ],
             ),
             (
                 "Напомнить за месяц, за неделю, за 3 дня, за день",
@@ -213,327 +213,50 @@ class TestCaseParserCommon(unittest.TestCase):
                 self.assertEqual(number, parse_month(month))
 
 
-# TODO: Проверить все тесты и варианты значений
-class TestParseCommand(unittest.TestCase):
+class TestCaseParseCommand(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.now: datetime = datetime(year=2025, month=8, day=9, hour=22, minute=0)
         cls.defaults: Defaults = Defaults(hours=11, minutes=0)
 
-    # TODO: Перенести в разные методы по списку тестовых значений
-    # TODO: Проверить правильность парсинга
-    @classmethod
-    def get_test_data(cls) -> list[tuple[str, ParseResult]]:
-        return [
-            (
-                'День рождения "Поход" 10 февраля. Повтор раз в год. Напомнить за месяц, за неделю, за 3 дня, за день',
-                ParseResult(
-                    target="Поход",
-                    target_datetime=datetime(2026, 2, 10, cls.defaults.hours, cls.defaults.minutes),
-                    repeat_every=RepeatEvery(
-                        unit=TimeUnit(number=1, unit=TimeUnitEnum.YEAR)
-                    ),
-                    repeat_before=[
-                        TimeUnit(number=1, unit=TimeUnitEnum.MONTH),
-                        TimeUnit(number=1, unit=TimeUnitEnum.WEEK),
-                        TimeUnit(number=3, unit=TimeUnitEnum.DAY),
-                        TimeUnit(number=1, unit=TimeUnitEnum.DAY),
-                    ],
-                ),
-            ),
-            (
-                'День рождения "День рождения Ивана" 10 февраля. Повтор раз в полгода. Напомнить за месяц, за неделю, за 3 дня, за день',
-                ParseResult(
-                    target="День рождения Ивана",
-                    target_datetime=datetime(2026, 2, 10, cls.defaults.hours, cls.defaults.minutes),
-                    repeat_every=RepeatEvery(
-                        unit=TimeUnit(number=6, unit=TimeUnitEnum.MONTH)
-                    ),
-                    repeat_before=[
-                        TimeUnit(number=1, unit=TimeUnitEnum.MONTH),
-                        TimeUnit(number=1, unit=TimeUnitEnum.WEEK),
-                        TimeUnit(number=3, unit=TimeUnitEnum.DAY),
-                        TimeUnit(number=1, unit=TimeUnitEnum.DAY),
-                    ],
-                ),
-            ),
-            (
-                'День рождения "!!!" 10 февраля. Повтор раз в месяц. Напомнить за месяц, за 2 недели, за неделю, за 3 дня, за день',
-                ParseResult(
-                    target="!!!",
-                    target_datetime=datetime(2026, 2, 10, cls.defaults.hours, cls.defaults.minutes),
-                    repeat_every=RepeatEvery(
-                        unit=TimeUnit(number=1, unit=TimeUnitEnum.MONTH)
-                    ),
-                    repeat_before=[
-                        TimeUnit(number=1, unit=TimeUnitEnum.MONTH),
-                        TimeUnit(number=2, unit=TimeUnitEnum.WEEK),
-                        TimeUnit(number=1, unit=TimeUnitEnum.WEEK),
-                        TimeUnit(number=3, unit=TimeUnitEnum.DAY),
-                        TimeUnit(number=1, unit=TimeUnitEnum.DAY),
-                    ],
-                ),
-            ),
-            (
-                'День рождения "***" 10 февраля. Повтор раз в неделю. Напомнить за месяц, за неделю, за 3 дня, за день',
-                ParseResult(
-                    target="***",
-                    target_datetime=datetime(2026, 2, 10, cls.defaults.hours, cls.defaults.minutes),
-                    repeat_every=RepeatEvery(
-                        unit=TimeUnit(number=1, unit=TimeUnitEnum.WEEK)
-                    ),
-                    repeat_before=[
-                        TimeUnit(number=1, unit=TimeUnitEnum.MONTH),
-                        TimeUnit(number=1, unit=TimeUnitEnum.WEEK),
-                        TimeUnit(number=3, unit=TimeUnitEnum.DAY),
-                        TimeUnit(number=1, unit=TimeUnitEnum.DAY),
-                    ],
-                ),
-            ),
-            (
-                'День рождения "123" 10 февраля. Повтор каждый день',
-                ParseResult(
-                    target="123",
-                    target_datetime=datetime(2026, 2, 10, cls.defaults.hours, cls.defaults.minutes),
-                    repeat_every=RepeatEvery(
-                        unit=TimeUnit(number=1, unit=TimeUnitEnum.DAY)
-                    ),
-                    repeat_before=[],
-                ),
-            ),
-            (
-                'День рождения "-_-" 10 февраля в 14:55. Повтор каждый день',
-                ParseResult(
-                    target="-_-",
-                    target_datetime=datetime(2026, 2, 10, 14, 55),
-                    repeat_every=RepeatEvery(
-                        unit=TimeUnit(number=1, unit=TimeUnitEnum.DAY)
-                    ),
-                    repeat_before=[],
-                ),
-            ),
-            (
-                'День рождения "abc" 10 февраля 2027 года. Повтор каждый день',
-                ParseResult(
-                    target="abc",
-                    target_datetime=datetime(2027, 2, 10, cls.defaults.hours, cls.defaults.minutes),
-                    repeat_every=RepeatEvery(
-                        unit=TimeUnit(number=1, unit=TimeUnitEnum.DAY)
-                    ),
-                    repeat_before=[],
-                ),
-            ),
-            (
-                'День рождения "xxx" 10 февраля 2027 года в 14:55. Повтор каждый день',
-                ParseResult(
-                    target="xxx",
-                    target_datetime=datetime(2027, 2, 10, 14, 55),
-                    repeat_every=RepeatEvery(
-                        unit=TimeUnit(number=1, unit=TimeUnitEnum.DAY)
-                    ),
-                    repeat_before=[],
-                ),
-            ),
-            # TODO: Поддержать в PATTERN_REPEAT_EVERY/get_repeat_every
-            # (
-            #     'День рождения "xxx" 10 февраля 2027 года в 14:55. Повтор каждые 4 дня',
-            #     ParseResult(
-            #         target="xxx",
-            #         target_datetime=datetime(2027, 2, 10, 14, 55),
-            #         repeat_every=RepeatEvery(
-            #             unit=TimeUnit(number=4, unit=TimeUnitEnum.DAY)
-            #         ),
-            #         repeat_before=[],
-            #     ),
-            # ),
-            (
-                'Праздник "xxx" 10 февраля. Повтор каждую неделю',
-                ParseResult(
-                    target="xxx",
-                    target_datetime=datetime(2026, 2, 10, cls.defaults.hours, cls.defaults.minutes),
-                    repeat_every=RepeatEvery(
-                        unit=TimeUnit(number=1, unit=TimeUnitEnum.WEEK)
-                    ),
-                    repeat_before=[],
-                ),
-            ),
-            # TODO: Поддержать в PATTERN_REPEAT_EVERY/get_repeat_every
-            # (
-            #     'Праздник "xxx" 10 февраля. Повтор каждые 2 недели',
-            #     ParseResult(
-            #         target="xxx",
-            #         target_datetime=datetime(2026, 2, 10, cls.defaults.hours, cls.defaults.minutes),
-            #         repeat_every=RepeatEvery(
-            #             unit=TimeUnit(number=2, unit=TimeUnitEnum.WEEK)
-            #         ),
-            #         repeat_before=[],
-            #     ),
-            # ),
-            (
-                'Праздник "xxx" 10 февраля. Повтор каждый месяц',
-                ParseResult(
-                    target="xxx",
-                    target_datetime=datetime(2026, 2, 10, cls.defaults.hours, cls.defaults.minutes),
-                    repeat_every=RepeatEvery(
-                        unit=TimeUnit(number=1, unit=TimeUnitEnum.MONTH)
-                    ),
-                    repeat_before=[],
-                ),
-            ),
-            # TODO: Поддержать в PATTERN_REPEAT_EVERY/get_repeat_every
-            # (
-            #     'Праздник "xxx" 10 февраля. Повтор каждый 3 месяца',
-            #     ParseResult(
-            #         target="xxx",
-            #         target_datetime=datetime(2026, 2, 10, cls.defaults.hours, cls.defaults.minutes),
-            #         repeat_every=RepeatEvery(
-            #             unit=TimeUnit(number=3, unit=TimeUnitEnum.MONTH)
-            #         ),
-            #         repeat_before=[],
-            #     ),
-            # ),
-            (
-                'Праздник "xxx" 10 февраля. Повтор каждый год',
-                ParseResult(
-                    target="xxx",
-                    target_datetime=datetime(2026, 2, 10, cls.defaults.hours, cls.defaults.minutes),
-                    repeat_every=RepeatEvery(
-                        unit=TimeUnit(number=1, unit=TimeUnitEnum.YEAR)
-                    ),
-                    repeat_before=[],
-                ),
-            ),
-            (
-                'Праздник "xxx" 10 февраля 2026 года. Повтор каждый год',
-                ParseResult(
-                    target="xxx",
-                    target_datetime=datetime(2026, 2, 10, cls.defaults.hours, cls.defaults.minutes),
-                    repeat_every=RepeatEvery(
-                        unit=TimeUnit(number=1, unit=TimeUnitEnum.YEAR)
-                    ),
-                    repeat_before=[],
-                ),
-            ),
-            (
-                'Напомни о "🍕" 10 февраля. Повтор раз в год. Напомнить за месяц, за неделю, за 3 дня, за день',
-                ParseResult(
-                    target="🍕",
-                    target_datetime=datetime(2026, 2, 10, cls.defaults.hours, cls.defaults.minutes),
-                    repeat_every=RepeatEvery(
-                        unit=TimeUnit(number=1, unit=TimeUnitEnum.YEAR)
-                    ),
-                    repeat_before=[
-                        TimeUnit(number=1, unit=TimeUnitEnum.MONTH),
-                        TimeUnit(number=1, unit=TimeUnitEnum.WEEK),
-                        TimeUnit(number=3, unit=TimeUnitEnum.DAY),
-                        TimeUnit(number=1, unit=TimeUnitEnum.DAY),
-                    ],
-                ),
-            ),
+    def assert_parse_result(self, command: str, result: ParseResult):
+        actual_result = parse_command(command, self.now, self.defaults)
+        self.assertEqual(result.target, actual_result.target)
+        self.assertEqual(result.target_datetime, actual_result.target_datetime)
+        self.assertEqual(result.repeat_before, actual_result.repeat_before)
+        self.assertEqual(result.repeat_every, actual_result.repeat_every)
+        self.assertEqual(result, actual_result)
+
+    def test_parse_absolute_date(self):
+        for command, result in [
             (
                 'Напомни о "🍕" 10 февраля',
                 ParseResult(
                     target="🍕",
-                    target_datetime=datetime(2026, 2, 10, cls.defaults.hours, cls.defaults.minutes),
+                    target_datetime=datetime(
+                        2026, 2, 10, self.defaults.hours, self.defaults.minutes
+                    ),
                     repeat_every=None,
                     repeat_before=[],
-                ),
-            ),
-            (
-                'Напомни о "🍕" 10 февраля. Напомнить за 3 года, за год, за полгода, за 3 месяца, за месяц, за 10 дней, за неделю, за 3 дня, за день',
-                ParseResult(
-                    target="🍕",
-                    target_datetime=datetime(2026, 2, 10, cls.defaults.hours, cls.defaults.minutes),
-                    repeat_every=None,
-                    repeat_before=[
-                        TimeUnit(number=3, unit=TimeUnitEnum.YEAR),
-                        TimeUnit(number=1, unit=TimeUnitEnum.YEAR),
-                        TimeUnit(number=6, unit=TimeUnitEnum.MONTH),
-                        TimeUnit(number=3, unit=TimeUnitEnum.MONTH),
-                        TimeUnit(number=1, unit=TimeUnitEnum.MONTH),
-                        TimeUnit(number=10, unit=TimeUnitEnum.DAY),
-                        TimeUnit(number=1, unit=TimeUnitEnum.WEEK),
-                        TimeUnit(number=3, unit=TimeUnitEnum.DAY),
-                        TimeUnit(number=1, unit=TimeUnitEnum.DAY),
-                    ],
-                ),
-            ),
-            (
-                'Напомни о "🍕" 10 февраля. Напомнить за неделю, за 3 дня, за день',
-                ParseResult(
-                    target="🍕",
-                    target_datetime=datetime(2026, 2, 10, cls.defaults.hours, cls.defaults.minutes),
-                    repeat_every=None,
-                    repeat_before=[
-                        TimeUnit(number=1, unit=TimeUnitEnum.WEEK),
-                        TimeUnit(number=3, unit=TimeUnitEnum.DAY),
-                        TimeUnit(number=1, unit=TimeUnitEnum.DAY),
-                    ],
-                ),
-            ),
-            (
-                'Напомни о "🍕" 10 февраля. Напомнить за 3 дня, за день',
-                ParseResult(
-                    target="🍕",
-                    target_datetime=datetime(2026, 2, 10, cls.defaults.hours, cls.defaults.minutes),
-                    repeat_every=None,
-                    repeat_before=[
-                        TimeUnit(number=3, unit=TimeUnitEnum.DAY),
-                        TimeUnit(number=1, unit=TimeUnitEnum.DAY),
-                    ],
-                ),
-            ),
-            (
-                'День рождения "xxx" 10 февраля. Напомнить за месяц, за неделю, за 3 дня, за день',
-                ParseResult(
-                    target="xxx",
-                    target_datetime=datetime(2026, 2, 10, cls.defaults.hours, cls.defaults.minutes),
-                    repeat_every=None,
-                    repeat_before=[
-                        TimeUnit(number=1, unit=TimeUnitEnum.MONTH),
-                        TimeUnit(number=1, unit=TimeUnitEnum.WEEK),
-                        TimeUnit(number=3, unit=TimeUnitEnum.DAY),
-                        TimeUnit(number=1, unit=TimeUnitEnum.DAY),
-                    ],
-                ),
-            ),
-            (
-                'День рождения "xxx" 10 февраля. Напомнить за день, за неделю, за месяц, за 3 дня',
-                ParseResult(
-                    target="xxx",
-                    target_datetime=datetime(2026, 2, 10, cls.defaults.hours, cls.defaults.minutes),
-                    repeat_every=None,
-                    repeat_before=[
-                        TimeUnit(number=1, unit=TimeUnitEnum.MONTH),
-                        TimeUnit(number=1, unit=TimeUnitEnum.WEEK),
-                        TimeUnit(number=3, unit=TimeUnitEnum.DAY),
-                        TimeUnit(number=1, unit=TimeUnitEnum.DAY),
-                    ],
                 ),
             ),
             (
                 'Напомни о "Звонок другу" 29 декабря',
                 ParseResult(
                     target="Звонок другу",
-                    target_datetime=datetime(2025, 12, 29, cls.defaults.hours, cls.defaults.minutes),
+                    target_datetime=datetime(
+                        2025, 12, 29, self.defaults.hours, self.defaults.minutes
+                    ),
                     repeat_every=None,
                     repeat_before=[],
                 ),
             ),
-            (
-                'Напомни о "Звонок другу" 29 декабря. Напомнить за неделю, за 2 дня, за 7 дней, за 3 дня, за 2 дня, за день',
-                ParseResult(
-                    target="Звонок другу",
-                    target_datetime=datetime(2025, 12, 29, cls.defaults.hours, cls.defaults.minutes),
-                    repeat_every=None,
-                    repeat_before=[
-                        TimeUnit(number=7, unit=TimeUnitEnum.DAY),
-                        TimeUnit(number=3, unit=TimeUnitEnum.DAY),
-                        TimeUnit(number=2, unit=TimeUnitEnum.DAY),
-                        TimeUnit(number=1, unit=TimeUnitEnum.DAY),
-                    ],
-                ),
-            ),
+        ]:
+            with self.subTest(command=command):
+                self.assert_parse_result(command, result)
+
+    def test_parse_absolute_date_with_time(self):
+        for command, result in [
             (
                 'Напомни о "ДНС" 10 февраля в 14:55',
                 ParseResult(
@@ -544,19 +267,332 @@ class TestParseCommand(unittest.TestCase):
                 ),
             ),
             (
-                'Напомни о "???" 12 июля в 17:55. Напомни за неделю, за 3 дня, за 2 дня, за 1 день',
+                'Напомни о "ДНС" 10 февраля в 03:30',
                 ParseResult(
-                    target="???",
-                    target_datetime=datetime(2026, 7, 12, 17, 55),
+                    target="ДНС",
+                    target_datetime=datetime(2026, 2, 10, 3, 30),
                     repeat_every=None,
-                    repeat_before=[
-                        TimeUnit(number=1, unit=TimeUnitEnum.WEEK),
-                        TimeUnit(number=3, unit=TimeUnitEnum.DAY),
-                        TimeUnit(number=2, unit=TimeUnitEnum.DAY),
-                        TimeUnit(number=1, unit=TimeUnitEnum.DAY),
-                    ],
+                    repeat_before=[],
                 ),
             ),
+        ]:
+            with self.subTest(command=command):
+                self.assert_parse_result(command, result)
+
+    def test_parse_relative_today(self):
+        for command, result in [
+            (
+                'Напомни о "Покупки" сегодня',
+                ParseResult(
+                    target="Покупки",
+                    target_datetime=datetime(
+                        2025, 8, 10, self.defaults.hours, self.defaults.minutes
+                    ),
+                    repeat_every=None,
+                    repeat_before=[],
+                ),
+            ),
+            (
+                'Напомни о "Покупки" завтра',
+                ParseResult(
+                    target="Покупки",
+                    target_datetime=datetime(
+                        2025, 8, 10, self.defaults.hours, self.defaults.minutes
+                    ),
+                    repeat_every=None,
+                    repeat_before=[],
+                ),
+            ),
+            (
+                'Напомни о "Покупки" послезавтра',
+                ParseResult(
+                    target="Покупки",
+                    target_datetime=datetime(
+                        2025, 8, 11, self.defaults.hours, self.defaults.minutes
+                    ),
+                    repeat_every=None,
+                    repeat_before=[],
+                ),
+            ),
+            (
+                'Встреча "Колян" сегодня',
+                ParseResult(
+                    target="Колян",
+                    target_datetime=datetime(
+                        2025, 8, 10, self.defaults.hours, self.defaults.minutes
+                    ),
+                    repeat_every=None,
+                    repeat_before=[],
+                ),
+            ),
+            (
+                '"Встреча с Коляном" сегодня',
+                ParseResult(
+                    target="Встреча с Коляном",
+                    target_datetime=datetime(
+                        2025, 8, 10, self.defaults.hours, self.defaults.minutes
+                    ),
+                    repeat_every=None,
+                    repeat_before=[],
+                ),
+            ),
+        ]:
+            with self.subTest(command=command):
+                self.assert_parse_result(command, result)
+
+    def test_parse_relative_today_with_time(self):
+        for command, result in [
+            (
+                'Напомни о "Покупки" сегодня в 18:00',
+                ParseResult(
+                    target="Покупки",
+                    target_datetime=datetime(2025, 8, 10, 18, 0),
+                    repeat_every=None,
+                    repeat_before=[],
+                ),
+            ),
+            (
+                'Напомни о "Покупки" завтра в 12:00',
+                ParseResult(
+                    target="Покупки",
+                    target_datetime=datetime(2025, 8, 10, 12, 0),
+                    repeat_every=None,
+                    repeat_before=[],
+                ),
+            ),
+            (
+                'Напомни о "Покупки" послезавтра в 12:00',
+                ParseResult(
+                    target="Покупки",
+                    target_datetime=datetime(2025, 8, 11, 12, 0),
+                    repeat_every=None,
+                    repeat_before=[],
+                ),
+            ),
+            (
+                'Встреча "Колян" сегодня в 19:45',
+                ParseResult(
+                    target="Колян",
+                    target_datetime=datetime(2025, 8, 10, 19, 45),
+                    repeat_every=None,
+                    repeat_before=[],
+                ),
+            ),
+            (
+                '"Встреча с Коляном" сегодня в 19:45',
+                ParseResult(
+                    target="Встреча с Коляном",
+                    target_datetime=datetime(2025, 8, 10, 19, 45),
+                    repeat_every=None,
+                    repeat_before=[],
+                ),
+            ),
+        ]:
+            with self.subTest(command=command):
+                self.assert_parse_result(command, result)
+
+    def test_parse_relative_next_weekday(self):
+        for command, result in [
+            (
+                'Напомни о "Покупки" в следующий понедельник',
+                ParseResult(
+                    target="Покупки",
+                    target_datetime=datetime(
+                        2025, 8, 11, self.defaults.hours, self.defaults.minutes
+                    ),
+                    repeat_every=None,
+                    repeat_before=[],
+                ),
+            ),
+            (
+                'Напомни о "Покупки" в следующий вторник',
+                ParseResult(
+                    target="Покупки",
+                    target_datetime=datetime(
+                        2025, 8, 12, self.defaults.hours, self.defaults.minutes
+                    ),
+                    repeat_every=None,
+                    repeat_before=[],
+                ),
+            ),
+            (
+                'Напомни о "Покупки" в следующую среду',
+                ParseResult(
+                    target="Покупки",
+                    target_datetime=datetime(
+                        2025, 8, 13, self.defaults.hours, self.defaults.minutes
+                    ),
+                    repeat_every=None,
+                    repeat_before=[],
+                ),
+            ),
+            (
+                'Напомни о "Покупки" в следующий четверг',
+                ParseResult(
+                    target="Покупки",
+                    target_datetime=datetime(
+                        2025, 8, 14, self.defaults.hours, self.defaults.minutes
+                    ),
+                    repeat_every=None,
+                    repeat_before=[],
+                ),
+            ),
+            (
+                'Напомни о "Покупки" в следующую пятницу',
+                ParseResult(
+                    target="Покупки",
+                    target_datetime=datetime(
+                        2025, 8, 15, self.defaults.hours, self.defaults.minutes
+                    ),
+                    repeat_every=None,
+                    repeat_before=[],
+                ),
+            ),
+            (
+                'Напомни о "Покупки" в следующую субботу',
+                ParseResult(
+                    target="Покупки",
+                    target_datetime=datetime(
+                        2025, 8, 16, self.defaults.hours, self.defaults.minutes
+                    ),
+                    repeat_every=None,
+                    repeat_before=[],
+                ),
+            ),
+            (
+                'Напомни о "Покупки" в следующее воскресенье',
+                ParseResult(
+                    target="Покупки",
+                    target_datetime=datetime(
+                        2025, 8, 10, self.defaults.hours, self.defaults.minutes
+                    ),
+                    repeat_every=None,
+                    repeat_before=[],
+                ),
+            ),
+            (
+                'Встреча "Колян" в понедельник',
+                ParseResult(
+                    target="Колян",
+                    target_datetime=datetime(
+                        2025, 8, 11, self.defaults.hours, self.defaults.minutes
+                    ),
+                    repeat_every=None,
+                    repeat_before=[],
+                ),
+            ),
+            (
+                'Встреча "Колян" в пятницу',
+                ParseResult(
+                    target="Колян",
+                    target_datetime=datetime(
+                        2025, 8, 15, self.defaults.hours, self.defaults.minutes
+                    ),
+                    repeat_every=None,
+                    repeat_before=[],
+                ),
+            ),
+        ]:
+            with self.subTest(command=command):
+                self.assert_parse_result(command, result)
+
+    def test_parse_relative_next_weekday_with_time(self):
+        for command, result in [
+            (
+                'Напомни о "Покупки" в следующий понедельник в 12:00',
+                ParseResult(
+                    target="Покупки",
+                    target_datetime=datetime(2025, 8, 11, 12, 0),
+                    repeat_every=None,
+                    repeat_before=[],
+                ),
+            ),
+            (
+                'Напомни о "Покупки" в следующий вторник в 12:00',
+                ParseResult(
+                    target="Покупки",
+                    target_datetime=datetime(2025, 8, 12, 12, 0),
+                    repeat_every=None,
+                    repeat_before=[],
+                ),
+            ),
+            (
+                'Напомни о "Покупки" в следующую среду в 12:00',
+                ParseResult(
+                    target="Покупки",
+                    target_datetime=datetime(2025, 8, 13, 12, 0),
+                    repeat_every=None,
+                    repeat_before=[],
+                ),
+            ),
+            (
+                'Напомни о "Покупки" в следующий четверг в 12:00',
+                ParseResult(
+                    target="Покупки",
+                    target_datetime=datetime(2025, 8, 14, 12, 0),
+                    repeat_every=None,
+                    repeat_before=[],
+                ),
+            ),
+            (
+                'Напомни о "Покупки" в следующую пятницу в 12:00',
+                ParseResult(
+                    target="Покупки",
+                    target_datetime=datetime(2025, 8, 15, 12, 0),
+                    repeat_every=None,
+                    repeat_before=[],
+                ),
+            ),
+            (
+                'Напомни о "Покупки" в следующую субботу в 12:00',
+                ParseResult(
+                    target="Покупки",
+                    target_datetime=datetime(2025, 8, 16, 12, 0),
+                    repeat_every=None,
+                    repeat_before=[],
+                ),
+            ),
+            (
+                'Напомни о "Покупки" в следующее воскресенье в 12:00',
+                ParseResult(
+                    target="Покупки",
+                    target_datetime=datetime(2025, 8, 10, 12, 0),
+                    repeat_every=None,
+                    repeat_before=[],
+                ),
+            ),
+            (
+                'Встреча "Колян" в понедельник в 19:45',
+                ParseResult(
+                    target="Колян",
+                    target_datetime=datetime(2025, 8, 11, 19, 45),
+                    repeat_every=None,
+                    repeat_before=[],
+                ),
+            ),
+            (
+                'Встреча "Колян" в пятницу в 19:45',
+                ParseResult(
+                    target="Колян",
+                    target_datetime=datetime(2025, 8, 15, 19, 45),
+                    repeat_every=None,
+                    repeat_before=[],
+                ),
+            ),
+        ]:
+            with self.subTest(command=command):
+                self.assert_parse_result(command, result)
+
+    def test_parse_defaults(self):
+        command = 'Напомни о "Встреча" 10 февраля'
+        result = parse_command(
+            command, self.now, defaults=Defaults(hours=14, minutes=55)
+        )
+        self.assertEqual(result.target_datetime.hour, 14)
+        self.assertEqual(result.target_datetime.minute, 55)
+
+    def test_parse_with_repeat_every(self):
+        for command, result in [
             (
                 'Напомни о "Чатик 🍕" 17 июля в 12:00. Повтор каждый понедельник',
                 ParseResult(
@@ -635,307 +671,444 @@ class TestParseCommand(unittest.TestCase):
                 ),
             ),
             (
-                'Напомни о "Покупки" сегодня в 18:00',
+                'День рождения "123" 10 февраля. Повтор каждый день',
                 ParseResult(
-                    target="Покупки",
-                    target_datetime=datetime(2025, 8, 10, 18, 0),
-                    repeat_every=None,
+                    target="123",
+                    target_datetime=datetime(
+                        2026, 2, 10, self.defaults.hours, self.defaults.minutes
+                    ),
+                    repeat_every=RepeatEvery(
+                        unit=TimeUnit(number=1, unit=TimeUnitEnum.DAY)
+                    ),
                     repeat_before=[],
                 ),
             ),
             (
-                'Напомни о "Покупки" завтра в 12:00',
+                'День рождения "-_-" 10 февраля в 14:55. Повтор каждый день',
                 ParseResult(
-                    target="Покупки",
-                    target_datetime=datetime(2025, 8, 10, 12, 0),
-                    repeat_every=None,
+                    target="-_-",
+                    target_datetime=datetime(2026, 2, 10, 14, 55),
+                    repeat_every=RepeatEvery(
+                        unit=TimeUnit(number=1, unit=TimeUnitEnum.DAY)
+                    ),
                     repeat_before=[],
                 ),
             ),
             (
-                'Напомни о "Покупки" послезавтра в 12:00',
+                'День рождения "abc" 10 февраля 2027 года. Повтор каждый день',
                 ParseResult(
-                    target="Покупки",
-                    target_datetime=datetime(2025, 8, 11, 12, 0),
-                    repeat_every=None,
+                    target="abc",
+                    target_datetime=datetime(
+                        2027, 2, 10, self.defaults.hours, self.defaults.minutes
+                    ),
+                    repeat_every=RepeatEvery(
+                        unit=TimeUnit(number=1, unit=TimeUnitEnum.DAY)
+                    ),
                     repeat_before=[],
                 ),
             ),
             (
-                'Напомни о "Покупки" в следующий понедельник в 12:00',
+                'День рождения "xxx" 10 февраля 2027 года в 14:55. Повтор каждый день',
                 ParseResult(
-                    target="Покупки",
-                    target_datetime=datetime(2025, 8, 11, 12, 0),
-                    repeat_every=None,
+                    target="xxx",
+                    target_datetime=datetime(2027, 2, 10, 14, 55),
+                    repeat_every=RepeatEvery(
+                        unit=TimeUnit(number=1, unit=TimeUnitEnum.DAY)
+                    ),
+                    repeat_before=[],
+                ),
+            ),
+            # TODO: Поддержать в PATTERN_REPEAT_EVERY/get_repeat_every
+            # (
+            #     'День рождения "xxx" 10 февраля 2027 года в 14:55. Повтор каждые 4 дня',
+            #     ParseResult(
+            #         target="xxx",
+            #         target_datetime=datetime(2027, 2, 10, 14, 55),
+            #         repeat_every=RepeatEvery(
+            #             unit=TimeUnit(number=4, unit=TimeUnitEnum.DAY)
+            #         ),
+            #         repeat_before=[],
+            #     ),
+            # ),
+            (
+                'Праздник "xxx" 10 февраля. Повтор каждую неделю',
+                ParseResult(
+                    target="xxx",
+                    target_datetime=datetime(
+                        2026, 2, 10, self.defaults.hours, self.defaults.minutes
+                    ),
+                    repeat_every=RepeatEvery(
+                        unit=TimeUnit(number=1, unit=TimeUnitEnum.WEEK)
+                    ),
+                    repeat_before=[],
+                ),
+            ),
+            # TODO: Поддержать в PATTERN_REPEAT_EVERY/get_repeat_every
+            # (
+            #     'Праздник "xxx" 10 февраля. Повтор каждые 2 недели',
+            #     ParseResult(
+            #         target="xxx",
+            #         target_datetime=datetime(2026, 2, 10, self.defaults.hours, self.defaults.minutes),
+            #         repeat_every=RepeatEvery(
+            #             unit=TimeUnit(number=2, unit=TimeUnitEnum.WEEK)
+            #         ),
+            #         repeat_before=[],
+            #     ),
+            # ),
+            (
+                'Праздник "xxx" 10 февраля. Повтор каждый месяц',
+                ParseResult(
+                    target="xxx",
+                    target_datetime=datetime(
+                        2026, 2, 10, self.defaults.hours, self.defaults.minutes
+                    ),
+                    repeat_every=RepeatEvery(
+                        unit=TimeUnit(number=1, unit=TimeUnitEnum.MONTH)
+                    ),
+                    repeat_before=[],
+                ),
+            ),
+            # TODO: Поддержать в PATTERN_REPEAT_EVERY/get_repeat_every
+            # (
+            #     'Праздник "xxx" 10 февраля. Повтор каждый 3 месяца',
+            #     ParseResult(
+            #         target="xxx",
+            #         target_datetime=datetime(2026, 2, 10, self.defaults.hours, self.defaults.minutes),
+            #         repeat_every=RepeatEvery(
+            #             unit=TimeUnit(number=3, unit=TimeUnitEnum.MONTH)
+            #         ),
+            #         repeat_before=[],
+            #     ),
+            # ),
+            (
+                'Праздник "xxx" 10 февраля. Повтор каждый год',
+                ParseResult(
+                    target="xxx",
+                    target_datetime=datetime(
+                        2026, 2, 10, self.defaults.hours, self.defaults.minutes
+                    ),
+                    repeat_every=RepeatEvery(
+                        unit=TimeUnit(number=1, unit=TimeUnitEnum.YEAR)
+                    ),
                     repeat_before=[],
                 ),
             ),
             (
-                'Напомни о "Покупки" в следующий вторник в 12:00',
+                'Праздник "xxx" 10 февраля 2026 года. Повтор каждый год',
                 ParseResult(
-                    target="Покупки",
-                    target_datetime=datetime(2025, 8, 12, 12, 0),
-                    repeat_every=None,
+                    target="xxx",
+                    target_datetime=datetime(
+                        2026, 2, 10, self.defaults.hours, self.defaults.minutes
+                    ),
+                    repeat_every=RepeatEvery(
+                        unit=TimeUnit(number=1, unit=TimeUnitEnum.YEAR)
+                    ),
                     repeat_before=[],
                 ),
             ),
             (
-                'Напомни о "Покупки" в следующую среду в 12:00',
+                'День рождения "Поход" 10 февраля. Повтор раз в год. Напомнить за месяц, за неделю, за 3 дня, за день',
                 ParseResult(
-                    target="Покупки",
-                    target_datetime=datetime(2025, 8, 13, 12, 0),
-                    repeat_every=None,
-                    repeat_before=[],
+                    target="Поход",
+                    target_datetime=datetime(
+                        2026, 2, 10, self.defaults.hours, self.defaults.minutes
+                    ),
+                    repeat_every=RepeatEvery(
+                        unit=TimeUnit(number=1, unit=TimeUnitEnum.YEAR)
+                    ),
+                    repeat_before=[
+                        TimeUnit(number=1, unit=TimeUnitEnum.MONTH),
+                        TimeUnit(number=1, unit=TimeUnitEnum.WEEK),
+                        TimeUnit(number=3, unit=TimeUnitEnum.DAY),
+                        TimeUnit(number=1, unit=TimeUnitEnum.DAY),
+                    ],
                 ),
             ),
             (
-                'Напомни о "Покупки" в следующий четверг в 12:00',
+                'День рождения "День рождения Ивана" 10 февраля. Повтор раз в полгода. Напомнить за месяц, за неделю, за 3 дня, за день',
                 ParseResult(
-                    target="Покупки",
-                    target_datetime=datetime(2025, 8, 14, 12, 0),
-                    repeat_every=None,
-                    repeat_before=[],
+                    target="День рождения Ивана",
+                    target_datetime=datetime(
+                        2026, 2, 10, self.defaults.hours, self.defaults.minutes
+                    ),
+                    repeat_every=RepeatEvery(
+                        unit=TimeUnit(number=6, unit=TimeUnitEnum.MONTH)
+                    ),
+                    repeat_before=[
+                        TimeUnit(number=1, unit=TimeUnitEnum.MONTH),
+                        TimeUnit(number=1, unit=TimeUnitEnum.WEEK),
+                        TimeUnit(number=3, unit=TimeUnitEnum.DAY),
+                        TimeUnit(number=1, unit=TimeUnitEnum.DAY),
+                    ],
                 ),
             ),
             (
-                'Напомни о "Покупки" в следующую пятницу в 12:00',
+                'День рождения "!!!" 10 февраля. Повтор раз в месяц. Напомнить за месяц, за 2 недели, за неделю, за 3 дня, за день',
                 ParseResult(
-                    target="Покупки",
-                    target_datetime=datetime(2025, 8, 15, 12, 0),
-                    repeat_every=None,
-                    repeat_before=[],
+                    target="!!!",
+                    target_datetime=datetime(
+                        2026, 2, 10, self.defaults.hours, self.defaults.minutes
+                    ),
+                    repeat_every=RepeatEvery(
+                        unit=TimeUnit(number=1, unit=TimeUnitEnum.MONTH)
+                    ),
+                    repeat_before=[
+                        TimeUnit(number=1, unit=TimeUnitEnum.MONTH),
+                        TimeUnit(number=2, unit=TimeUnitEnum.WEEK),
+                        TimeUnit(number=1, unit=TimeUnitEnum.WEEK),
+                        TimeUnit(number=3, unit=TimeUnitEnum.DAY),
+                        TimeUnit(number=1, unit=TimeUnitEnum.DAY),
+                    ],
                 ),
             ),
             (
-                'Напомни о "Покупки" в следующую субботу в 12:00',
+                'День рождения "***" 10 февраля. Повтор раз в неделю. Напомнить за месяц, за неделю, за 3 дня, за день',
                 ParseResult(
-                    target="Покупки",
-                    target_datetime=datetime(2025, 8, 16, 12, 0),
-                    repeat_every=None,
-                    repeat_before=[],
+                    target="***",
+                    target_datetime=datetime(
+                        2026, 2, 10, self.defaults.hours, self.defaults.minutes
+                    ),
+                    repeat_every=RepeatEvery(
+                        unit=TimeUnit(number=1, unit=TimeUnitEnum.WEEK)
+                    ),
+                    repeat_before=[
+                        TimeUnit(number=1, unit=TimeUnitEnum.MONTH),
+                        TimeUnit(number=1, unit=TimeUnitEnum.WEEK),
+                        TimeUnit(number=3, unit=TimeUnitEnum.DAY),
+                        TimeUnit(number=1, unit=TimeUnitEnum.DAY),
+                    ],
                 ),
             ),
             (
-                'Напомни о "Покупки" в следующее воскресенье в 12:00',
+                'Напомни о "🍕" 10 февраля. Повтор раз в год. Напомнить за месяц, за неделю, за 3 дня, за день',
                 ParseResult(
-                    target="Покупки",
-                    target_datetime=datetime(2025, 8, 10, 12, 0),
-                    repeat_every=None,
-                    repeat_before=[],
+                    target="🍕",
+                    target_datetime=datetime(
+                        2026, 2, 10, self.defaults.hours, self.defaults.minutes
+                    ),
+                    repeat_every=RepeatEvery(
+                        unit=TimeUnit(number=1, unit=TimeUnitEnum.YEAR)
+                    ),
+                    repeat_before=[
+                        TimeUnit(number=1, unit=TimeUnitEnum.MONTH),
+                        TimeUnit(number=1, unit=TimeUnitEnum.WEEK),
+                        TimeUnit(number=3, unit=TimeUnitEnum.DAY),
+                        TimeUnit(number=1, unit=TimeUnitEnum.DAY),
+                    ],
                 ),
             ),
             (
-                'Встреча "Колян" сегодня в 19:45',
+                'Напомни о "???" 12 июля в 17:55. Напомни за неделю, за 3 дня, за 2 дня, за 1 день',
                 ParseResult(
-                    target="Колян",
-                    target_datetime=datetime(2025, 8, 10, 19, 45),
+                    target="???",
+                    target_datetime=datetime(2026, 7, 12, 17, 55),
                     repeat_every=None,
-                    repeat_before=[],
+                    repeat_before=[
+                        TimeUnit(number=1, unit=TimeUnitEnum.WEEK),
+                        TimeUnit(number=3, unit=TimeUnitEnum.DAY),
+                        TimeUnit(number=2, unit=TimeUnitEnum.DAY),
+                        TimeUnit(number=1, unit=TimeUnitEnum.DAY),
+                    ],
                 ),
             ),
-            (
-                'Встреча "Колян" в понедельник в 19:45',
-                ParseResult(
-                    target="Колян",
-                    target_datetime=datetime(2025, 8, 11, 19, 45),
-                    repeat_every=None,
-                    repeat_before=[],
-                ),
-            ),
-            (
-                'Встреча "Колян" в пятницу в 19:45',
-                ParseResult(
-                    target="Колян",
-                    target_datetime=datetime(2025, 8, 15, 19, 45),
-                    repeat_every=None,
-                    repeat_before=[],
-                ),
-            ),
-            (
-                '"Встреча с Коляном" сегодня в 19:45',
-                ParseResult(
-                    target="Встреча с Коляном",
-                    target_datetime=datetime(2025, 8, 10, 19, 45),
-                    repeat_every=None,
-                    repeat_before=[],
-                ),
-            ),
-        ]
-
-    def test_test_data(self):
-        for command, result in self.get_test_data():
+        ]:
             with self.subTest(command=command):
-                actual_result = parse_command(command, self.now, self.defaults)
-                self.assertEqual(result.target, actual_result.target)
-                self.assertEqual(result.target_datetime, actual_result.target_datetime)
-                self.assertEqual(result.repeat_before, actual_result.repeat_before)
-                self.assertEqual(result.repeat_every, actual_result.repeat_every)
-                self.assertEqual(result, actual_result)
-
-
-    def test_parse_absolute_date(self):
-        command = 'День рождения "Иван" 10 февраля'
-        result = parse_command(command, self.now, self.defaults)
-        self.assertIsInstance(result, ParseResult)
-        self.assertEqual(result.target, "Иван")
-        self.assertEqual(result.target_datetime.day, 10)
-        self.assertEqual(result.target_datetime.month, 2)
-        self.assertEqual(result.target_datetime.year, 2026)
-        self.assertEqual(result.target_datetime.hour, self.defaults.hours)
-        self.assertEqual(result.target_datetime.minute, self.defaults.minutes)
-
-    def test_parse_relative_today(self):
-        now: datetime = datetime(year=2025, month=8, day=9, hour=10, minute=0)
-
-        command = 'Напомни о "Задача" сегодня'
-        result = parse_command(command, now, self.defaults)
-        self.assertEqual(result.target_datetime.day, now.day)
-        self.assertEqual(result.target_datetime.month, now.month)
-        self.assertEqual(result.target_datetime.year, now.year)
-        self.assertEqual(result.target_datetime.hour, self.defaults.hours)
-        self.assertEqual(result.target_datetime.minute, self.defaults.minutes)
-
-    def test_parse_relative_tomorrow(self):
-        # TODO: Добавить время
-        command = 'Напомни о "Собрание" завтра'
-        result = parse_command(command, self.now, self.defaults)
-        expected_date = self.now + timedelta(days=1)
-        self.assertEqual(result.target_datetime.day, expected_date.day)
-        self.assertEqual(result.target_datetime.month, expected_date.month)
-        self.assertEqual(result.target_datetime.year, expected_date.year)
-        self.assertEqual(result.target_datetime.hour, self.defaults.hours)
-        self.assertEqual(result.target_datetime.minute, self.defaults.minutes)
-
-    def test_parse_relative_day_after_tomorrow(self):
-        # TODO: Добавить время
-        command = 'Напомни о "Собрание" послезавтра'
-        result = parse_command(command, self.now, self.defaults)
-        expected_date = self.now + timedelta(days=2)
-        self.assertEqual(result.target_datetime.day, expected_date.day)
-        self.assertEqual(result.target_datetime.month, expected_date.month)
-        self.assertEqual(result.target_datetime.year, expected_date.year)
-        self.assertEqual(result.target_datetime.hour, self.defaults.hours)
-        self.assertEqual(result.target_datetime.minute, self.defaults.minutes)
-
-    def test_parse_relative_next_weekday(self):
-        command = 'Напомни о "Мероприятие" в следующий понедельник'
-        result = parse_command(command, self.now, self.defaults)
-        unit = TimeUnitWeekDayUnit.parse_text("понедельник")
-        next_monday = unit.get_next_datetime(self.now)
-        self.assertEqual(result.target_datetime.day, next_monday.day)
-        self.assertEqual(result.target_datetime.month, next_monday.month)
-        self.assertEqual(result.target_datetime.year, next_monday.year)
-        self.assertEqual(result.target_datetime.hour, self.defaults.hours)
-        self.assertEqual(result.target_datetime.minute, self.defaults.minutes)
-
-    def test_parse_defaults(self):
-        command = 'Напомни о "Встреча" 10 февраля'
-        result = parse_command(command, self.now, defaults=Defaults(hours=14, minutes=55))
-        self.assertEqual(result.target_datetime.hour, 14)
-        self.assertEqual(result.target_datetime.minute, 55)
-
-    def test_parse_with_time(self):
-        command = 'Напомни о "Встреча" 10 февраля в 14:55'
-        result = parse_command(command, self.now, self.defaults)
-        self.assertEqual(result.target_datetime.hour, 14)
-        self.assertEqual(result.target_datetime.minute, 55)
-
-    def test_parse_with_repeat_every(self):
-        # for command, result in self.get_test_data():
-        #     with self.subTest(command=command, result=result):
-        #         actual = parse_command(command, self.now, self.default)
-        #         self.assertEqual(result, actual, msg=f"Проблема с {command!r}")
-
-        command = 'День рождения "Иван" 10 февраля. Повтор раз в год'
-        result = parse_command(command, self.now, self.defaults)
-        self.assertIsInstance(result.repeat_every, RepeatEvery)
-        self.assertEqual(result.repeat_every.get_value(), "1 YEAR")
+                self.assert_parse_result(command, result)
 
     def test_parse_with_repeat_before(self):
-        for command, units in [
+        for command, result in [
             (
-                'День рождения "Иван" 10 февраля. Напомнить за неделю, за 3 дня, за день',
-                [
-                    TimeUnit(number=1, unit=TimeUnitEnum.WEEK),
-                    TimeUnit(number=3, unit=TimeUnitEnum.DAY),
-                    TimeUnit(number=1, unit=TimeUnitEnum.DAY),
-                ],
+                'День рождения "Поход" 10 февраля. Повтор раз в год. Напомнить за месяц, за неделю, за 3 дня, за день',
+                ParseResult(
+                    target="Поход",
+                    target_datetime=datetime(
+                        2026, 2, 10, self.defaults.hours, self.defaults.minutes
+                    ),
+                    repeat_every=RepeatEvery(
+                        unit=TimeUnit(number=1, unit=TimeUnitEnum.YEAR)
+                    ),
+                    repeat_before=[
+                        TimeUnit(number=1, unit=TimeUnitEnum.MONTH),
+                        TimeUnit(number=1, unit=TimeUnitEnum.WEEK),
+                        TimeUnit(number=3, unit=TimeUnitEnum.DAY),
+                        TimeUnit(number=1, unit=TimeUnitEnum.DAY),
+                    ],
+                ),
             ),
             (
-                'День рождения "Иван" 10 февраля. Напомнить за день, за 3 дня, за неделю',
-                [
-                    TimeUnit(number=1, unit=TimeUnitEnum.WEEK),
-                    TimeUnit(number=3, unit=TimeUnitEnum.DAY),
-                    TimeUnit(number=1, unit=TimeUnitEnum.DAY),
-                ],
+                'День рождения "День рождения Ивана" 10 февраля. Повтор раз в полгода. Напомнить за месяц, за неделю, за 3 дня, за день',
+                ParseResult(
+                    target="День рождения Ивана",
+                    target_datetime=datetime(
+                        2026, 2, 10, self.defaults.hours, self.defaults.minutes
+                    ),
+                    repeat_every=RepeatEvery(
+                        unit=TimeUnit(number=6, unit=TimeUnitEnum.MONTH)
+                    ),
+                    repeat_before=[
+                        TimeUnit(number=1, unit=TimeUnitEnum.MONTH),
+                        TimeUnit(number=1, unit=TimeUnitEnum.WEEK),
+                        TimeUnit(number=3, unit=TimeUnitEnum.DAY),
+                        TimeUnit(number=1, unit=TimeUnitEnum.DAY),
+                    ],
+                ),
             ),
             (
-                'День рождения "Иван" 10 февраля. Напомнить за месяц, за неделю, за 3 дня, за день',
-                [
-                    TimeUnit(number=1, unit=TimeUnitEnum.MONTH),
-                    TimeUnit(number=1, unit=TimeUnitEnum.WEEK),
-                    TimeUnit(number=3, unit=TimeUnitEnum.DAY),
-                    TimeUnit(number=1, unit=TimeUnitEnum.DAY),
-                ],
+                'День рождения "!!!" 10 февраля. Повтор раз в месяц. Напомнить за месяц, за 2 недели, за неделю, за 3 дня, за день',
+                ParseResult(
+                    target="!!!",
+                    target_datetime=datetime(
+                        2026, 2, 10, self.defaults.hours, self.defaults.minutes
+                    ),
+                    repeat_every=RepeatEvery(
+                        unit=TimeUnit(number=1, unit=TimeUnitEnum.MONTH)
+                    ),
+                    repeat_before=[
+                        TimeUnit(number=1, unit=TimeUnitEnum.MONTH),
+                        TimeUnit(number=2, unit=TimeUnitEnum.WEEK),
+                        TimeUnit(number=1, unit=TimeUnitEnum.WEEK),
+                        TimeUnit(number=3, unit=TimeUnitEnum.DAY),
+                        TimeUnit(number=1, unit=TimeUnitEnum.DAY),
+                    ],
+                ),
             ),
             (
-                'День рождения "Иван" 10 февраля. Напомнить за день, за неделю, за месяц, за 3 дня',
-                [
-                    TimeUnit(number=1, unit=TimeUnitEnum.MONTH),
-                    TimeUnit(number=1, unit=TimeUnitEnum.WEEK),
-                    TimeUnit(number=3, unit=TimeUnitEnum.DAY),
-                    TimeUnit(number=1, unit=TimeUnitEnum.DAY),
-                ],
+                'День рождения "***" 10 февраля. Повтор раз в неделю. Напомнить за месяц, за неделю, за 3 дня, за день',
+                ParseResult(
+                    target="***",
+                    target_datetime=datetime(
+                        2026, 2, 10, self.defaults.hours, self.defaults.minutes
+                    ),
+                    repeat_every=RepeatEvery(
+                        unit=TimeUnit(number=1, unit=TimeUnitEnum.WEEK)
+                    ),
+                    repeat_before=[
+                        TimeUnit(number=1, unit=TimeUnitEnum.MONTH),
+                        TimeUnit(number=1, unit=TimeUnitEnum.WEEK),
+                        TimeUnit(number=3, unit=TimeUnitEnum.DAY),
+                        TimeUnit(number=1, unit=TimeUnitEnum.DAY),
+                    ],
+                ),
             ),
             (
-                'День рождения "Иван" 10 февраля. Напомнить за месяц, за 2 недели, за неделю, за 3 дня, за день',
-                [
-                    TimeUnit(number=1, unit=TimeUnitEnum.MONTH),
-                    TimeUnit(number=2, unit=TimeUnitEnum.WEEK),
-                    TimeUnit(number=1, unit=TimeUnitEnum.WEEK),
-                    TimeUnit(number=3, unit=TimeUnitEnum.DAY),
-                    TimeUnit(number=1, unit=TimeUnitEnum.DAY),
-                ],
+                'Напомни о "🍕" 10 февраля. Повтор раз в год. Напомнить за месяц, за неделю, за 3 дня, за день',
+                ParseResult(
+                    target="🍕",
+                    target_datetime=datetime(
+                        2026, 2, 10, self.defaults.hours, self.defaults.minutes
+                    ),
+                    repeat_every=RepeatEvery(
+                        unit=TimeUnit(number=1, unit=TimeUnitEnum.YEAR)
+                    ),
+                    repeat_before=[
+                        TimeUnit(number=1, unit=TimeUnitEnum.MONTH),
+                        TimeUnit(number=1, unit=TimeUnitEnum.WEEK),
+                        TimeUnit(number=3, unit=TimeUnitEnum.DAY),
+                        TimeUnit(number=1, unit=TimeUnitEnum.DAY),
+                    ],
+                ),
             ),
             (
-                'День рождения "Иван" 10 февраля. Напомнить за неделю, за 3 дня, за день',
-                [
-                    TimeUnit(number=1, unit=TimeUnitEnum.WEEK),
-                    TimeUnit(number=3, unit=TimeUnitEnum.DAY),
-                    TimeUnit(number=1, unit=TimeUnitEnum.DAY),
-                ],
+                'Напомни о "🍕" 10 февраля. Напомнить за 3 года, за год, за полгода, за 3 месяца, за месяц, за 10 дней, за неделю, за 3 дня, за день',
+                ParseResult(
+                    target="🍕",
+                    target_datetime=datetime(
+                        2026, 2, 10, self.defaults.hours, self.defaults.minutes
+                    ),
+                    repeat_every=None,
+                    repeat_before=[
+                        TimeUnit(number=3, unit=TimeUnitEnum.YEAR),
+                        TimeUnit(number=1, unit=TimeUnitEnum.YEAR),
+                        TimeUnit(number=6, unit=TimeUnitEnum.MONTH),
+                        TimeUnit(number=3, unit=TimeUnitEnum.MONTH),
+                        TimeUnit(number=1, unit=TimeUnitEnum.MONTH),
+                        TimeUnit(number=10, unit=TimeUnitEnum.DAY),
+                        TimeUnit(number=1, unit=TimeUnitEnum.WEEK),
+                        TimeUnit(number=3, unit=TimeUnitEnum.DAY),
+                        TimeUnit(number=1, unit=TimeUnitEnum.DAY),
+                    ],
+                ),
             ),
             (
-                'День рождения "Иван" 10 февраля. Напомнить за 3 дня, за день',
-                [
-                    TimeUnit(number=3, unit=TimeUnitEnum.DAY),
-                    TimeUnit(number=1, unit=TimeUnitEnum.DAY),
-                ],
+                'Напомни о "🍕" 10 февраля. Напомнить за неделю, за 3 дня, за день',
+                ParseResult(
+                    target="🍕",
+                    target_datetime=datetime(
+                        2026, 2, 10, self.defaults.hours, self.defaults.minutes
+                    ),
+                    repeat_every=None,
+                    repeat_before=[
+                        TimeUnit(number=1, unit=TimeUnitEnum.WEEK),
+                        TimeUnit(number=3, unit=TimeUnitEnum.DAY),
+                        TimeUnit(number=1, unit=TimeUnitEnum.DAY),
+                    ],
+                ),
             ),
             (
-                'День рождения "Иван" 10 февраля. Напомнить за 2 дня',
-                [TimeUnit(number=2, unit=TimeUnitEnum.DAY)],
+                'Напомни о "🍕" 10 февраля. Напомнить за 3 дня, за день',
+                ParseResult(
+                    target="🍕",
+                    target_datetime=datetime(
+                        2026, 2, 10, self.defaults.hours, self.defaults.minutes
+                    ),
+                    repeat_every=None,
+                    repeat_before=[
+                        TimeUnit(number=3, unit=TimeUnitEnum.DAY),
+                        TimeUnit(number=1, unit=TimeUnitEnum.DAY),
+                    ],
+                ),
             ),
             (
-                'День рождения "Иван" 10 февраля. Напомнить за день',
-                [TimeUnit(number=1, unit=TimeUnitEnum.DAY)],
+                'День рождения "xxx" 10 февраля. Напомнить за месяц, за неделю, за 3 дня, за день',
+                ParseResult(
+                    target="xxx",
+                    target_datetime=datetime(
+                        2026, 2, 10, self.defaults.hours, self.defaults.minutes
+                    ),
+                    repeat_every=None,
+                    repeat_before=[
+                        TimeUnit(number=1, unit=TimeUnitEnum.MONTH),
+                        TimeUnit(number=1, unit=TimeUnitEnum.WEEK),
+                        TimeUnit(number=3, unit=TimeUnitEnum.DAY),
+                        TimeUnit(number=1, unit=TimeUnitEnum.DAY),
+                    ],
+                ),
             ),
             (
-                'День рождения "Иван" 10 февраля. Напомнить за неделю, за 2 дня, '
-                "за 7 дней, за 3 дня, за 2 дня, за день",
-                [
-                    TimeUnit(number=7, unit=TimeUnitEnum.DAY),
-                    TimeUnit(number=3, unit=TimeUnitEnum.DAY),
-                    TimeUnit(number=2, unit=TimeUnitEnum.DAY),
-                    TimeUnit(number=1, unit=TimeUnitEnum.DAY),
-                ],
+                'День рождения "xxx" 10 февраля. Напомнить за день, за неделю, за месяц, за 3 дня',
+                ParseResult(
+                    target="xxx",
+                    target_datetime=datetime(
+                        2026, 2, 10, self.defaults.hours, self.defaults.minutes
+                    ),
+                    repeat_every=None,
+                    repeat_before=[
+                        TimeUnit(number=1, unit=TimeUnitEnum.MONTH),
+                        TimeUnit(number=1, unit=TimeUnitEnum.WEEK),
+                        TimeUnit(number=3, unit=TimeUnitEnum.DAY),
+                        TimeUnit(number=1, unit=TimeUnitEnum.DAY),
+                    ],
+                ),
             ),
-            ('День рождения "Иван" 10 февраля', []),
-            ('День рождения "Иван" 10 февраля.', []),
+            (
+                'Напомни о "Звонок другу" 29 декабря. Напомнить за неделю, за 2 дня, за 7 дней, за 3 дня, за 2 дня, за день',
+                ParseResult(
+                    target="Звонок другу",
+                    target_datetime=datetime(
+                        2025, 12, 29, self.defaults.hours, self.defaults.minutes
+                    ),
+                    repeat_every=None,
+                    repeat_before=[
+                        TimeUnit(number=7, unit=TimeUnitEnum.DAY),
+                        TimeUnit(number=3, unit=TimeUnitEnum.DAY),
+                        TimeUnit(number=2, unit=TimeUnitEnum.DAY),
+                        TimeUnit(number=1, unit=TimeUnitEnum.DAY),
+                    ],
+                ),
+            ),
         ]:
-            with self.subTest(command=command, units=units):
-                result = parse_command(command, self.now, self.defaults)
-                self.assertEqual(result.repeat_before, units)
+            with self.subTest(command=command):
+                self.assert_parse_result(command, result)
 
     def test_invalid_input(self):
         with self.assertRaises(ParserException):
