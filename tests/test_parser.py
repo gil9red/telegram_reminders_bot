@@ -251,6 +251,17 @@ class TestCaseParseCommand(unittest.TestCase):
                     repeat_before=[],
                 ),
             ),
+            (
+                '"Звонок другу" 29 декабря',
+                ParseResult(
+                    target="Звонок другу",
+                    target_datetime=datetime(
+                        2025, 12, 29, self.defaults.hours, self.defaults.minutes
+                    ),
+                    repeat_every=None,
+                    repeat_before=[],
+                ),
+            ),
         ]:
             with self.subTest(command=command):
                 self.assert_parse_result(command, result)
@@ -492,6 +503,17 @@ class TestCaseParseCommand(unittest.TestCase):
                     repeat_before=[],
                 ),
             ),
+            (
+                '"Колян" в пятницу',
+                ParseResult(
+                    target="Колян",
+                    target_datetime=datetime(
+                        2025, 8, 15, self.defaults.hours, self.defaults.minutes
+                    ),
+                    repeat_every=None,
+                    repeat_before=[],
+                ),
+            ),
         ]:
             with self.subTest(command=command):
                 self.assert_parse_result(command, result)
@@ -572,6 +594,15 @@ class TestCaseParseCommand(unittest.TestCase):
             ),
             (
                 'Встреча "Колян" в пятницу в 19:45',
+                ParseResult(
+                    target="Колян",
+                    target_datetime=datetime(2025, 8, 15, 19, 45),
+                    repeat_every=None,
+                    repeat_before=[],
+                ),
+            ),
+            (
+                '"Колян" в пятницу в 19:45',
                 ParseResult(
                     target="Колян",
                     target_datetime=datetime(2025, 8, 15, 19, 45),
@@ -746,7 +777,9 @@ class TestCaseParseCommand(unittest.TestCase):
                 'Праздник "xxx" 10 февраля. Повтор каждые 2 недели',
                 ParseResult(
                     target="xxx",
-                    target_datetime=datetime(2026, 2, 10, self.defaults.hours, self.defaults.minutes),
+                    target_datetime=datetime(
+                        2026, 2, 10, self.defaults.hours, self.defaults.minutes
+                    ),
                     repeat_every=RepeatEvery(
                         unit=TimeUnit(number=2, unit=TimeUnitEnum.WEEK)
                     ),
@@ -770,7 +803,9 @@ class TestCaseParseCommand(unittest.TestCase):
                 'Праздник "xxx" 10 февраля. Повтор каждый 3 месяца',
                 ParseResult(
                     target="xxx",
-                    target_datetime=datetime(2026, 2, 10, self.defaults.hours, self.defaults.minutes),
+                    target_datetime=datetime(
+                        2026, 2, 10, self.defaults.hours, self.defaults.minutes
+                    ),
                     repeat_every=RepeatEvery(
                         unit=TimeUnit(number=3, unit=TimeUnitEnum.MONTH)
                     ),
@@ -896,6 +931,20 @@ class TestCaseParseCommand(unittest.TestCase):
             ),
             (
                 'Напомни о "???" 12 июля в 17:55. Напомни за неделю, за 3 дня, за 2 дня, за 1 день',
+                ParseResult(
+                    target="???",
+                    target_datetime=datetime(2026, 7, 12, 17, 55),
+                    repeat_every=None,
+                    repeat_before=[
+                        TimeUnit(number=1, unit=TimeUnitEnum.WEEK),
+                        TimeUnit(number=3, unit=TimeUnitEnum.DAY),
+                        TimeUnit(number=2, unit=TimeUnitEnum.DAY),
+                        TimeUnit(number=1, unit=TimeUnitEnum.DAY),
+                    ],
+                ),
+            ),
+            (
+                '"???" 12 июля в 17:55. Напомни за неделю, за 3 дня, за 2 дня, за 1 день',
                 ParseResult(
                     target="???",
                     target_datetime=datetime(2026, 7, 12, 17, 55),
@@ -1089,6 +1138,22 @@ class TestCaseParseCommand(unittest.TestCase):
             ),
             (
                 'Напомни о "Звонок другу" 29 декабря. Напомнить за неделю, за 2 дня, за 7 дней, за 3 дня, за 2 дня, за день',
+                ParseResult(
+                    target="Звонок другу",
+                    target_datetime=datetime(
+                        2025, 12, 29, self.defaults.hours, self.defaults.minutes
+                    ),
+                    repeat_every=None,
+                    repeat_before=[
+                        TimeUnit(number=7, unit=TimeUnitEnum.DAY),
+                        TimeUnit(number=3, unit=TimeUnitEnum.DAY),
+                        TimeUnit(number=2, unit=TimeUnitEnum.DAY),
+                        TimeUnit(number=1, unit=TimeUnitEnum.DAY),
+                    ],
+                ),
+            ),
+            (
+                '"Звонок другу" 29 декабря. Напомнить за неделю, за 2 дня, за 7 дней, за 3 дня, за 2 дня, за день',
                 ParseResult(
                     target="Звонок другу",
                     target_datetime=datetime(
