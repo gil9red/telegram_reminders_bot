@@ -257,7 +257,7 @@ def parse_repeat_before(command: str) -> list[TimeUnit]:
     if not command:
         return []
 
-    m = PATTERN_REPEAT_BEFORE.search(command)
+    m: re.Match | None = PATTERN_REPEAT_BEFORE.search(command)
     if not m:
         return []
 
@@ -304,9 +304,9 @@ def parse_command(
     dt: datetime,
     defaults: Defaults,
 ) -> ParseResult:
-    command = command.strip()
+    command: str = command.strip()
 
-    m = PATTERN_TARGET_DATETIME.search(command)
+    m: re.Match | None = PATTERN_TARGET_DATETIME.search(command)
     if not m:
         raise ParserException(f"Команда {command!r} не соответствует шаблону")
 
@@ -329,9 +329,9 @@ def parse_command(
 
                 new_dt = unit.get_next_datetime(new_dt)
 
-        day = new_dt.day
-        month = new_dt.month
-        year = new_dt.year
+        day: int = new_dt.day
+        month: int = new_dt.month
+        year: int = new_dt.year
 
     else:
         day: int = int(m.group("day"))
@@ -346,7 +346,7 @@ def parse_command(
 
     time_value: str | None = m.group("time")
     if time_value:
-        parts = time_value.split(":")
+        parts: list[str] = time_value.split(":")
         hours, minutes = map(int, parts)
     else:
         hours = defaults.hours
