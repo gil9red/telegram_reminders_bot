@@ -16,9 +16,4 @@ try:
 except:
     raise Exception("TOKEN не задан")
 
-ERROR_TEXT: str = (
-    "⚠ Возникла какая-то проблема. "
-    "Попробуйте повторить запрос или попробовать чуть позже..."
-)
-
 MESS_MAX_LENGTH: int = 4096
