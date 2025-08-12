@@ -17,9 +17,15 @@ from telegram.ext import (
 )
 from telegram.error import BadRequest
 
-from common import log, datetime_to_str, prepare_text, get_int_from_match
+from common import (
+    log,
+    datetime_to_str,
+    prepare_text,
+    get_int_from_match,
+    convert_tz,
+    get_tz,
+)
 from bot_utils import log_func, reply_error
-from tz_utils import convert_tz, get_tz
 from db import Reminder, Chat, User
 
 from parser import (

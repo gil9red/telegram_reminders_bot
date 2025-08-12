@@ -21,7 +21,7 @@ from playhouse.sqliteq import SqliteQueueDatabase
 
 import telegram
 
-from tz_utils import convert_tz, get_tz
+from common import convert_tz, get_tz
 from parser import TimeUnit, RepeatEvery, cals_next_send_datetime
 from third_party.db_peewee_meta_model import MetaModel
 
@@ -218,7 +218,9 @@ class Reminder(BaseModel):
         if now_utc >= target_datetime_utc:
             repeat_every: RepeatEvery | None = self.get_repeat_every()
             if repeat_every:
-                target_datetime_utc = repeat_every.get_next_datetime(target_datetime_utc)
+                target_datetime_utc = repeat_every.get_next_datetime(
+                    target_datetime_utc
+                )
             else:
                 self.delete_instance()
                 return False

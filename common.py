@@ -8,11 +8,13 @@ import logging
 import re
 import sys
 
-from datetime import datetime
+from datetime import datetime, tzinfo
 from logging.handlers import RotatingFileHandler
 from pathlib import Path
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 import config
+from third_party.get_tz_from_offset__zoneinfo import get_tz as get_tz_from_offset
 
 
 def get_logger(file_name: str, dir_name: Path = config.DIR / "logs") -> logging.Logger:
@@ -65,6 +67,26 @@ def get_int_from_match(
         return int(match[name])
     except:
         return default
+
+
+def convert_tz(dt: datetime, from_tz: tzinfo, to_tz: tzinfo) -> datetime:
+    return (
+        dt.replace(tzinfo=from_tz)  # Указание часового пояса (дата не меняется)
+        .astimezone(to_tz)  # Изменение времени и часового пояса (дата изменилась)
+        .replace(tzinfo=None)  # Удаление часового пояса (дата не меняется)
+    )
+
+
+def get_tz(value: str) -> tzinfo:
+    try:
+        return get_tz_from_offset(value)
+    except Exception:
+        try:
+            return ZoneInfo(value)
+        except ZoneInfoNotFoundError:
+            pass
+
+        raise ZoneInfoNotFoundError(value)
 
 
 log = get_logger(__file__)
