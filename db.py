@@ -22,7 +22,7 @@ from playhouse.sqliteq import SqliteQueueDatabase
 import telegram
 
 from tz_utils import convert_tz, get_tz
-from parser import TimeUnit, RepeatEvery, cals_next_send_datetime_utc
+from parser import TimeUnit, RepeatEvery, cals_next_send_datetime
 from third_party.db_peewee_meta_model import MetaModel
 
 
@@ -226,9 +226,9 @@ class Reminder(BaseModel):
         self.target_datetime_utc = target_datetime_utc
 
         # Следующая дата отправки
-        self.next_send_datetime_utc = cals_next_send_datetime_utc(
-            now_utc=now_utc,
-            target_datetime_utc=self.target_datetime_utc,
+        self.next_send_datetime_utc = cals_next_send_datetime(
+            dt=now_utc,
+            target_datetime=self.target_datetime_utc,
             repeat_before=self.get_repeat_before(),
         )
 

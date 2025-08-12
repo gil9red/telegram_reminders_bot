@@ -375,21 +375,21 @@ def parse_command(
 
 
 # TODO: Добавить тесты
-def cals_next_send_datetime_utc(
-    now_utc: datetime,  # TODO: dt
-    target_datetime_utc: datetime,  # TODO: без _utc
+def cals_next_send_datetime(
+    dt: datetime,
+    target_datetime: datetime,
     repeat_before: list[TimeUnit],
 ) -> datetime:
     # Следующая дата отправки
-    next_dates: list[datetime] = [target_datetime_utc]
+    next_dates: list[datetime] = [target_datetime]
 
     # Если заданы напоминания до
     for unit in repeat_before:
-        prev_dt = unit.get_prev_datetime(target_datetime_utc)
+        prev_dt = unit.get_prev_datetime(target_datetime)
         next_dates.append(prev_dt)
 
     # Остаются даты после текущей
-    next_dates = [d for d in next_dates if d > now_utc]
+    next_dates = [d for d in next_dates if d > dt]
     if not next_dates:
         raise ParserException(f"Не удалось рассчитать дату следующего напоминания")
 

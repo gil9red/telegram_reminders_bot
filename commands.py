@@ -28,7 +28,7 @@ from parser import (
     Defaults,
     RepeatEvery,
     parse_command,
-    cals_next_send_datetime_utc,
+    cals_next_send_datetime,
 )
 from regexp_patterns import (
     COMMAND_START,
@@ -314,10 +314,10 @@ def add_reminder(command: str, update: Update):
 
     # Следующая дата отправки
     try:
-        next_send_datetime_utc: datetime = cals_next_send_datetime_utc(
-            target_datetime_utc=target_datetime_utc,
+        next_send_datetime_utc: datetime = cals_next_send_datetime(
+            target_datetime=target_datetime_utc,
             repeat_before=parse_result.repeat_before,
-            now_utc=now_utc,
+            dt=now_utc,
         )
     except Exception as e:
         log.exception("Error on cals_next_send_datetime_utc:")
