@@ -9,14 +9,14 @@ import re
 
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
-from typing import Optional, Type
+from typing import Any, Optional, Type
 
 
 class ParserException(Exception):
     pass
 
 
-PATTERN_TARGET_DATETIME = re.compile(
+PATTERN_TARGET_DATETIME: re.Pattern = re.compile(
     r"""
     .*?
     # Причина
@@ -38,27 +38,34 @@ PATTERN_TARGET_DATETIME = re.compile(
     flags=re.IGNORECASE | re.VERBOSE,
 )
 
-# TODO: Парсить даты с указанием количества
-# TODO: Поддерживать тесты с указанием количества
-PATTERN_REPEAT_EVERY = re.compile(
-    r"Повтор\s*(?:раз\s*в|кажд\w{1,2})\s*((?P<number>\d+)\s*)?"
-    r"(?P<unit>день|дн\w{1,2}|недел\w|месяц|полгода|год"
-    r"|понедельник|вторник|среду|четверг|пятницу|суббот\w|воскресенье)",
-    flags=re.IGNORECASE,
+PATTERN_REPEAT_EVERY: re.Pattern = re.compile(
+    r"""
+    Повтор\s*(?:раз\s*в|кажд\w{1,2})\s*
+    ((?P<number>\d+)\s*)?
+    (?P<unit>
+        день|дн\w{1,2}|недел\w|месяц|полгода|год
+        |понедельник|вторник|среду|четверг|пятницу|суббот\w|воскресенье
+    )
+    """,
+    flags=re.IGNORECASE | re.VERBOSE,
 )
-PATTERN_REPEAT_BEFORE = re.compile(
+
+PATTERN_REPEAT_BEFORE: re.Pattern = re.compile(
     r"Напомни(?:ть)?\s*(за\s*.+)",
     flags=re.IGNORECASE,
 )
-PATTERN_REPEAT_BEFORE_TIME_UNIT = re.compile(
-    r"за\s*((?P<number>\d+)\s*)?(?P<day>дн\w+|день|недел\w|месяц\w?|полгода|год\w?)",
-    flags=re.IGNORECASE,
+PATTERN_REPEAT_BEFORE_TIME_UNIT: re.Pattern = re.compile(
+    r"""
+    за\s*((?P<number>\d+)\s*)?
+    (?P<day>дн\w+|день|недел\w|месяц\w?|полгода|год\w?)
+    """,
+    flags=re.IGNORECASE | re.VERBOSE,
 )
 
 
 class AutoName(enum.Enum):
     @staticmethod
-    def _generate_next_value_(name, start, count, last_values):
+    def _generate_next_value_(name: str, start: int, count: int, last_values: list[Any]) -> Any:
         return name
 
 
