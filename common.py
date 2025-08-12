@@ -115,11 +115,20 @@ def reply_error(log: logging.Logger, update: Update, context: CallbackContext):
             f"Попробуйте повторить запрос или попробовать чуть позже..."
         )
 
+    text: str = prepare_text(text)
+
     update.effective_message.reply_text(text, quote=True)
 
 
 def datetime_to_str(dt: datetime) -> str:
     return f"{dt:%d.%m.%Y %H:%M:%S}"
+
+
+def prepare_text(text: str, mess_max_length: int = config.MESS_MAX_LENGTH) -> str:
+    if len(text) > mess_max_length:
+        text = text[: mess_max_length - 3] + "..."
+
+    return text
 
 
 log = get_logger(__file__)

@@ -18,8 +18,7 @@ from telegram.ext import (
 )
 from telegram.error import BadRequest
 
-from config import MESS_MAX_LENGTH
-from common import log_func, log, reply_error, datetime_to_str
+from common import log_func, log, reply_error, datetime_to_str, prepare_text
 from tz_utils import convert_tz, get_tz
 from db import Reminder, Chat, User
 
@@ -122,10 +121,7 @@ def send_reminder(
                 f"    {time_unit.get_value()}: {prev_dt} (в UTC {datetime_to_str(prev_dt_utc)})"
             )
 
-    text = "\n".join(lines)
-
-    if len(text) > MESS_MAX_LENGTH:
-        text = text[: MESS_MAX_LENGTH - 3] + "..."
+    text: str = prepare_text("\n".join(lines))
 
     if as_new_message:
         bot.send_message(
@@ -200,7 +196,8 @@ def get_reminders(update: Update, context: CallbackContext):
 @log_func(log)
 def on_start(update: Update, _: CallbackContext):
     update.effective_message.reply_markdown(
-        """
+        prepare_text(
+            """
 Введите что-нибудь или с добавление команды `/add "Встреча" сегодня в 18:00`, например:
 - `Напомни о "🍕" 10 февраля`
 - `"ДНС" 10 февраля в 14:55`
@@ -221,6 +218,7 @@ def on_start(update: Update, _: CallbackContext):
   - `/tz Europe/Moscow`
   - `/tz +03:00`
         """
+        )
     )
 
 
@@ -253,7 +251,9 @@ def on_tz(update: Update, context: CallbackContext):
     if is_set:
         if chat.tz == value:
             message.reply_markdown(
-                f"Часовой пояс `{value}` уже был установлен.\n{date_info}",
+                text=prepare_text(
+                    "Часовой пояс `{value}` уже был установлен.\n{date_info}"
+                ),
                 quote=True,
             )
             return
@@ -262,13 +262,13 @@ def on_tz(update: Update, context: CallbackContext):
         chat.save()
 
         message.reply_markdown(
-            f"Установлен часовой пояс `{value}`.\n{date_info}",
+            text=prepare_text(f"Установлен часовой пояс `{value}`.\n{date_info}"),
             quote=True,
         )
         return
 
     message.reply_markdown(
-        f"Часовой пояс `{value}`.\n{date_info}",
+        text=prepare_text(f"Часовой пояс `{value}`.\n{date_info}"),
         quote=True,
     )
 
@@ -299,7 +299,9 @@ def add_reminder(command: str, update: Update):
     except Exception as e:
         log.exception("Error on parse_command:")
         message.reply_markdown(
-            text=f"Не получилось разобрать команду!\nПричина:\n```plaintext\n{e}```",
+            text=prepare_text(
+                f"Не получилось разобрать команду!\nПричина:\n```plaintext\n{e}```"
+            ),
             quote=True,
         )
         return
@@ -322,7 +324,9 @@ def add_reminder(command: str, update: Update):
     except Exception as e:
         log.exception("Error on cals_next_send_datetime_utc:")
         message.reply_markdown(
-            text=f"Не получилось выполнить команду!\nПричина:\n```plaintext\n{e}```",
+            text=prepare_text(
+                f"Не получилось выполнить команду!\nПричина:\n```plaintext\n{e}```"
+            ),
             quote=True,
         )
         return
