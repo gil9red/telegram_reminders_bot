@@ -16,7 +16,7 @@ from telegram.ext import Updater, Defaults
 from telegram.error import BadRequest, Unauthorized
 
 import commands
-from common import datetime_to_str, log
+from common import datetime_to_str, prepare_text, log
 from config import TOKEN
 from db import Reminder
 
@@ -52,7 +52,7 @@ def process_check_reminders(bot: Bot):
                     f"Следующее: {datetime_to_str(next_send_datetime)} "
                     f"(в UTC {datetime_to_str(next_send_datetime_utc)})"
                 )
-            text: str = "\n".join(lines)
+            text: str = prepare_text("\n".join(lines))
 
             reply_to_message_id: int | None = reminder.get_reply_to_message_id()
             while True:
