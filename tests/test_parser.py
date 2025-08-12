@@ -702,6 +702,28 @@ class TestCaseParseCommand(unittest.TestCase):
                 ),
             ),
             (
+                'Напомни о "🍕" в следующий четверг в 12:00. Повтор каждый четверг',
+                ParseResult(
+                    target="🍕",
+                    target_datetime=datetime(2025, 8, 14, 12, 0),
+                    repeat_every=RepeatEvery(
+                        unit=TimeUnitWeekDayUnit(unit=TimeUnitWeekDayEnum.THURSDAY)
+                    ),
+                    repeat_before=[],
+                ),
+            ),
+            (
+                'Напомни о "🍕" в четверг в 12:00. Повтор каждый четверг',
+                ParseResult(
+                    target="🍕",
+                    target_datetime=datetime(2025, 8, 14, 12, 0),
+                    repeat_every=RepeatEvery(
+                        unit=TimeUnitWeekDayUnit(unit=TimeUnitWeekDayEnum.THURSDAY)
+                    ),
+                    repeat_before=[],
+                ),
+            ),
+            (
                 'День рождения "123" 10 февраля. Повтор каждый день',
                 ParseResult(
                     target="123",
