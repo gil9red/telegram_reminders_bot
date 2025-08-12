@@ -252,7 +252,7 @@ def on_tz(update: Update, context: CallbackContext):
         if chat.tz == value:
             message.reply_markdown(
                 text=prepare_text(
-                    "Часовой пояс `{value}` уже был установлен.\n{date_info}"
+                    f"Часовой пояс `{value}` уже был установлен.\n{date_info}"
                 ),
                 quote=True,
             )
