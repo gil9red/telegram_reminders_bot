@@ -108,9 +108,9 @@ def reply_error(log: logging.Logger, update: Update, context: CallbackContext):
         return
 
     if isinstance(context.error, ZoneInfoNotFoundError):
-        text = f"Не удалось найти часовой пояс {context.error.args[0]!r}"
+        text: str = f"Не удалось найти часовой пояс {context.error.args[0]!r}"
     else:
-        text = (
+        text: str = (
             f"⚠ Возникла непредвиденная ошибка {str(context.error)!r}.\n"
             f"Попробуйте повторить запрос или попробовать чуть позже..."
         )
