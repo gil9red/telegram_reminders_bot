@@ -718,18 +718,17 @@ class TestCaseParseCommand(unittest.TestCase):
                     repeat_before=[],
                 ),
             ),
-            # TODO: Поддержать в PATTERN_REPEAT_EVERY/get_repeat_every
-            # (
-            #     'День рождения "xxx" 10 февраля 2027 года в 14:55. Повтор каждые 4 дня',
-            #     ParseResult(
-            #         target="xxx",
-            #         target_datetime=datetime(2027, 2, 10, 14, 55),
-            #         repeat_every=RepeatEvery(
-            #             unit=TimeUnit(number=4, unit=TimeUnitEnum.DAY)
-            #         ),
-            #         repeat_before=[],
-            #     ),
-            # ),
+            (
+                'День рождения "xxx" 10 февраля 2027 года в 14:55. Повтор каждые 4 дня',
+                ParseResult(
+                    target="xxx",
+                    target_datetime=datetime(2027, 2, 10, 14, 55),
+                    repeat_every=RepeatEvery(
+                        unit=TimeUnit(number=4, unit=TimeUnitEnum.DAY)
+                    ),
+                    repeat_before=[],
+                ),
+            ),
             (
                 'Праздник "xxx" 10 февраля. Повтор каждую неделю',
                 ParseResult(
@@ -743,18 +742,17 @@ class TestCaseParseCommand(unittest.TestCase):
                     repeat_before=[],
                 ),
             ),
-            # TODO: Поддержать в PATTERN_REPEAT_EVERY/get_repeat_every
-            # (
-            #     'Праздник "xxx" 10 февраля. Повтор каждые 2 недели',
-            #     ParseResult(
-            #         target="xxx",
-            #         target_datetime=datetime(2026, 2, 10, self.defaults.hours, self.defaults.minutes),
-            #         repeat_every=RepeatEvery(
-            #             unit=TimeUnit(number=2, unit=TimeUnitEnum.WEEK)
-            #         ),
-            #         repeat_before=[],
-            #     ),
-            # ),
+            (
+                'Праздник "xxx" 10 февраля. Повтор каждые 2 недели',
+                ParseResult(
+                    target="xxx",
+                    target_datetime=datetime(2026, 2, 10, self.defaults.hours, self.defaults.minutes),
+                    repeat_every=RepeatEvery(
+                        unit=TimeUnit(number=2, unit=TimeUnitEnum.WEEK)
+                    ),
+                    repeat_before=[],
+                ),
+            ),
             (
                 'Праздник "xxx" 10 февраля. Повтор каждый месяц',
                 ParseResult(
@@ -768,18 +766,17 @@ class TestCaseParseCommand(unittest.TestCase):
                     repeat_before=[],
                 ),
             ),
-            # TODO: Поддержать в PATTERN_REPEAT_EVERY/get_repeat_every
-            # (
-            #     'Праздник "xxx" 10 февраля. Повтор каждый 3 месяца',
-            #     ParseResult(
-            #         target="xxx",
-            #         target_datetime=datetime(2026, 2, 10, self.defaults.hours, self.defaults.minutes),
-            #         repeat_every=RepeatEvery(
-            #             unit=TimeUnit(number=3, unit=TimeUnitEnum.MONTH)
-            #         ),
-            #         repeat_before=[],
-            #     ),
-            # ),
+            (
+                'Праздник "xxx" 10 февраля. Повтор каждый 3 месяца',
+                ParseResult(
+                    target="xxx",
+                    target_datetime=datetime(2026, 2, 10, self.defaults.hours, self.defaults.minutes),
+                    repeat_every=RepeatEvery(
+                        unit=TimeUnit(number=3, unit=TimeUnitEnum.MONTH)
+                    ),
+                    repeat_before=[],
+                ),
+            ),
             (
                 'Праздник "xxx" 10 февраля. Повтор каждый год',
                 ParseResult(

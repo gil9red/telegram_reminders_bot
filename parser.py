@@ -41,7 +41,7 @@ PATTERN_TARGET_DATETIME = re.compile(
 # TODO: Парсить даты с указанием количества
 # TODO: Поддерживать тесты с указанием количества
 PATTERN_REPEAT_EVERY = re.compile(
-    r"Повтор\s*(?:раз\s*в|кажд\w{1,2})\s*"
+    r"Повтор\s*(?:раз\s*в|кажд\w{1,2})\s*((?P<number>\d+)\s*)?"
     r"(?P<unit>день|дн\w{1,2}|недел\w|месяц|полгода|год"
     r"|понедельник|вторник|среду|четверг|пятницу|суббот\w|воскресенье)",
     flags=re.IGNORECASE,
@@ -230,7 +230,17 @@ def get_repeat_every(command: str) -> RepeatEvery | None:
     if not m:
         return
 
-    return RepeatEvery.parse_text(m.group("unit"))
+    number_value: str | None = m.group("number")
+    if number_value is not None:
+        number: int = int(number_value)
+    else:
+        number: int = 1
+
+    repeat_every: RepeatEvery | None = RepeatEvery.parse_text(m.group("unit"))
+    if repeat_every and isinstance(repeat_every.unit, TimeUnit):
+        repeat_every.unit.number *= number
+
+    return repeat_every
 
 
 def parse_repeat_before(command: str) -> list[TimeUnit]:
