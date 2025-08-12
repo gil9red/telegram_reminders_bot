@@ -861,9 +861,9 @@ class TestCaseParseCommand(unittest.TestCase):
                 ),
             ),
             (
-                'День рождения "Поход" 10 февраля. Повтор раз в год. Напомнить за месяц, за неделю, за 3 дня, за день',
+                'День рождения "^_^" 10 февраля. Повтор раз в год. Напомнить за месяц, за неделю, за 3 дня, за день',
                 ParseResult(
-                    target="Поход",
+                    target="^_^",
                     target_datetime=datetime(
                         2026, 2, 10, self.defaults.hours, self.defaults.minutes
                     ),
