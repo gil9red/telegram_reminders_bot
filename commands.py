@@ -305,11 +305,19 @@ def add_reminder(command: str, update: Update):
     )
 
     # Следующая дата отправки
-    next_send_datetime_utc: datetime = Reminder.cals_next_send_datetime_utc(
-        target_datetime_utc=target_datetime_utc,
-        repeat_before=parse_result.repeat_before,
-        now_utc=now_utc,
-    )
+    try:
+        next_send_datetime_utc: datetime = cals_next_send_datetime_utc(
+            target_datetime_utc=target_datetime_utc,
+            repeat_before=parse_result.repeat_before,
+            now_utc=now_utc,
+        )
+    except Exception as e:
+        log.exception("Error on cals_next_send_datetime_utc:")
+        message.reply_markdown(
+            text=f"Не получилось выполнить команду!\nПричина:\n```plaintext\n{e}```",
+            quote=True,
+        )
+        return
 
     # TODO: Проверка на дубликат команды
     reminder = Reminder.add(
