@@ -69,6 +69,13 @@ class AutoName(enum.Enum):
         return name
 
 
+def parse_int(value: str | None, default: int = 1) -> int:
+    try:
+        return int(value)
+    except:
+        return default
+
+
 class TimeUnitEnum(AutoName):
     YEAR = enum.auto()
     MONTH = enum.auto()
@@ -237,11 +244,7 @@ def get_repeat_every(command: str) -> RepeatEvery | None:
     if not m:
         return
 
-    number_value: str | None = m.group("number")
-    if number_value is not None:
-        number: int = int(number_value)
-    else:
-        number: int = 1
+    number: int = parse_int(m.group("number"), default=1)
 
     repeat_every: RepeatEvery | None = RepeatEvery.parse_text(m.group("unit"))
     if repeat_every and isinstance(repeat_every.unit, TimeUnit):
@@ -261,11 +264,7 @@ def parse_repeat_before(command: str) -> list[TimeUnit]:
     time_by_unit: dict[timedelta, TimeUnit] = dict()
 
     for m in PATTERN_REPEAT_BEFORE_TIME_UNIT.finditer(m.group()):
-        number_value: str | None = m.group("number")
-        if number_value is not None:
-            number: int = int(number_value)
-        else:
-            number: int = 1
+        number: int = parse_int(m.group("number"), default=1)
 
         day_value: str = m.group("day")
         time_unit: TimeUnit = TimeUnit.parse_text(day_value)
