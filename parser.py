@@ -11,6 +11,8 @@ from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from typing import Any, Optional, Type
 
+from common import get_int_from_match
+
 
 class ParserException(Exception):
     pass
@@ -69,13 +71,6 @@ class AutoName(enum.Enum):
         name: str, start: int, count: int, last_values: list[Any]
     ) -> Any:
         return name
-
-
-def parse_int(value: str | None, default: int = 1) -> int:
-    try:
-        return int(value)
-    except:
-        return default
 
 
 class TimeUnitEnum(AutoName):
@@ -246,7 +241,7 @@ def get_repeat_every(command: str) -> RepeatEvery | None:
     if not m:
         return
 
-    number: int = parse_int(m.group("number"), default=1)
+    number: int = get_int_from_match(m, name="number", default=1)
 
     repeat_every: RepeatEvery | None = RepeatEvery.parse_text(m.group("unit"))
     if repeat_every and isinstance(repeat_every.unit, TimeUnit):
@@ -266,7 +261,7 @@ def parse_repeat_before(command: str) -> list[TimeUnit]:
     time_by_unit: dict[timedelta, TimeUnit] = dict()
 
     for m in PATTERN_REPEAT_BEFORE_TIME_UNIT.finditer(m.group()):
-        number: int = parse_int(m.group("number"), default=1)
+        number: int = get_int_from_match(m, name="number", default=1)
 
         day_value: str = m.group("day")
         time_unit: TimeUnit = TimeUnit.parse_text(day_value)

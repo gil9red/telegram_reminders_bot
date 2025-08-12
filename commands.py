@@ -4,7 +4,6 @@
 __author__ = "ipetrash"
 
 
-import re
 from datetime import datetime, tzinfo, timezone
 
 from telegram import Update, Bot
@@ -18,7 +17,8 @@ from telegram.ext import (
 )
 from telegram.error import BadRequest
 
-from common import log_func, log, reply_error, datetime_to_str, prepare_text
+from common import log, datetime_to_str, prepare_text, get_int_from_match
+from bot_utils import log_func, reply_error
 from tz_utils import convert_tz, get_tz
 from db import Reminder, Chat, User
 
@@ -64,17 +64,6 @@ def get_context_value(context: CallbackContext) -> str | None:
 
     except:
         return
-
-
-def get_int_from_match(
-    match: re.Match,
-    name: str,
-    default: int | None = None,
-) -> int | None:
-    try:
-        return int(match[name])
-    except:
-        return default
 
 
 def send_reminder(

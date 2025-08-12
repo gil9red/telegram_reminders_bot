@@ -4,10 +4,12 @@
 __author__ = "ipetrash"
 
 
+import re
+
 from datetime import datetime
 from unittest import TestCase
 
-from common import datetime_to_str, prepare_text
+from common import datetime_to_str, prepare_text, get_int_from_match
 
 
 class TestCaseCommon(TestCase):
@@ -25,3 +27,25 @@ class TestCaseCommon(TestCase):
         max_length: int = 4096
         text: str = "1" * max_length * 2
         self.assertTrue(len(prepare_text(text, max_length=max_length)) == max_length)
+
+    def test_get_int_from_match(self):
+        self.assertEqual(
+            123,
+            get_int_from_match(
+                re.search(r"(?P<number>\d+)", "123"), name="number", default=None
+            ),
+        )
+
+        self.assertEqual(
+            None,
+            get_int_from_match(
+                re.search(r"(?P<number>\d+)", "abc"), name="number", default=None
+            ),
+        )
+
+        self.assertEqual(
+            1,
+            get_int_from_match(
+                re.search(r"(?P<number>\d+)", "abc"), name="number", default=1
+            ),
+        )
