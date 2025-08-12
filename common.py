@@ -104,13 +104,18 @@ def log_func(log: logging.Logger):
 
 def reply_error(log: logging.Logger, update: Update, context: CallbackContext):
     log.error("Error: %s\nUpdate: %s", context.error, update, exc_info=context.error)
-    if update:
-        if isinstance(context.error, ZoneInfoNotFoundError):
-            text = f"Не удалось найти часовой пояс {context.error.args[0]!r}"
-        else:
-            text = config.ERROR_TEXT
+    if not update:
+        return
 
-        update.effective_message.reply_text(text, quote=True)
+    if isinstance(context.error, ZoneInfoNotFoundError):
+        text = f"Не удалось найти часовой пояс {context.error.args[0]!r}"
+    else:
+        text = (
+            f"⚠ Возникла непредвиденная ошибка {context.error!r}.\n"
+            f"Попробуйте повторить запрос или попробовать чуть позже..."
+        )
+
+    update.effective_message.reply_text(text, quote=True)
 
 
 def datetime_to_str(dt: datetime) -> str:
