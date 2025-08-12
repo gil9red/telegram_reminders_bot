@@ -23,7 +23,13 @@ from common import log_func, log, reply_error, datetime_to_str
 from tz_utils import convert_tz, get_tz
 from db import Reminder, Chat, User
 
-from parser import ParserException, ParseResult, Defaults, RepeatEvery, parse_command
+from parser import (
+    ParseResult,
+    Defaults,
+    RepeatEvery,
+    parse_command,
+    cals_next_send_datetime_utc,
+)
 from regexp_patterns import (
     COMMAND_START,
     COMMAND_HELP,
@@ -265,22 +271,31 @@ def add_reminder(command: str, update: Update):
     chat = Chat.get_from(update.effective_chat)
     message = update.effective_message
 
-    now_utc = datetime.utcnow()
-    default = Defaults(hours=10, minutes=0)
+    tz_chat: tzinfo = get_tz(chat.tz)
+
+    now_utc: datetime = datetime.utcnow()
+
+    # Время в часовом поясе пользователя
+    now_dt_chat: datetime = convert_tz(
+        dt=now_utc,
+        from_tz=timezone.utc,
+        to_tz=tz_chat,
+    )
+
+    defaults = Defaults(hours=10, minutes=0)
 
     try:
-        parse_result: ParseResult = parse_command(command, dt=now_utc, defaults=default)
-    except ParserException as e:
+        parse_result: ParseResult = parse_command(
+            command, dt=now_dt_chat, defaults=defaults
+        )
+    except Exception as e:
         log.exception("Error on parse_command:")
         message.reply_markdown(
-            text=f"Не получилось разобрать команду!\nПричина:\n```{e}```",
+            text=f"Не получилось разобрать команду!\nПричина:\n```plaintext\n{e}```",
             quote=True,
         )
         return
 
-    tz_chat: tzinfo = get_tz(chat.tz)
-
-    # Время в часовом поясе пользователя
     target_datetime: datetime = parse_result.target_datetime
 
     target_datetime_utc: datetime = convert_tz(
