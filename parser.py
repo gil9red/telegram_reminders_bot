@@ -65,7 +65,9 @@ PATTERN_REPEAT_BEFORE_TIME_UNIT: re.Pattern = re.compile(
 
 class AutoName(enum.Enum):
     @staticmethod
-    def _generate_next_value_(name: str, start: int, count: int, last_values: list[Any]) -> Any:
+    def _generate_next_value_(
+        name: str, start: int, count: int, last_values: list[Any]
+    ) -> Any:
         return name
 
 

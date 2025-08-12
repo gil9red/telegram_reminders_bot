@@ -160,8 +160,7 @@ def get_reminders(update: Update, context: CallbackContext):
 
     reminder: Reminder | None = Reminder.get_by_page(page=page, filters=filters)
     if not reminder:
-        text = "Напоминаний нет"
-        message.reply_text(text, quote=True)
+        message.reply_text("Напоминаний нет", quote=True)
         return
 
     total = Reminder.count(filters)
