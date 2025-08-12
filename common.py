@@ -124,9 +124,10 @@ def datetime_to_str(dt: datetime) -> str:
     return f"{dt:%d.%m.%Y %H:%M:%S}"
 
 
-def prepare_text(text: str, mess_max_length: int = config.MESS_MAX_LENGTH) -> str:
-    if len(text) > mess_max_length:
-        text = text[: mess_max_length - 3] + "..."
+def prepare_text(text: str, max_length: int = config.MESS_MAX_LENGTH) -> str:
+    postfix: str = "..."
+    if len(text) > max_length:
+        text = text[: max_length - len(postfix)] + postfix
 
     return text
 
