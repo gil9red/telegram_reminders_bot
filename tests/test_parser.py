@@ -20,6 +20,7 @@ from parser import (
     parse_repeat_before,
     parse_command,
     ParserException,
+    get_nearest_datetime,
 )
 
 
@@ -211,6 +212,104 @@ class TestCaseParserCommon(unittest.TestCase):
         ]:
             with self.subTest(number=number, month=month):
                 self.assertEqual(number, parse_month(month))
+
+    def test_get_nearest_datetime(self):
+        now: datetime = datetime(year=2025, month=8, day=9, hour=22, minute=0)
+        target_dt: datetime = datetime(year=2026, month=1, day=10, hour=10, minute=0)
+
+        with self.subTest(msg="ParserException"):
+            with self.assertRaises(ParserException):
+                get_nearest_datetime(dt=now, target_dt=now, repeat_before=[])
+
+            with self.assertRaises(ParserException):
+                get_nearest_datetime(
+                    dt=now, target_dt=now - timedelta(seconds=1), repeat_before=[]
+                )
+
+            with self.assertRaises(ParserException):
+                get_nearest_datetime(dt=target_dt, target_dt=now, repeat_before=[])
+
+        with self.subTest(msg="Ok"):
+            self.assertEqual(
+                target_dt,
+                get_nearest_datetime(dt=now, target_dt=target_dt, repeat_before=[]),
+            )
+
+            self.assertEqual(
+                target_dt,
+                get_nearest_datetime(
+                    dt=now,
+                    target_dt=target_dt,
+                    repeat_before=[TimeUnit(number=1, unit=TimeUnitEnum.YEAR)],
+                ),
+            )
+            self.assertEqual(
+                target_dt,
+                get_nearest_datetime(
+                    dt=now,
+                    target_dt=target_dt,
+                    repeat_before=[
+                        TimeUnit(number=1, unit=TimeUnitEnum.YEAR),
+                        TimeUnit(number=6, unit=TimeUnitEnum.MONTH),
+                    ],
+                ),
+            )
+
+            self.assertEqual(
+                target_dt - TimeUnit(number=1, unit=TimeUnitEnum.DAY).get_timedelta(),
+                get_nearest_datetime(
+                    dt=now,
+                    target_dt=target_dt,
+                    repeat_before=[TimeUnit(number=1, unit=TimeUnitEnum.DAY)],
+                ),
+            )
+            self.assertEqual(
+                target_dt - TimeUnit(number=2, unit=TimeUnitEnum.WEEK).get_timedelta(),
+                get_nearest_datetime(
+                    dt=now,
+                    target_dt=target_dt,
+                    repeat_before=[
+                        TimeUnit(number=1, unit=TimeUnitEnum.DAY),
+                        TimeUnit(number=3, unit=TimeUnitEnum.DAY),
+                        TimeUnit(number=1, unit=TimeUnitEnum.WEEK),
+                        TimeUnit(number=2, unit=TimeUnitEnum.WEEK),
+                    ],
+                ),
+            )
+            self.assertEqual(
+                target_dt - TimeUnit(number=3, unit=TimeUnitEnum.MONTH).get_timedelta(),
+                get_nearest_datetime(
+                    dt=now,
+                    target_dt=target_dt,
+                    repeat_before=[
+                        TimeUnit(number=1, unit=TimeUnitEnum.DAY),
+                        TimeUnit(number=3, unit=TimeUnitEnum.DAY),
+                        TimeUnit(number=1, unit=TimeUnitEnum.WEEK),
+                        TimeUnit(number=2, unit=TimeUnitEnum.WEEK),
+                        TimeUnit(number=1, unit=TimeUnitEnum.MONTH),
+                        TimeUnit(number=3, unit=TimeUnitEnum.MONTH),
+                    ],
+                ),
+            )
+
+            self.assertEqual(
+                target_dt - TimeUnit(number=3, unit=TimeUnitEnum.MONTH).get_timedelta(),
+                get_nearest_datetime(
+                    dt=now,
+                    target_dt=target_dt,
+                    repeat_before=[
+                        TimeUnit(number=1, unit=TimeUnitEnum.DAY),
+                        TimeUnit(number=3, unit=TimeUnitEnum.DAY),
+                        TimeUnit(number=1, unit=TimeUnitEnum.WEEK),
+                        TimeUnit(number=2, unit=TimeUnitEnum.WEEK),
+                        TimeUnit(number=1, unit=TimeUnitEnum.MONTH),
+                        TimeUnit(number=3, unit=TimeUnitEnum.MONTH),
+                        # NOTE: 6 месяцев и 1 год уже будут меньше now
+                        TimeUnit(number=6, unit=TimeUnitEnum.MONTH),
+                        TimeUnit(number=1, unit=TimeUnitEnum.YEAR),
+                    ],
+                ),
+            )
 
 
 class TestCaseParseCommand(unittest.TestCase):
