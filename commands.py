@@ -33,7 +33,7 @@ from parser import (
     Defaults,
     RepeatEvery,
     parse_command,
-    cals_next_send_datetime,
+    get_nearest_datetime,
 )
 from regexp_patterns import (
     COMMAND_START,
@@ -311,8 +311,8 @@ def add_reminder(command: str, update: Update):
 
     # Следующая дата отправки
     try:
-        next_send_datetime_utc: datetime = cals_next_send_datetime(
-            target_datetime=target_datetime_utc,
+        next_send_datetime_utc: datetime = get_nearest_datetime(
+            target_dt=target_datetime_utc,
             repeat_before=parse_result.repeat_before,
             dt=now_utc,
         )

@@ -369,23 +369,22 @@ def parse_command(
     )
 
 
-# TODO: Добавить тесты
-def cals_next_send_datetime(
+def get_nearest_datetime(
     dt: datetime,
-    target_datetime: datetime,
+    target_dt: datetime,
     repeat_before: list[TimeUnit],
 ) -> datetime:
     # Следующая дата отправки
-    next_dates: list[datetime] = [target_datetime]
+    next_dates: list[datetime] = [target_dt]
 
     # Если заданы напоминания до
     for unit in repeat_before:
-        prev_dt = unit.get_prev_datetime(target_datetime)
+        prev_dt = unit.get_prev_datetime(target_dt)
         next_dates.append(prev_dt)
 
     # Остаются даты после текущей
     next_dates = [d for d in next_dates if d > dt]
     if not next_dates:
-        raise ParserException(f"Не удалось рассчитать дату следующего напоминания")
+        raise ParserException(f"Не удалось рассчитать ближайшую дату")
 
     return min(next_dates)
