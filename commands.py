@@ -271,9 +271,16 @@ def on_tz(update: Update, context: CallbackContext):
 def add_reminder(command: str, update: Update):
     log.debug(f"Command: {command!r}")
 
-    chat = Chat.get_from(update.effective_chat)
     message = update.effective_message
 
+    if not command:
+        message.reply_text(
+            text=prepare_text("Нет команды не было. Пример команд можно посмотреть в /help"),
+            quote=True,
+        )
+        return
+
+    chat = Chat.get_from(update.effective_chat)
     tz_chat: tzinfo = get_tz(chat.tz)
 
     now_utc: datetime = datetime.utcnow()
