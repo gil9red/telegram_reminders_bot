@@ -276,7 +276,7 @@ def add_reminder(command: str, update: Update):
     if not command:
         message.reply_text(
             text=prepare_text(
-                "Для создания напоминания нужно ввести команду. "
+                "Для создания напоминания нужно ввести команду.\n"
                 "Пример команд можно посмотреть в /help"
             ),
             quote=True,
