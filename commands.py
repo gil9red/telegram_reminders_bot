@@ -213,7 +213,8 @@ def on_start(update: Update, _: CallbackContext):
   - `/tz Europe/Moscow`
   - `/tz +03:00`
         """
-        )
+        ),
+        quote=True,
     )
 
 
