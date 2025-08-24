@@ -42,9 +42,8 @@ from regexp_patterns import (
     COMMAND_TZ,
     COMMAND_LIST,
     PATTERN_LIST,
-    # PATTERN_DELETE_MESSAGE,  # TODO:
     PATTERN_REMINDER_PAGE,
-    PATTERN_SHOW_ORIGINAL_MESSAGE,
+    PATTERN_SHOW_DETAILS,
     PATTERN_DELETE,
     fill_string_pattern,
 )
@@ -52,13 +51,7 @@ from third_party.telegram_bot_pagination import InlineKeyboardPaginator
 from third_party.is_equal_inline_keyboards import is_equal_inline_keyboards
 
 
-# TODO:
-# INLINE_BUTTON_TEXT_DELETE = "❌ Удалить"
-#
-#
-# INLINE_BUTTON_DELETE = InlineKeyboardButton(
-#     INLINE_BUTTON_TEXT_DELETE, callback_data=PATTERN_DELETE_MESSAGE
-# )
+INLINE_BUTTON_TEXT_DELETE: str = "❌ Удалить"
 
 
 def get_context_value(context: CallbackContext) -> str | None:
@@ -164,21 +157,16 @@ def get_reminders(update: Update, context: CallbackContext):
         current_page=page,
         data_pattern=fill_string_pattern(pattern, "{page}"),
     )
-    # TODO: Удалять напоминание, а не сообщение
-    #       Мб еще отдельным сообщением спрашивать?
-    # paginator.add_before(INLINE_BUTTON_DELETE)
+
     paginator.add_before(
         InlineKeyboardButton(
-            text="Оригинальное сообщение",  # TODO:
-            callback_data=fill_string_pattern(
-                PATTERN_SHOW_ORIGINAL_MESSAGE, reminder.id
-            ),
+            text="📝 Подробно",
+            callback_data=fill_string_pattern(PATTERN_SHOW_DETAILS, reminder.id),
         ),
         InlineKeyboardButton(
-            text="Удалить",  # TODO:
+            text=INLINE_BUTTON_TEXT_DELETE,
             callback_data=fill_string_pattern(PATTERN_DELETE, reminder.id),
         ),
-        # TODO: Кнопка удаления
     )
 
     reply_markup: str | None = paginator.markup
@@ -396,7 +384,7 @@ def add_reminder(command: str, update: Update):
         text="\n".join(lines),
         reply_markup=InlineKeyboardMarkup.from_button(
             InlineKeyboardButton(
-                text="Удалить",  # TODO:
+                text=INLINE_BUTTON_TEXT_DELETE,
                 callback_data=fill_string_pattern(PATTERN_DELETE, reminder.id),
             ),
         ),
@@ -431,7 +419,7 @@ def on_change_reminder_page(update: Update, context: CallbackContext):
 
 
 @log_func(log)
-def on_reminder_show_original_message(update: Update, context: CallbackContext):
+def on_reminder_show_details(update: Update, context: CallbackContext):
     query = update.callback_query
     if query:
         query.answer()
@@ -519,9 +507,7 @@ def setup(dp: Dispatcher):
     )
 
     dp.add_handler(
-        CallbackQueryHandler(
-            on_reminder_show_original_message, pattern=PATTERN_SHOW_ORIGINAL_MESSAGE
-        )
+        CallbackQueryHandler(on_reminder_show_details, pattern=PATTERN_SHOW_DETAILS)
     )
     dp.add_handler(CallbackQueryHandler(on_reminder_delete, pattern=PATTERN_DELETE))
 
