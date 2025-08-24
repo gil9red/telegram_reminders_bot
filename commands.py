@@ -6,7 +6,7 @@ __author__ = "ipetrash"
 
 from datetime import datetime, tzinfo, timezone
 
-from telegram import Update, Bot
+from telegram import Update, Bot, InlineKeyboardButton
 from telegram.ext import (
     CallbackContext,
     CallbackQueryHandler,
@@ -44,6 +44,8 @@ from regexp_patterns import (
     PATTERN_LIST,
     # PATTERN_DELETE_MESSAGE,  # TODO:
     PATTERN_REMINDER_PAGE,
+    PATTERN_SHOW_ORIGINAL_MESSAGE,
+    PATTERN_DELETE,  # TODO:
     fill_string_pattern,
 )
 from third_party.telegram_bot_pagination import InlineKeyboardPaginator
@@ -165,6 +167,15 @@ def get_reminders(update: Update, context: CallbackContext):
     # TODO: Удалять напоминание, а не сообщение
     #       Мб еще отдельным сообщением спрашивать?
     # paginator.add_before(INLINE_BUTTON_DELETE)
+    paginator.add_before(
+        InlineKeyboardButton(
+            text="Оригинальное сообщение",  # TODO:
+            callback_data=fill_string_pattern(
+                PATTERN_SHOW_ORIGINAL_MESSAGE, reminder.id
+            ),
+        ),
+        # TODO: Кнопка удаления
+    )
 
     reply_markup: str | None = paginator.markup
 
@@ -406,6 +417,28 @@ def on_change_reminder_page(update: Update, context: CallbackContext):
     get_reminders(update, context)
 
 
+@log_func(log)
+def on_reminder_show_original_message(update: Update, context: CallbackContext):
+    query = update.callback_query
+    if query:
+        query.answer()
+
+    message = update.effective_message
+    reminder_id: int = get_int_from_match(context.match, "id")
+
+    reminder: Reminder | None = Reminder.get_or_none(id=reminder_id)
+    if not reminder:
+        message.reply_text("⚠ Напоминания уже нет", quote=True)
+        return
+
+    message.reply_markdown(
+        text=prepare_text(
+            f"Оригинальное сообщение:\n```plaintext\n{reminder.original_message_text}```"
+        ),
+        quote=True,
+    )
+
+
 # TODO:
 # @log_func(log)
 # def on_callback_delete_message(update: Update, _: CallbackContext):
@@ -447,6 +480,12 @@ def setup(dp: Dispatcher):
     # )
     dp.add_handler(
         CallbackQueryHandler(on_change_reminder_page, pattern=PATTERN_REMINDER_PAGE)
+    )
+
+    dp.add_handler(
+        CallbackQueryHandler(
+            on_reminder_show_original_message, pattern=PATTERN_SHOW_ORIGINAL_MESSAGE
+        )
     )
 
     dp.add_handler(CommandHandler(COMMAND_ADD, on_add))
