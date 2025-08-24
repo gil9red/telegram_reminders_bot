@@ -312,9 +312,10 @@ def add_reminder(command: str, update: Update):
         )
     except Exception as e:
         log.exception("Error on parse_command:")
-        message.reply_markdown(
+        message.reply_html(
             text=prepare_text(
-                f"Не получилось разобрать команду!\nПричина:\n```plaintext\n{e}```"
+                f"Не получилось разобрать команду!\n"
+                f"Причина:\n{get_blockquote_html(str(e))}"
             ),
             quote=True,
         )
@@ -337,9 +338,10 @@ def add_reminder(command: str, update: Update):
         )
     except Exception as e:
         log.exception("Error on cals_next_send_datetime_utc:")
-        message.reply_markdown(
+        message.reply_html(
             text=prepare_text(
-                f"Не получилось выполнить команду!\nПричина:\n```plaintext\n{e}```"
+                f"Не получилось выполнить команду!\n"
+                f"Причина:\n{get_blockquote_html(str(e))}"
             ),
             quote=True,
         )
