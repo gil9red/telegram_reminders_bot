@@ -6,6 +6,7 @@ __author__ = "ipetrash"
 
 import functools
 import logging
+from html import escape
 from zoneinfo import ZoneInfoNotFoundError
 
 from telegram import Update
@@ -84,3 +85,20 @@ def reply_error(log: logging.Logger, update: Update, context: CallbackContext):
     text: str = prepare_text(text)
 
     update.effective_message.reply_text(text, quote=True)
+
+
+def get_blockquote_html(text: str) -> str:
+    return f"<blockquote>{escape(text)}</blockquote>"
+
+
+if __name__ == "__main__":
+    # TODO: tests
+    assert get_blockquote_html("") == "<blockquote></blockquote>"
+    assert get_blockquote_html("Hello World") == "<blockquote>Hello World</blockquote>"
+    assert (
+        get_blockquote_html("Hello\n\nWorld\n!")
+        == "<blockquote>Hello\n\nWorld\n!</blockquote>"
+    )
+    assert (
+        get_blockquote_html("Hello&World") == "<blockquote>Hello&amp;World</blockquote>"
+    )

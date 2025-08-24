@@ -25,7 +25,7 @@ from common import (
     convert_tz,
     get_tz,
 )
-from bot_utils import log_func, reply_error
+from bot_utils import log_func, reply_error, get_blockquote_html
 from db import Reminder, Chat, User
 
 from parser import (
@@ -85,7 +85,8 @@ def send_reminder(
     repeat_every: RepeatEvery | None = reminder.get_repeat_every()
 
     lines: list[str] = [
-        f"Напоминание: {reminder.target}",
+        "Напоминание:",
+        get_blockquote_html(reminder.target),
         f"Установлено на {datetime_to_str(target_datetime)} (в UTC {datetime_to_str(target_datetime_utc)})",
         f"Ближайшее: {datetime_to_str(next_send_datetime)} (в UTC {datetime_to_str(next_send_datetime_utc)})",
         f"Повтор: {repeat_every.get_value() if repeat_every else 'нет'}",
@@ -112,11 +113,11 @@ def send_reminder(
 
     lines.append(
         f"\nОригинальное сообщение:\n"
-        f"```plaintext\n{reminder.original_message_text}```"
+        + get_blockquote_html(reminder.original_message_text)
     )
 
     text: str = prepare_text("\n".join(lines))
-    parse_mode: str = ParseMode.MARKDOWN
+    parse_mode: str = ParseMode.HTML
 
     if as_new_message:
         bot.send_message(
