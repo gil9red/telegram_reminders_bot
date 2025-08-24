@@ -6,7 +6,7 @@ __author__ = "ipetrash"
 
 from datetime import datetime, tzinfo, timezone
 
-from telegram import Update, Bot, InlineKeyboardButton
+from telegram import Update, Bot, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (
     CallbackContext,
     CallbackQueryHandler,
@@ -392,7 +392,16 @@ def add_reminder(command: str, update: Update):
                 f"    {time_unit.get_value()}: {prev_dt} (в UTC {datetime_to_str(prev_dt_utc)})"
             )
 
-    message.reply_text("\n".join(lines), quote=True)
+    message.reply_text(
+        text="\n".join(lines),
+        reply_markup=InlineKeyboardMarkup.from_button(
+            InlineKeyboardButton(
+                text="Удалить",  # TODO:
+                callback_data=fill_string_pattern(PATTERN_DELETE, reminder.id),
+            ),
+        ),
+        quote=True,
+    )
 
 
 @log_func(log)
@@ -458,7 +467,8 @@ def on_reminder_delete(update: Update, context: CallbackContext):
         return
 
     message.reply_markdown(
-        text=prepare_text("Напоминание было удалено!"),  # TODO: Мб вывести оригинальное сообщение?
+        # TODO: Мб вывести оригинальное сообщение?
+        text=prepare_text("Напоминание было удалено!"),
         quote=True,
     )
 
