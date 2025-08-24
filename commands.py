@@ -6,7 +6,7 @@ __author__ = "ipetrash"
 
 from datetime import datetime, tzinfo, timezone
 
-from telegram import Update, Bot, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram import Update, Bot, InlineKeyboardButton, InlineKeyboardMarkup, ParseMode
 from telegram.ext import (
     CallbackContext,
     CallbackQueryHandler,
@@ -43,7 +43,6 @@ from regexp_patterns import (
     COMMAND_LIST,
     PATTERN_LIST,
     PATTERN_REMINDER_PAGE,
-    PATTERN_SHOW_DETAILS,
     PATTERN_DELETE,
     fill_string_pattern,
 )
@@ -111,12 +110,19 @@ def send_reminder(
                 f"    {time_unit.get_value()}: {prev_dt} (в UTC {datetime_to_str(prev_dt_utc)})"
             )
 
+    lines.append(
+        f"\nОригинальное сообщение:\n"
+        f"```plaintext\n{reminder.original_message_text}```"
+    )
+
     text: str = prepare_text("\n".join(lines))
+    parse_mode: str = ParseMode.MARKDOWN
 
     if as_new_message:
         bot.send_message(
             chat_id=chat_id,
             text=text,
+            parse_mode=parse_mode,
             reply_markup=reply_markup,
             reply_to_message_id=message_id,
         )
@@ -124,6 +130,7 @@ def send_reminder(
         bot.edit_message_text(
             chat_id=chat_id,
             text=text,
+            parse_mode=parse_mode,
             reply_markup=reply_markup,
             message_id=message_id,
         )
@@ -159,10 +166,6 @@ def get_reminders(update: Update, context: CallbackContext):
     )
 
     paginator.add_before(
-        InlineKeyboardButton(
-            text="📝 Подробно",
-            callback_data=fill_string_pattern(PATTERN_SHOW_DETAILS, reminder.id),
-        ),
         InlineKeyboardButton(
             text=INLINE_BUTTON_TEXT_DELETE,
             callback_data=fill_string_pattern(PATTERN_DELETE, reminder.id),
@@ -419,28 +422,6 @@ def on_change_reminder_page(update: Update, context: CallbackContext):
 
 
 @log_func(log)
-def on_reminder_show_details(update: Update, context: CallbackContext):
-    query = update.callback_query
-    if query:
-        query.answer()
-
-    message = update.effective_message
-    reminder_id: int = get_int_from_match(context.match, "id")
-
-    reminder: Reminder | None = Reminder.get_or_none(id=reminder_id)
-    if not reminder:
-        message.reply_text("⚠ Напоминания уже нет", quote=True)
-        return
-
-    message.reply_markdown(
-        text=prepare_text(
-            f"Оригинальное сообщение:\n```plaintext\n{reminder.original_message_text}```"
-        ),
-        quote=True,
-    )
-
-
-@log_func(log)
 def on_reminder_delete(update: Update, context: CallbackContext):
     query = update.callback_query
     if query:
@@ -506,9 +487,6 @@ def setup(dp: Dispatcher):
         CallbackQueryHandler(on_change_reminder_page, pattern=PATTERN_REMINDER_PAGE)
     )
 
-    dp.add_handler(
-        CallbackQueryHandler(on_reminder_show_details, pattern=PATTERN_SHOW_DETAILS)
-    )
     dp.add_handler(CallbackQueryHandler(on_reminder_delete, pattern=PATTERN_DELETE))
 
     dp.add_handler(CommandHandler(COMMAND_ADD, on_add))
