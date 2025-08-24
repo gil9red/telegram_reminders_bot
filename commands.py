@@ -466,6 +466,8 @@ def on_reminder_delete(update: Update, context: CallbackContext):
         message.reply_text("⚠ Напоминания уже нет", quote=True)
         return
 
+    reminder.delete_instance()
+
     message.reply_markdown(
         # TODO: Мб вывести оригинальное сообщение?
         text=prepare_text("Напоминание было удалено!"),
