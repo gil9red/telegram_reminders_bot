@@ -43,7 +43,7 @@ from regexp_patterns import (
     COMMAND_LIST,
     PATTERN_LIST,
     PATTERN_REMINDER_PAGE,
-    PATTERN_DELETE,
+    PATTERN_REMINDER_DELETE,
     fill_string_pattern,
 )
 from third_party.telegram_bot_pagination import InlineKeyboardPaginator
@@ -169,7 +169,7 @@ def get_reminders(update: Update, context: CallbackContext):
     paginator.add_before(
         InlineKeyboardButton(
             text=INLINE_BUTTON_TEXT_DELETE,
-            callback_data=fill_string_pattern(PATTERN_DELETE, reminder.id),
+            callback_data=fill_string_pattern(PATTERN_REMINDER_DELETE, reminder.id),
         ),
     )
 
@@ -391,7 +391,7 @@ def add_reminder(command: str, update: Update):
         reply_markup=InlineKeyboardMarkup.from_button(
             InlineKeyboardButton(
                 text=INLINE_BUTTON_TEXT_DELETE,
-                callback_data=fill_string_pattern(PATTERN_DELETE, reminder.id),
+                callback_data=fill_string_pattern(PATTERN_REMINDER_DELETE, reminder.id),
             ),
         ),
         quote=True,
@@ -490,7 +490,7 @@ def setup(dp: Dispatcher):
         CallbackQueryHandler(on_change_reminder_page, pattern=PATTERN_REMINDER_PAGE)
     )
 
-    dp.add_handler(CallbackQueryHandler(on_reminder_delete, pattern=PATTERN_DELETE))
+    dp.add_handler(CallbackQueryHandler(on_reminder_delete, pattern=PATTERN_REMINDER_DELETE))
 
     dp.add_handler(CommandHandler(COMMAND_ADD, on_add))
     dp.add_handler(MessageHandler(Filters.text, on_request))

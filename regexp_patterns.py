@@ -10,7 +10,7 @@ from third_party.regexp import fill_string_pattern
 
 
 PATTERN_REMINDER_PAGE = re.compile(r"^reminder page=(?P<page>\d+)$")
-PATTERN_DELETE = re.compile(r"^reminder#(?P<id>\d+)-delete$")
+PATTERN_REMINDER_DELETE = re.compile(r"^reminder#(?P<id>\d+)-delete$")
 
 COMMAND_START = "start"
 COMMAND_HELP = "help"
@@ -31,7 +31,7 @@ if __name__ == "__main__":
         == "reminder page=999999999"
     )
 
-    print(fill_string_pattern(PATTERN_DELETE, 999_999_999))
+    print(fill_string_pattern(PATTERN_REMINDER_DELETE, 999_999_999))
     assert (
-        fill_string_pattern(PATTERN_DELETE, 999_999_999) == "reminder#999999999-delete"
+            fill_string_pattern(PATTERN_REMINDER_DELETE, 999_999_999) == "reminder#999999999-delete"
     )
