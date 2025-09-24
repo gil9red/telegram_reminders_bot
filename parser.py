@@ -219,6 +219,49 @@ class RepeatEvery:
         return self.unit.get_value()
 
     def get_next_datetime(self, dt: datetime) -> datetime:
+        # Для повторов по TimeUnit нужна точная дата, а не просто +30 или +365 дней
+        if isinstance(self.unit, TimeUnit):
+            # Текущий день может отсутствовать, поэтому ищем ближайший день
+            # Например, если день 31, то ищем ближайший день 30
+            def _correct_datetime(
+                dt: datetime,
+                target_year: int,
+                target_month: int,
+            ) -> datetime:
+                while True:
+                    try:
+                        dt = dt.replace(year=target_year, month=target_month)
+                        break
+                    except ValueError:
+                        dt -= timedelta(days=1)
+                return dt
+
+            if self.unit.unit == TimeUnitEnum.YEAR:
+                return _correct_datetime(
+                    dt=dt,
+                    target_year=dt.year + self.unit.number,
+                    target_month=dt.month,
+                )
+
+            elif self.unit.unit == TimeUnitEnum.MONTH:
+                # TODO: Добавить сдвиг к целевой дате?
+                #       Например, если дата 30, в следующем месяце будет 29,
+                #       а еще в следующем месяце есть 30-я дата, то ее брать
+                month: int = dt.month
+                year: int = dt.year
+
+                for _ in range(self.unit.number):
+                    month += 1
+                    if month > 12:
+                        month = 1
+                        year += 1
+
+                return _correct_datetime(
+                    dt=dt,
+                    target_year=year,
+                    target_month=month,
+                )
+
         return self.unit.get_next_datetime(dt)
 
 

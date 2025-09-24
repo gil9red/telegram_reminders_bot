@@ -1675,7 +1675,7 @@ class TestCaseParserRepeatEvery(unittest.TestCase):
             with self.subTest(value=value, repeat_every=repeat_every):
                 self.assertEqual(value, RepeatEvery.parse_value(value).get_value())
 
-    def test_get_next_datetime(self):
+    def test_get_next_datetime_TimeUnit(self):
         dt = datetime(year=2025, month=7, day=1, hour=10, minute=0, second=0)
 
         for value, repeat_every in [
@@ -1696,12 +1696,20 @@ class TestCaseParserRepeatEvery(unittest.TestCase):
                 RepeatEvery(unit=TimeUnit(number=2, unit=TimeUnitEnum.WEEK)),
             ),
             (
-                datetime(year=2025, month=7, day=31, hour=10, minute=0, second=0),
+                datetime(year=2025, month=8, day=1, hour=10, minute=0, second=0),
                 RepeatEvery(unit=TimeUnit(number=1, unit=TimeUnitEnum.MONTH)),
             ),
             (
-                datetime(year=2025, month=9, day=29, hour=10, minute=0, second=0),
+                datetime(year=2025, month=10, day=1, hour=10, minute=0, second=0),
                 RepeatEvery(unit=TimeUnit(number=3, unit=TimeUnitEnum.MONTH)),
+            ),
+            (
+                datetime(year=2025, month=12, day=1, hour=10, minute=0, second=0),
+                RepeatEvery(unit=TimeUnit(number=5, unit=TimeUnitEnum.MONTH)),
+            ),
+            (
+                datetime(year=2026, month=2, day=1, hour=10, minute=0, second=0),
+                RepeatEvery(unit=TimeUnit(number=7, unit=TimeUnitEnum.MONTH)),
             ),
             (
                 datetime(year=2026, month=7, day=1, hour=10, minute=0, second=0),
@@ -1711,6 +1719,14 @@ class TestCaseParserRepeatEvery(unittest.TestCase):
                 datetime(year=2027, month=7, day=1, hour=10, minute=0, second=0),
                 RepeatEvery(unit=TimeUnit(number=2, unit=TimeUnitEnum.YEAR)),
             ),
+        ]:
+            with self.subTest(value=value, repeat_every=repeat_every):
+                self.assertEqual(value, repeat_every.get_next_datetime(dt))
+
+    def test_get_next_datetime_TimeUnitWeekDayUnit(self):
+        dt = datetime(year=2025, month=7, day=1, hour=10, minute=0, second=0)
+
+        for value, repeat_every in [
             (
                 datetime(year=2025, month=7, day=7, hour=10, minute=0, second=0),
                 RepeatEvery(unit=TimeUnitWeekDayUnit(unit=TimeUnitWeekDayEnum.MONDAY)),
@@ -1744,6 +1760,50 @@ class TestCaseParserRepeatEvery(unittest.TestCase):
             (
                 datetime(year=2025, month=7, day=6, hour=10, minute=0, second=0),
                 RepeatEvery(unit=TimeUnitWeekDayUnit(unit=TimeUnitWeekDayEnum.SUNDAY)),
+            ),
+        ]:
+            with self.subTest(value=value, repeat_every=repeat_every):
+                self.assertEqual(value, repeat_every.get_next_datetime(dt))
+
+    def test_get_next_datetime_leap_year_add_month(self):
+        dt = datetime(year=2024, month=1, day=29, hour=10, minute=0, second=0)
+
+        for value, repeat_every in [
+            (
+                datetime(year=2024, month=2, day=29, hour=10, minute=0, second=0),
+                RepeatEvery(unit=TimeUnit(number=1, unit=TimeUnitEnum.MONTH)),
+            ),
+            (
+                datetime(year=2025, month=2, day=28, hour=10, minute=0, second=0),
+                RepeatEvery(unit=TimeUnit(number=13, unit=TimeUnitEnum.MONTH)),
+            ),
+            (
+                datetime(year=2028, month=2, day=29, hour=10, minute=0, second=0),
+                RepeatEvery(unit=TimeUnit(number=49, unit=TimeUnitEnum.MONTH)),
+            ),
+        ]:
+            with self.subTest(value=value, repeat_every=repeat_every):
+                self.assertEqual(value, repeat_every.get_next_datetime(dt))
+
+    def test_get_next_datetime_leap_year_add_year(self):
+        dt = datetime(year=2024, month=2, day=29, hour=10, minute=0, second=0)
+
+        for value, repeat_every in [
+            (
+                datetime(year=2025, month=2, day=28, hour=10, minute=0, second=0),
+                RepeatEvery(unit=TimeUnit(number=1, unit=TimeUnitEnum.YEAR)),
+            ),
+            (
+                datetime(year=2026, month=2, day=28, hour=10, minute=0, second=0),
+                RepeatEvery(unit=TimeUnit(number=2, unit=TimeUnitEnum.YEAR)),
+            ),
+            (
+                datetime(year=2027, month=2, day=28, hour=10, minute=0, second=0),
+                RepeatEvery(unit=TimeUnit(number=3, unit=TimeUnitEnum.YEAR)),
+            ),
+            (
+                datetime(year=2028, month=2, day=29, hour=10, minute=0, second=0),
+                RepeatEvery(unit=TimeUnit(number=4, unit=TimeUnitEnum.YEAR)),
             ),
         ]:
             with self.subTest(value=value, repeat_every=repeat_every):
