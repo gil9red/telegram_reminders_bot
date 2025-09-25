@@ -5,22 +5,21 @@ __author__ = "ipetrash"
 
 
 import re
-
 from third_party.regexp import fill_string_pattern
 
 
-PATTERN_REMINDER_PAGE = re.compile(r"^reminder page=(?P<page>\d+)$")
-PATTERN_REMINDER_DELETE = re.compile(r"^reminder#(?P<id>\d+)-delete$")
+PATTERN_REMINDER_PAGE: re.Pattern = re.compile(r"^reminder page=(?P<page>\d+)$")
+PATTERN_REMINDER_DELETE: re.Pattern = re.compile(r"^reminder#(?P<id>\d+)-delete$")
 
-COMMAND_START = "start"
-COMMAND_HELP = "help"
+COMMAND_START: str = "start"
+COMMAND_HELP: str = "help"
 
-COMMAND_ADD = "add"
+COMMAND_ADD: str = "add"
 
-COMMAND_TZ = "tz"
+COMMAND_TZ: str = "tz"
 
-COMMAND_LIST = "list"
-PATTERN_LIST = re.compile("^Список$", flags=re.IGNORECASE)
+COMMAND_LIST: str = "list"
+PATTERN_LIST: re.Pattern = re.compile("^Список$", flags=re.IGNORECASE)
 
 
 if __name__ == "__main__":
@@ -33,5 +32,6 @@ if __name__ == "__main__":
 
     print(fill_string_pattern(PATTERN_REMINDER_DELETE, 999_999_999))
     assert (
-            fill_string_pattern(PATTERN_REMINDER_DELETE, 999_999_999) == "reminder#999999999-delete"
+        fill_string_pattern(PATTERN_REMINDER_DELETE, 999_999_999)
+        == "reminder#999999999-delete"
     )
