@@ -442,9 +442,22 @@ def on_reminder_ask_delete(update: Update, context: CallbackContext):
         message.reply_text("⚠ Напоминания уже нет", quote=True)
         return
 
-    message.reply_markdown(
-        # TODO: Мб вывести оригинальное сообщение?
-        text=prepare_text("Удалить напоминание?"),
+    target_datetime_utc = reminder.target_datetime_utc
+    target_datetime = reminder.get_target_datetime()
+
+    # TODO: Какой-нибудь общий метод для текста по напоминаниям?
+    lines: list[str] = [
+        "Удалить напоминание?",
+        "",
+        f"Установлено на {datetime_to_str(target_datetime)} (в UTC {datetime_to_str(target_datetime_utc)})",
+        "",
+        "Оригинальное сообщение:",
+        get_blockquote_html(reminder.original_message_text),
+    ]
+    text: str = prepare_text("\n".join(lines))
+
+    message.reply_html(
+        text=prepare_text(text),
         reply_markup=InlineKeyboardMarkup.from_row(
             [
                 InlineKeyboardButton(
