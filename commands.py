@@ -44,6 +44,8 @@ from regexp_patterns import (
     PATTERN_LIST,
     PATTERN_REMINDER_PAGE,
     PATTERN_REMINDER_DELETE,
+    PATTERN_REMINDER_ASK_DELETE,
+    PATTERN_DELETE_MESSAGE,
     fill_string_pattern,
 )
 from third_party.telegram_bot_pagination import InlineKeyboardPaginator
@@ -51,6 +53,15 @@ from third_party.is_equal_inline_keyboards import is_equal_inline_keyboards
 
 
 INLINE_BUTTON_TEXT_DELETE: str = "❌ Удалить"
+INLINE_BUTTON_TEXT_YES: str = "✅ Да"
+INLINE_BUTTON_TEXT_NO: str = "❌ Нет"
+
+
+def get_delete_button_for_reminder(reminder_id: int) -> InlineKeyboardButton:
+    return InlineKeyboardButton(
+        text=INLINE_BUTTON_TEXT_DELETE,
+        callback_data=fill_string_pattern(PATTERN_REMINDER_ASK_DELETE, reminder_id),
+    )
 
 
 def get_context_value(context: CallbackContext) -> str | None:
@@ -165,12 +176,8 @@ def get_reminders(update: Update, context: CallbackContext):
         current_page=page,
         data_pattern=fill_string_pattern(pattern, "{page}"),
     )
-
     paginator.add_before(
-        InlineKeyboardButton(
-            text=INLINE_BUTTON_TEXT_DELETE,
-            callback_data=fill_string_pattern(PATTERN_REMINDER_DELETE, reminder.id),
-        ),
+        get_delete_button_for_reminder(reminder.id),
     )
 
     reply_markup: str | None = paginator.markup
@@ -389,10 +396,7 @@ def add_reminder(command: str, update: Update):
     message.reply_text(
         text="\n".join(lines),
         reply_markup=InlineKeyboardMarkup.from_button(
-            InlineKeyboardButton(
-                text=INLINE_BUTTON_TEXT_DELETE,
-                callback_data=fill_string_pattern(PATTERN_REMINDER_DELETE, reminder.id),
-            ),
+            get_delete_button_for_reminder(reminder.id),
         ),
         quote=True,
     )
@@ -425,6 +429,43 @@ def on_change_reminder_page(update: Update, context: CallbackContext):
 
 
 @log_func(log)
+def on_reminder_ask_delete(update: Update, context: CallbackContext):
+    query = update.callback_query
+    if query:
+        query.answer()
+
+    message = update.effective_message
+    reminder_id: int = get_int_from_match(context.match, "id")
+
+    reminder: Reminder | None = Reminder.get_or_none(id=reminder_id)
+    if not reminder:
+        message.reply_text("⚠ Напоминания уже нет", quote=True)
+        return
+
+    message.reply_markdown(
+        # TODO: Мб вывести оригинальное сообщение?
+        text=prepare_text("Удалить напоминание?"),
+        reply_markup=InlineKeyboardMarkup.from_row(
+            [
+                InlineKeyboardButton(
+                    text=INLINE_BUTTON_TEXT_YES,
+                    callback_data=fill_string_pattern(
+                        PATTERN_REMINDER_DELETE, reminder.id
+                    ),
+                ),
+                InlineKeyboardButton(
+                    text=INLINE_BUTTON_TEXT_NO,
+                    callback_data=fill_string_pattern(
+                        PATTERN_DELETE_MESSAGE, reminder.id
+                    ),
+                ),
+            ]
+        ),
+        quote=True,
+    )
+
+
+@log_func(log)
 def on_reminder_delete(update: Update, context: CallbackContext):
     query = update.callback_query
     if query:
@@ -447,26 +488,25 @@ def on_reminder_delete(update: Update, context: CallbackContext):
     )
 
 
-# TODO:
-# @log_func(log)
-# def on_callback_delete_message(update: Update, _: CallbackContext):
-#     query = update.callback_query
-#
-#     try:
-#         query.delete_message()
-#     except BadRequest as e:
-#         if "Message can't be deleted for everyone" in str(e):
-#             text = "Нельзя удалить сообщение, т.к. оно слишком старое. Остается только вручную его удалить"
-#         else:
-#             text = f"При попытке удаления сообщения возникла ошибка: {str(e)!r}"
-#
-#         query.answer(
-#             text=text,
-#             show_alert=True,
-#         )
-#         return
-#
-#     query.answer()
+@log_func(log)
+def on_delete_message(update: Update, _: CallbackContext):
+    query = update.callback_query
+
+    try:
+        query.delete_message()
+    except BadRequest as e:
+        if "Message can't be deleted for everyone" in str(e):
+            text = "Нельзя удалить сообщение, т.к. оно слишком старое. Остается только вручную его удалить"
+        else:
+            text = f"При попытке удаления сообщения возникла ошибка: {str(e)!r}"
+
+        query.answer(
+            text=text,
+            show_alert=True,
+        )
+        return
+
+    query.answer()
 
 
 def on_error(update: Update, context: CallbackContext):
@@ -482,15 +522,21 @@ def setup(dp: Dispatcher):
     dp.add_handler(CommandHandler(COMMAND_LIST, on_get_reminders))
     dp.add_handler(MessageHandler(Filters.regex(PATTERN_LIST), on_get_reminders))
 
-    # TODO:
-    # dp.add_handler(
-    #     CallbackQueryHandler(on_callback_delete_message, pattern=PATTERN_DELETE_MESSAGE)
-    # )
     dp.add_handler(
         CallbackQueryHandler(on_change_reminder_page, pattern=PATTERN_REMINDER_PAGE)
     )
 
-    dp.add_handler(CallbackQueryHandler(on_reminder_delete, pattern=PATTERN_REMINDER_DELETE))
+    dp.add_handler(
+        CallbackQueryHandler(
+            on_reminder_ask_delete, pattern=PATTERN_REMINDER_ASK_DELETE
+        )
+    )
+    dp.add_handler(
+        CallbackQueryHandler(on_reminder_delete, pattern=PATTERN_REMINDER_DELETE)
+    )
+    dp.add_handler(
+        CallbackQueryHandler(on_delete_message, pattern=PATTERN_DELETE_MESSAGE)
+    )
 
     dp.add_handler(CommandHandler(COMMAND_ADD, on_add))
     dp.add_handler(MessageHandler(Filters.text, on_request))
