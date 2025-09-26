@@ -109,7 +109,7 @@ def send_reminder(
     else:
         tz_chat: tzinfo = chat.get_tz()
 
-        lines.append("Напоминаний:")
+        lines.append("Напоминания:")
 
         for time_unit in repeat_before:
             prev_dt = time_unit.get_prev_datetime(target_datetime)
