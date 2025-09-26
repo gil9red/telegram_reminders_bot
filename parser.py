@@ -221,6 +221,7 @@ class RepeatEvery:
     def get_next_datetime(self, dt: datetime) -> datetime:
         # Для повторов по TimeUnit нужна точная дата, а не просто +30 или +365 дней
         if isinstance(self.unit, TimeUnit):
+            # SOURCE: https://github.com/gil9red/SimplePyScripts/blob/9a5a457f066934aa9da593dabf0ff48c1aa7202a/datetime_example/correct_datetime.py#L12
             # Текущий день может отсутствовать, поэтому ищем ближайший день
             # Например, если день 31, то ищем ближайший день 30
             def _correct_datetime(
