@@ -29,6 +29,7 @@ from bot_utils import log_func, reply_error, get_blockquote_html
 from db import Reminder, Chat, User
 
 from parser import (
+    TimeUnit,
     ParseResult,
     Defaults,
     RepeatEvery,
@@ -77,6 +78,37 @@ def get_context_value(context: CallbackContext) -> str | None:
         return
 
 
+def _fill_repeat_before(
+    repeat_before: list[TimeUnit],
+    target_datetime: datetime,
+    tz_chat: tzinfo,
+) -> list[str]:
+    if not repeat_before:
+        return ["Без напоминаний"]
+
+    lines: list[str] = ["Напоминания:"]
+    now_dt: datetime = datetime.now()
+
+    for time_unit in repeat_before:
+        prev_dt: datetime = time_unit.get_prev_datetime(target_datetime)
+        prev_dt_utc: datetime = convert_tz(
+            dt=prev_dt,
+            from_tz=tz_chat,
+            to_tz=timezone.utc,
+        )
+
+        line: str = (
+            f"{time_unit.get_value()}: {prev_dt}"
+            f" (в UTC {datetime_to_str(prev_dt_utc)})"
+        )
+        if prev_dt < now_dt:  # Зачеркнуть прошедшие даты
+            line = f"<del>{line}</del>"
+
+        lines.append(f"    {line}")
+
+    return lines
+
+
 def send_reminder(
     bot: Bot,
     chat: Chat,
@@ -102,26 +134,11 @@ def send_reminder(
         f"Ближайшее: {datetime_to_str(next_send_datetime)} (в UTC {datetime_to_str(next_send_datetime_utc)})",
         f"Повтор: {repeat_every.get_value() if repeat_every else 'нет'}",
     ]
-
-    repeat_before = reminder.get_repeat_before()
-    if not repeat_before:
-        lines.append("Без напоминаний")
-    else:
-        tz_chat: tzinfo = chat.get_tz()
-
-        lines.append("Напоминания:")
-
-        for time_unit in repeat_before:
-            prev_dt = time_unit.get_prev_datetime(target_datetime)
-            prev_dt_utc = convert_tz(
-                dt=prev_dt,
-                from_tz=tz_chat,
-                to_tz=timezone.utc,
-            )
-            lines.append(
-                f"    {time_unit.get_value()}: {prev_dt} (в UTC {datetime_to_str(prev_dt_utc)})"
-            )
-
+    lines += _fill_repeat_before(
+        repeat_before=reminder.get_repeat_before(),
+        target_datetime=target_datetime,
+        tz_chat=chat.get_tz(),
+    )
     lines.append(
         f"\nОригинальное сообщение:\n"
         + get_blockquote_html(reminder.original_message_text)
@@ -376,25 +393,16 @@ def add_reminder(command: str, update: Update):
         f"Ближайшее: {datetime_to_str(next_send_datetime)} (в UTC {datetime_to_str(next_send_datetime_utc)})",
         f"Повтор: {parse_result.repeat_every.get_value() if parse_result.repeat_every else 'нет'}",
     ]
+    lines += _fill_repeat_before(
+        repeat_before=parse_result.repeat_before,
+        target_datetime=target_datetime,
+        tz_chat=tz_chat,
+    )
 
-    if not parse_result.repeat_before:
-        lines.append("Без напоминаний")
-    else:
-        lines.append("Напоминания:")
+    text: str = prepare_text("\n".join(lines))
 
-        for time_unit in parse_result.repeat_before:
-            prev_dt = time_unit.get_prev_datetime(parse_result.target_datetime)
-            prev_dt_utc = convert_tz(
-                dt=prev_dt,
-                from_tz=tz_chat,
-                to_tz=timezone.utc,
-            )
-            lines.append(
-                f"    {time_unit.get_value()}: {prev_dt} (в UTC {datetime_to_str(prev_dt_utc)})"
-            )
-
-    message.reply_text(
-        text="\n".join(lines),
+    message.reply_html(
+        text=text,
         reply_markup=InlineKeyboardMarkup.from_button(
             get_delete_button_for_reminder(reminder.id),
         ),
