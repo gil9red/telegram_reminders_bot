@@ -33,6 +33,8 @@ PATTERN_TARGET_DATETIME: re.Pattern = re.compile(
             сегодня|завтра|послезавтра
             |понедельник|вторник|среду|четверг|пятницу|субботу|воскресенье
         )
+        |
+        через\s*((?P<number>\d+)\s*)?(?P<unit>день|дн\w{1,2})
     )
     # Время в HH:MM
     (.*?(?P<time>\d{2}:\d{2}))?
@@ -352,6 +354,8 @@ def parse_command(
         raise ParserException(f"Команда {command!r} не соответствует шаблону")
 
     relative_day: str | None = m.group("relative_day")
+    unit: str | None = m.group("unit")
+
     if relative_day:
         new_dt: datetime = dt
 
@@ -369,6 +373,14 @@ def parse_command(
                     raise ParserException(f"Неподдерживаемый элемент {relative_day!r}")
 
                 new_dt = unit.get_next_datetime(new_dt)
+
+        day: int = new_dt.day
+        month: int = new_dt.month
+        year: int = new_dt.year
+
+    elif unit:  # NOTE: unit сейчас относятся только к дням
+        number: int = get_int_from_match(m, name="number", default=1)
+        new_dt: datetime = dt + timedelta(days=number)
 
         day: int = new_dt.day
         month: int = new_dt.month

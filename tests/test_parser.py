@@ -713,6 +713,218 @@ class TestCaseParseCommand(unittest.TestCase):
             with self.subTest(command=command):
                 self.assert_parse_result(command, result)
 
+    def test_parse_relative_days_with_time(self):
+        for command, result in [
+            (
+                'Напомни о "Покупки" через 1 день в 12:00',
+                ParseResult(
+                    target="Покупки",
+                    target_datetime=datetime(2025, 8, 10, 12, 0),
+                    repeat_every=None,
+                    repeat_before=[],
+                ),
+            ),
+            (
+                'Напомни о "Покупки" через день в 12:00',
+                ParseResult(
+                    target="Покупки",
+                    target_datetime=datetime(2025, 8, 10, 12, 0),
+                    repeat_every=None,
+                    repeat_before=[],
+                ),
+            ),
+            (
+                'Напомни о "Покупки" через 2 дня в 12:00',
+                ParseResult(
+                    target="Покупки",
+                    target_datetime=datetime(2025, 8, 11, 12, 0),
+                    repeat_every=None,
+                    repeat_before=[],
+                ),
+            ),
+            (
+                'Напомни о "Покупки" через 3 дня в 12:00',
+                ParseResult(
+                    target="Покупки",
+                    target_datetime=datetime(2025, 8, 12, 12, 0),
+                    repeat_every=None,
+                    repeat_before=[],
+                ),
+            ),
+            (
+                'Напомни о "Покупки" через 4 дня в 12:00',
+                ParseResult(
+                    target="Покупки",
+                    target_datetime=datetime(2025, 8, 13, 12, 0),
+                    repeat_every=None,
+                    repeat_before=[],
+                ),
+            ),
+            (
+                'Напомни о "Покупки" через 5 дней в 12:00',
+                ParseResult(
+                    target="Покупки",
+                    target_datetime=datetime(2025, 8, 14, 12, 0),
+                    repeat_every=None,
+                    repeat_before=[],
+                ),
+            ),
+            (
+                'Напомни о "Покупки" через 6 дней в 12:00',
+                ParseResult(
+                    target="Покупки",
+                    target_datetime=datetime(2025, 8, 15, 12, 0),
+                    repeat_every=None,
+                    repeat_before=[],
+                ),
+            ),
+            (
+                'Напомни о "Покупки" через 7 дней в 12:00',
+                ParseResult(
+                    target="Покупки",
+                    target_datetime=datetime(2025, 8, 16, 12, 0),
+                    repeat_every=None,
+                    repeat_before=[],
+                ),
+            ),
+            (
+                'Напомни о "Покупки" через 10 дней в 12:00',
+                ParseResult(
+                    target="Покупки",
+                    target_datetime=datetime(2025, 8, 19, 12, 0),
+                    repeat_every=None,
+                    repeat_before=[],
+                ),
+            ),
+            (
+                'Напомни о "Покупки" через 50 дней в 12:00',
+                ParseResult(
+                    target="Покупки",
+                    target_datetime=datetime(2025, 9, 28, 12, 0),
+                    repeat_every=None,
+                    repeat_before=[],
+                ),
+            ),
+        ]:
+            with self.subTest(command=command):
+                self.assert_parse_result(command, result)
+
+    def test_parse_relative_days(self):
+        for command, result in [
+            (
+                'Напомни о "Покупки" через 1 день',
+                ParseResult(
+                    target="Покупки",
+                    target_datetime=datetime(
+                        2025, 8, 10, self.defaults.hours, self.defaults.minutes
+                    ),
+                    repeat_every=None,
+                    repeat_before=[],
+                ),
+            ),
+            (
+                'Напомни о "Покупки" через день',
+                ParseResult(
+                    target="Покупки",
+                    target_datetime=datetime(
+                        2025, 8, 10, self.defaults.hours, self.defaults.minutes
+                    ),
+                    repeat_every=None,
+                    repeat_before=[],
+                ),
+            ),
+            (
+                'Напомни о "Покупки" через 2 дня',
+                ParseResult(
+                    target="Покупки",
+                    target_datetime=datetime(
+                        2025, 8, 11, self.defaults.hours, self.defaults.minutes
+                    ),
+                    repeat_every=None,
+                    repeat_before=[],
+                ),
+            ),
+            (
+                'Напомни о "Покупки" через 3 дня',
+                ParseResult(
+                    target="Покупки",
+                    target_datetime=datetime(
+                        2025, 8, 12, self.defaults.hours, self.defaults.minutes
+                    ),
+                    repeat_every=None,
+                    repeat_before=[],
+                ),
+            ),
+            (
+                'Напомни о "Покупки" через 4 дня',
+                ParseResult(
+                    target="Покупки",
+                    target_datetime=datetime(
+                        2025, 8, 13, self.defaults.hours, self.defaults.minutes
+                    ),
+                    repeat_every=None,
+                    repeat_before=[],
+                ),
+            ),
+            (
+                'Напомни о "Покупки" через 5 дней',
+                ParseResult(
+                    target="Покупки",
+                    target_datetime=datetime(
+                        2025, 8, 14, self.defaults.hours, self.defaults.minutes
+                    ),
+                    repeat_every=None,
+                    repeat_before=[],
+                ),
+            ),
+            (
+                'Напомни о "Покупки" через 6 дней',
+                ParseResult(
+                    target="Покупки",
+                    target_datetime=datetime(
+                        2025, 8, 15, self.defaults.hours, self.defaults.minutes
+                    ),
+                    repeat_every=None,
+                    repeat_before=[],
+                ),
+            ),
+            (
+                'Напомни о "Покупки" через 7 дней',
+                ParseResult(
+                    target="Покупки",
+                    target_datetime=datetime(
+                        2025, 8, 16, self.defaults.hours, self.defaults.minutes
+                    ),
+                    repeat_every=None,
+                    repeat_before=[],
+                ),
+            ),
+            (
+                'Напомни о "Покупки" через 10 дней',
+                ParseResult(
+                    target="Покупки",
+                    target_datetime=datetime(
+                        2025, 8, 19, self.defaults.hours, self.defaults.minutes
+                    ),
+                    repeat_every=None,
+                    repeat_before=[],
+                ),
+            ),
+            (
+                'Напомни о "Покупки" через 50 дней',
+                ParseResult(
+                    target="Покупки",
+                    target_datetime=datetime(
+                        2025, 9, 28, self.defaults.hours, self.defaults.minutes
+                    ),
+                    repeat_every=None,
+                    repeat_before=[],
+                ),
+            ),
+        ]:
+            with self.subTest(command=command):
+                self.assert_parse_result(command, result)
+
     def test_parse_defaults(self):
         command = 'Напомни о "Встреча" 10 февраля'
         result = parse_command(
