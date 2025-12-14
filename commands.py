@@ -144,6 +144,13 @@ def send_reminder(
         + get_blockquote_html(reminder.original_message_text)
     )
 
+    lines.append("")
+    create_datetime_utc = reminder.create_datetime_utc
+    create_datetime = reminder.get_create_datetime()
+    lines.append(
+        f"Создано {datetime_to_str(create_datetime)} (в UTC {datetime_to_str(create_datetime_utc)})",
+    )
+
     text: str = prepare_text("\n".join(lines))
     parse_mode: str = ParseMode.HTML
 
@@ -454,6 +461,9 @@ def on_reminder_ask_delete(update: Update, context: CallbackContext):
     target_datetime_utc = reminder.target_datetime_utc
     target_datetime = reminder.get_target_datetime()
 
+    create_datetime_utc = reminder.create_datetime_utc
+    create_datetime = reminder.get_create_datetime()
+
     # TODO: Какой-нибудь общий метод для текста по напоминаниям?
     lines: list[str] = [
         "Удалить напоминание?",
@@ -462,6 +472,8 @@ def on_reminder_ask_delete(update: Update, context: CallbackContext):
         "",
         "Оригинальное сообщение:",
         get_blockquote_html(reminder.original_message_text),
+        "",
+        f"Создано {datetime_to_str(create_datetime)} (в UTC {datetime_to_str(create_datetime_utc)})",
     ]
     text: str = prepare_text("\n".join(lines))
 

@@ -198,6 +198,13 @@ class Reminder(BaseModel):
             ]
         return []
 
+    def get_create_datetime(self) -> datetime:
+        return convert_tz(
+            dt=self.create_datetime_utc,
+            from_tz=timezone.utc,
+            to_tz=self.chat.get_tz(),
+        )
+
     def get_target_datetime(self) -> datetime:
         return convert_tz(
             dt=self.target_datetime_utc,
