@@ -20,11 +20,11 @@ from common import (
 
 
 class TestCaseCommon(TestCase):
-    def test_datetime_to_str(self):
+    def test_datetime_to_str(self) -> None:
         now: datetime = datetime(year=2025, month=8, day=9, hour=22, minute=0)
         self.assertEqual("09.08.2025 22:00:00", datetime_to_str(now))
 
-    def test_prepare_text(self):
+    def test_prepare_text(self) -> None:
         self.assertTrue(prepare_text("1234567890", max_length=6) == "123...")
 
         max_length: int = 4096
@@ -35,7 +35,7 @@ class TestCaseCommon(TestCase):
         text: str = "1" * max_length * 2
         self.assertTrue(len(prepare_text(text, max_length=max_length)) == max_length)
 
-    def test_get_int_from_match(self):
+    def test_get_int_from_match(self) -> None:
         self.assertEqual(
             123,
             get_int_from_match(
@@ -57,7 +57,7 @@ class TestCaseCommon(TestCase):
             ),
         )
 
-    def test_convert_tz(self):
+    def test_convert_tz(self) -> None:
         dt: datetime = datetime(year=2025, month=8, day=9, hour=18, minute=0)
         tz_utc: tzinfo = get_tz("UTC")
         tz_0230: tzinfo = get_tz("+02:30")
@@ -80,7 +80,7 @@ class TestCaseCommon(TestCase):
             ),
         )
 
-    def test_get_tz(self):
+    def test_get_tz(self) -> None:
         self.assertEqual("UTC+02:30", str(get_tz("+02:30")))
         self.assertEqual("UTC-02:30", str(get_tz("-02:30")))
         self.assertEqual("UTC", str(get_tz("UTC")))

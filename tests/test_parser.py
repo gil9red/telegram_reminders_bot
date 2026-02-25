@@ -25,7 +25,7 @@ from parser import (
 
 
 class TestCaseParserCommon(unittest.TestCase):
-    def test_TimeUnitEnum_days(self):
+    def test_TimeUnitEnum_days(self) -> None:
         self.assertEqual(365, TimeUnitEnum.YEAR.days())
         self.assertEqual(30, TimeUnitEnum.MONTH.days())
         self.assertEqual(7, TimeUnitEnum.WEEK.days())
@@ -43,7 +43,7 @@ class TestCaseParserCommon(unittest.TestCase):
                 self.assertEqual(enum_value, TimeUnitEnum(value))
                 self.assertEqual(enum_value, TimeUnitEnum[enum_value.name])
 
-    def test_TimeUnitWeekDayEnum(self):
+    def test_TimeUnitWeekDayEnum(self) -> None:
         for value, enum_value in [
             (1, TimeUnitWeekDayEnum.MONDAY),
             (2, TimeUnitWeekDayEnum.TUESDAY),
@@ -58,7 +58,7 @@ class TestCaseParserCommon(unittest.TestCase):
                 self.assertEqual(enum_value, TimeUnitWeekDayEnum(value))
                 self.assertEqual(enum_value, TimeUnitWeekDayEnum[enum_value.name])
 
-    def test_ParseResult(self):
+    def test_ParseResult(self) -> None:
         target = "target"
         target_datetime = datetime.now()
 
@@ -89,12 +89,12 @@ class TestCaseParserCommon(unittest.TestCase):
         self.assertEqual(repeat_every, result.repeat_every)
         self.assertEqual(repeat_before, result.repeat_before)
 
-    def test_Defaults(self):
+    def test_Defaults(self) -> None:
         defaults = Defaults(hours=10, minutes=30)
         self.assertEqual(10, defaults.hours)
         self.assertEqual(30, defaults.minutes)
 
-    def test_get_repeat_every(self):
+    def test_get_repeat_every(self) -> None:
         for prefix in ["Повтор раз в", "Повтор каждый"]:
             for values, repeat_every in TestCaseParserRepeatEvery.get_test_text():
                 with self.subTest(
@@ -108,7 +108,7 @@ class TestCaseParserCommon(unittest.TestCase):
                             msg=f"Проблема парсинга {text!r}",
                         )
 
-    def test_parse_repeat_before(self):
+    def test_parse_repeat_before(self) -> None:
         for text, units in [
             (
                 "Напомнить за 3 года, за год, за полгода, за 3 месяца, за месяц, за 10 дней, за неделю, за 3 дня, за день",
@@ -190,7 +190,7 @@ class TestCaseParserCommon(unittest.TestCase):
             with self.subTest(text=text, units=units):
                 self.assertEqual(units, parse_repeat_before(text))
 
-    def test_parse_month(self):
+    def test_parse_month(self) -> None:
         for number, month in [
             (1, "января"),
             (1, "Января"),
@@ -213,7 +213,7 @@ class TestCaseParserCommon(unittest.TestCase):
             with self.subTest(number=number, month=month):
                 self.assertEqual(number, parse_month(month))
 
-    def test_get_nearest_datetime(self):
+    def test_get_nearest_datetime(self) -> None:
         now: datetime = datetime(year=2025, month=8, day=9, hour=22, minute=0)
         target_dt: datetime = datetime(year=2026, month=1, day=10, hour=10, minute=0)
 
@@ -314,11 +314,11 @@ class TestCaseParserCommon(unittest.TestCase):
 
 class TestCaseParseCommand(unittest.TestCase):
     @classmethod
-    def setUpClass(cls):
+    def setUpClass(cls) -> None:
         cls.now: datetime = datetime(year=2025, month=8, day=9, hour=22, minute=0)
         cls.defaults: Defaults = Defaults(hours=11, minutes=0)
 
-    def assert_parse_result(self, command: str, result: ParseResult):
+    def assert_parse_result(self, command: str, result: ParseResult) -> None:
         actual_result = parse_command(command, self.now, self.defaults)
         self.assertEqual(result.target, actual_result.target)
         self.assertEqual(result.target_datetime, actual_result.target_datetime)
@@ -326,7 +326,7 @@ class TestCaseParseCommand(unittest.TestCase):
         self.assertEqual(result.repeat_every, actual_result.repeat_every)
         self.assertEqual(result, actual_result)
 
-    def test_parse_absolute_date(self):
+    def test_parse_absolute_date(self) -> None:
         for command, result in [
             (
                 'Напомни о "🍕" 10 февраля',
@@ -365,7 +365,7 @@ class TestCaseParseCommand(unittest.TestCase):
             with self.subTest(command=command):
                 self.assert_parse_result(command, result)
 
-    def test_parse_absolute_date_with_time(self):
+    def test_parse_absolute_date_with_time(self) -> None:
         for command, result in [
             (
                 'Напомни о "ДНС" 10 февраля в 14:55',
@@ -389,7 +389,7 @@ class TestCaseParseCommand(unittest.TestCase):
             with self.subTest(command=command):
                 self.assert_parse_result(command, result)
 
-    def test_parse_relative_today(self):
+    def test_parse_relative_today(self) -> None:
         for command, result in [
             (
                 'Напомни о "Покупки" сегодня',
@@ -450,7 +450,7 @@ class TestCaseParseCommand(unittest.TestCase):
             with self.subTest(command=command):
                 self.assert_parse_result(command, result)
 
-    def test_parse_relative_today_with_time(self):
+    def test_parse_relative_today_with_time(self) -> None:
         for command, result in [
             (
                 'Напомни о "Покупки" сегодня в 18:00',
@@ -501,7 +501,7 @@ class TestCaseParseCommand(unittest.TestCase):
             with self.subTest(command=command):
                 self.assert_parse_result(command, result)
 
-    def test_parse_relative_next_weekday(self):
+    def test_parse_relative_next_weekday(self) -> None:
         for command, result in [
             (
                 'Напомни о "Покупки" в следующий понедельник',
@@ -617,7 +617,7 @@ class TestCaseParseCommand(unittest.TestCase):
             with self.subTest(command=command):
                 self.assert_parse_result(command, result)
 
-    def test_parse_relative_next_weekday_with_time(self):
+    def test_parse_relative_next_weekday_with_time(self) -> None:
         for command, result in [
             (
                 'Напомни о "Покупки" в следующий понедельник в 12:00',
@@ -713,7 +713,7 @@ class TestCaseParseCommand(unittest.TestCase):
             with self.subTest(command=command):
                 self.assert_parse_result(command, result)
 
-    def test_parse_relative_days_with_time(self):
+    def test_parse_relative_days_with_time(self) -> None:
         for command, result in [
             (
                 'Напомни о "Покупки" через 1 день в 12:00',
@@ -809,7 +809,7 @@ class TestCaseParseCommand(unittest.TestCase):
             with self.subTest(command=command):
                 self.assert_parse_result(command, result)
 
-    def test_parse_relative_days(self):
+    def test_parse_relative_days(self) -> None:
         for command, result in [
             (
                 'Напомни о "Покупки" через 1 день',
@@ -925,7 +925,7 @@ class TestCaseParseCommand(unittest.TestCase):
             with self.subTest(command=command):
                 self.assert_parse_result(command, result)
 
-    def test_parse_defaults(self):
+    def test_parse_defaults(self) -> None:
         command = 'Напомни о "Встреча" 10 февраля'
         result = parse_command(
             command, self.now, defaults=Defaults(hours=14, minutes=55)
@@ -933,7 +933,7 @@ class TestCaseParseCommand(unittest.TestCase):
         self.assertEqual(result.target_datetime.hour, 14)
         self.assertEqual(result.target_datetime.minute, 55)
 
-    def test_parse_with_repeat_every(self):
+    def test_parse_with_repeat_every(self) -> None:
         for command, result in [
             (
                 'Напомни о "Чатик 🍕" 17 июля в 12:00. Повтор каждый понедельник',
@@ -1294,7 +1294,7 @@ class TestCaseParseCommand(unittest.TestCase):
             with self.subTest(command=command):
                 self.assert_parse_result(command, result)
 
-    def test_parse_with_repeat_before(self):
+    def test_parse_with_repeat_before(self) -> None:
         for command, result in [
             (
                 'День рождения "Поход" 10 февраля. Повтор раз в год. Напомнить за месяц, за неделю, за 3 дня, за день',
@@ -1505,7 +1505,7 @@ class TestCaseParseCommand(unittest.TestCase):
             with self.subTest(command=command):
                 self.assert_parse_result(command, result)
 
-    def test_invalid_input(self):
+    def test_invalid_input(self) -> None:
         with self.assertRaises(ParserException):
             parse_command("Некорректная команда", self.now, self.defaults)
 
@@ -1524,7 +1524,7 @@ class TestCaseTimeUnit(unittest.TestCase):
             ("2 YEAR", TimeUnit(number=2, unit=TimeUnitEnum.YEAR)),
         ]
 
-    def test_parse_text(self):
+    def test_parse_text(self) -> None:
         for values, unit in [
             (
                 ["год", "года", "ГОДА"],
@@ -1555,38 +1555,38 @@ class TestCaseTimeUnit(unittest.TestCase):
                 for text in values:
                     self.assertEqual(unit, TimeUnit.parse_text(text))
 
-    def test_parse_value(self):
+    def test_parse_value(self) -> None:
         for _, unit in self.get_test_data():
             with self.subTest(unit=unit):
                 value = unit.get_value()
                 self.assertEqual(unit, TimeUnit.parse_value(value))
 
-    def test_get_value(self):
+    def test_get_value(self) -> None:
         for value, unit in self.get_test_data():
             with self.subTest(value=value, unit=unit):
                 self.assertEqual(value, unit.get_value())
 
-    def test_get_prev_datetime(self):
+    def test_get_prev_datetime(self) -> None:
         dt = datetime(year=2020, month=1, day=1, hour=10, minute=0, second=0)
 
         for _, unit in self.get_test_data():
             with self.subTest(unit=unit):
                 self.assertEqual(dt - unit.get_timedelta(), unit.get_prev_datetime(dt))
 
-    def test_get_next_datetime(self):
+    def test_get_next_datetime(self) -> None:
         dt = datetime(year=2020, month=1, day=1, hour=10, minute=0, second=0)
 
         for _, unit in self.get_test_data():
             with self.subTest(unit=unit):
                 self.assertEqual(dt + unit.get_timedelta(), unit.get_next_datetime(dt))
 
-    def test_get_timedelta(self):
+    def test_get_timedelta(self) -> None:
         for _, unit in self.get_test_data():
             with self.subTest(unit=unit):
                 days = unit.number * unit.unit.days()
                 self.assertEqual(timedelta(days=days), unit.get_timedelta())
 
-    def test_sorting(self):
+    def test_sorting(self) -> None:
         data: list[TimeUnit] = [
             TimeUnit(number=1, unit=TimeUnitEnum.DAY),
             TimeUnit(number=10, unit=TimeUnitEnum.DAY),
@@ -1654,7 +1654,7 @@ class TestCaseTimeUnitWeekDayUnit(unittest.TestCase):
             ),
         ]
 
-    def test_parse_text(self):
+    def test_parse_text(self) -> None:
         for text, unit in self.get_test_data() + [
             # Invalid
             ("None", None),
@@ -1664,13 +1664,13 @@ class TestCaseTimeUnitWeekDayUnit(unittest.TestCase):
             with self.subTest(text=text, unit=unit):
                 self.assertEqual(unit, TimeUnitWeekDayUnit.parse_text(text))
 
-    def test_parse_value(self):
+    def test_parse_value(self) -> None:
         for _, unit in self.get_test_data():
             with self.subTest(unit=unit):
                 value = unit.get_value()
                 self.assertEqual(unit, TimeUnitWeekDayUnit.parse_value(value))
 
-    def test_get_value(self):
+    def test_get_value(self) -> None:
         for value, unit in [
             (
                 "MONDAY",
@@ -1704,7 +1704,7 @@ class TestCaseTimeUnitWeekDayUnit(unittest.TestCase):
             with self.subTest(value=value, unit=unit):
                 self.assertEqual(value, unit.get_value())
 
-    def test_get_next_datetime(self):
+    def test_get_next_datetime(self) -> None:
         dt = datetime(year=2025, month=7, day=1, hour=10, minute=0, second=0)
 
         for value, unit in [
@@ -1852,18 +1852,18 @@ class TestCaseParserRepeatEvery(unittest.TestCase):
             ),
         ]
 
-    def test_get_unit_classes(self):
+    def test_get_unit_classes(self) -> None:
         self.assertEqual(
             [TimeUnit, TimeUnitWeekDayUnit], RepeatEvery.get_unit_classes()
         )
 
-    def test_parse_text(self):
+    def test_parse_text(self) -> None:
         for values, repeat_every in self.get_test_text():
             with self.subTest(values=values, repeat_every=repeat_every):
                 for text in values:
                     self.assertEqual(repeat_every, RepeatEvery.parse_text(text))
 
-    def test_parse_value(self):
+    def test_parse_value(self) -> None:
         for value, repeat_every in self.get_test_data() + [
             # Invalid
             (
@@ -1882,12 +1882,12 @@ class TestCaseParserRepeatEvery(unittest.TestCase):
             with self.subTest(value=value, repeat_every=repeat_every):
                 self.assertEqual(repeat_every, RepeatEvery.parse_value(value))
 
-    def test_get_value(self):
+    def test_get_value(self) -> None:
         for value, repeat_every in self.get_test_data():
             with self.subTest(value=value, repeat_every=repeat_every):
                 self.assertEqual(value, RepeatEvery.parse_value(value).get_value())
 
-    def test_get_next_datetime_TimeUnit(self):
+    def test_get_next_datetime_TimeUnit(self) -> None:
         dt = datetime(year=2025, month=7, day=1, hour=10, minute=0, second=0)
 
         for value, repeat_every in [
@@ -1935,7 +1935,7 @@ class TestCaseParserRepeatEvery(unittest.TestCase):
             with self.subTest(value=value, repeat_every=repeat_every):
                 self.assertEqual(value, repeat_every.get_next_datetime(dt))
 
-    def test_get_next_datetime_TimeUnitWeekDayUnit(self):
+    def test_get_next_datetime_TimeUnitWeekDayUnit(self) -> None:
         dt = datetime(year=2025, month=7, day=1, hour=10, minute=0, second=0)
 
         for value, repeat_every in [
@@ -1977,7 +1977,7 @@ class TestCaseParserRepeatEvery(unittest.TestCase):
             with self.subTest(value=value, repeat_every=repeat_every):
                 self.assertEqual(value, repeat_every.get_next_datetime(dt))
 
-    def test_get_next_datetime_leap_year_add_month(self):
+    def test_get_next_datetime_leap_year_add_month(self) -> None:
         dt = datetime(year=2024, month=1, day=29, hour=10, minute=0, second=0)
 
         for value, repeat_every in [
@@ -1997,7 +1997,7 @@ class TestCaseParserRepeatEvery(unittest.TestCase):
             with self.subTest(value=value, repeat_every=repeat_every):
                 self.assertEqual(value, repeat_every.get_next_datetime(dt))
 
-    def test_get_next_datetime_leap_year_add_year(self):
+    def test_get_next_datetime_leap_year_add_year(self) -> None:
         dt = datetime(year=2024, month=2, day=29, hour=10, minute=0, second=0)
 
         for value, repeat_every in [
