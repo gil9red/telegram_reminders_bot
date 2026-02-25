@@ -87,7 +87,7 @@ def process_check_reminders(bot: Bot):
             time.sleep(1)
 
 
-def do_checking_reminders():
+def do_checking_reminders() -> None:
     while True:
         bot: Bot | None = DATA["BOT"]
         if not bot:
@@ -102,7 +102,7 @@ def do_checking_reminders():
             time.sleep(1)
 
 
-def main():
+def main() -> None:
     log.debug("Start")
 
     cpu_count = os.cpu_count()

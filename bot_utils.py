@@ -69,7 +69,7 @@ def log_func(log: logging.Logger):
     return actual_decorator
 
 
-def reply_error(log: logging.Logger, update: Update, context: CallbackContext):
+def reply_error(log: logging.Logger, update: Update, context: CallbackContext) -> None:
     log.error("Error: %s\nUpdate: %s", context.error, update, exc_info=context.error)
     if not update:
         return

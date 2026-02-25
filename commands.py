@@ -116,7 +116,7 @@ def send_reminder(
     message_id: int,
     reply_markup: str | None,
     as_new_message: bool = True,
-):
+) -> None:
     chat_id: int = chat.id
 
     target_datetime_utc = reminder.target_datetime_utc
@@ -227,7 +227,7 @@ def get_reminders(update: Update, context: CallbackContext):
 
 
 @log_func(log)
-def on_start(update: Update, _: CallbackContext):
+def on_start(update: Update, _: CallbackContext) -> None:
     update.effective_message.reply_markdown(
         prepare_text(
             """
@@ -258,7 +258,7 @@ def on_start(update: Update, _: CallbackContext):
 
 
 @log_func(log)
-def on_tz(update: Update, context: CallbackContext):
+def on_tz(update: Update, context: CallbackContext) -> None:
     chat = Chat.get_from(update.effective_chat)
     message = update.effective_message
 
@@ -308,7 +308,7 @@ def on_tz(update: Update, context: CallbackContext):
     )
 
 
-def add_reminder(command: str, update: Update):
+def add_reminder(command: str, update: Update) -> None:
     log.debug(f"Command: {command!r}")
 
     message = update.effective_message
@@ -419,7 +419,7 @@ def add_reminder(command: str, update: Update):
 
 
 @log_func(log)
-def on_add(update: Update, context: CallbackContext):
+def on_add(update: Update, context: CallbackContext) -> None:
     add_reminder(
         command=get_context_value(context),
         update=update,
@@ -427,7 +427,7 @@ def on_add(update: Update, context: CallbackContext):
 
 
 @log_func(log)
-def on_request(update: Update, _: CallbackContext):
+def on_request(update: Update, _: CallbackContext) -> None:
     add_reminder(
         command=update.effective_message.text,
         update=update,
@@ -435,17 +435,17 @@ def on_request(update: Update, _: CallbackContext):
 
 
 @log_func(log)
-def on_get_reminders(update: Update, context: CallbackContext):
+def on_get_reminders(update: Update, context: CallbackContext) -> None:
     get_reminders(update, context)
 
 
 @log_func(log)
-def on_change_reminder_page(update: Update, context: CallbackContext):
+def on_change_reminder_page(update: Update, context: CallbackContext) -> None:
     get_reminders(update, context)
 
 
 @log_func(log)
-def on_reminder_ask_delete(update: Update, context: CallbackContext):
+def on_reminder_ask_delete(update: Update, context: CallbackContext) -> None:
     query = update.callback_query
     if query:
         query.answer()
@@ -500,7 +500,7 @@ def on_reminder_ask_delete(update: Update, context: CallbackContext):
 
 
 @log_func(log)
-def on_reminder_delete(update: Update, context: CallbackContext):
+def on_reminder_delete(update: Update, context: CallbackContext) -> None:
     query = update.callback_query
     if query:
         query.answer()
@@ -523,7 +523,7 @@ def on_reminder_delete(update: Update, context: CallbackContext):
 
 
 @log_func(log)
-def on_delete_message(update: Update, _: CallbackContext):
+def on_delete_message(update: Update, _: CallbackContext) -> None:
     query = update.callback_query
 
     try:
@@ -543,11 +543,11 @@ def on_delete_message(update: Update, _: CallbackContext):
     query.answer()
 
 
-def on_error(update: Update, context: CallbackContext):
+def on_error(update: Update, context: CallbackContext) -> None:
     reply_error(log, update, context)
 
 
-def setup(dp: Dispatcher):
+def setup(dp: Dispatcher) -> None:
     dp.add_handler(CommandHandler(COMMAND_START, on_start))
     dp.add_handler(CommandHandler(COMMAND_HELP, on_start))
 

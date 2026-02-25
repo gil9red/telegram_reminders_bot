@@ -62,7 +62,7 @@ class User(BaseModel):
     language_code: str = TextField(null=True)
     last_activity: datetime = DateTimeField(default=datetime.now)
 
-    def update_last_activity(self):
+    def update_last_activity(self) -> None:
         self.last_activity = datetime.now()
         self.save()
 
@@ -98,7 +98,7 @@ class Chat(BaseModel):
     def get_tz(self) -> tzinfo:
         return get_tz(self.tz)
 
-    def update_last_activity(self):
+    def update_last_activity(self) -> None:
         self.last_activity = datetime.now()
         self.save()
 
