@@ -21,8 +21,11 @@ from common import (
 
 class TestCaseCommon(TestCase):
     def test_datetime_to_str(self) -> None:
-        now: datetime = datetime(year=2025, month=8, day=9, hour=22, minute=0)
-        self.assertEqual("09.08.2025 22:00:00", datetime_to_str(now))
+        now: datetime = datetime(year=2025, month=8, day=9, hour=22, minute=0, second=0)
+        self.assertEqual("09.08.2025 22:00", datetime_to_str(now))
+
+        now = now.replace(second=10)
+        self.assertEqual("09.08.2025 22:00:10", datetime_to_str(now))
 
     def test_prepare_text(self) -> None:
         self.assertTrue(prepare_text("1234567890", max_length=6) == "123...")

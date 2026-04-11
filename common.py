@@ -47,7 +47,8 @@ def get_logger(file_name: str, dir_name: Path = config.DIR / "logs") -> logging.
 
 
 def datetime_to_str(dt: datetime) -> str:
-    return f"{dt:%d.%m.%Y %H:%M:%S}"
+    pattern: str = "%d.%m.%Y %H:%M:%S" if dt.second else "%d.%m.%Y %H:%M"
+    return f"{dt:{pattern}}"
 
 
 def prepare_text(text: str, max_length: int = config.MESS_MAX_LENGTH) -> str:
