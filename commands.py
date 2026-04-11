@@ -226,9 +226,7 @@ def get_reminders(update: Update, context: CallbackContext):
 
 @log_func(log)
 def on_start(update: Update, _: CallbackContext) -> None:
-    update.effective_message.reply_markdown(
-        prepare_text(
-            """
+    text = """
 Введите что-нибудь или с добавление команды `/add "Встреча" сегодня в 18:00`, например:
 - `Напомни о "🍕" 10 февраля`
 - `"ДНС" 10 февраля в 14:55`
@@ -249,8 +247,9 @@ def on_start(update: Update, _: CallbackContext) -> None:
 - /tz <часовой пояс в IANA или +-часы:минуты> - для установки. Например:
   - `/tz Europe/Moscow`
   - `/tz +03:00`
-        """
-        ),
+    """
+    update.effective_message.reply_markdown(
+        prepare_text(text),
         quote=True,
     )
 
