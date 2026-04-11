@@ -20,7 +20,6 @@ from common import datetime_to_str, prepare_text, log
 from config import TOKEN
 from db import Reminder
 
-
 DATA: dict[str, Any] = {
     "BOT": None,
 }
@@ -82,7 +81,9 @@ def process_check_reminders(bot: Bot):
                     raise e
 
                 except Unauthorized:
-                    log.exception(f"Нет доступа к чату #{reminder.chat_id}. Напоминание будет удалено")
+                    log.exception(
+                        f"Нет доступа к чату #{reminder.chat_id}. Напоминание будет удалено"
+                    )
                     reminder.delete_instance()
                     break
 
