@@ -53,7 +53,7 @@ def process_check_reminders(bot: Bot):
                 next_send_datetime_utc = reminder.next_send_datetime_utc
                 next_send_datetime = reminder.get_next_send_datetime()
                 lines.append(
-                    f"Следующее: {datetime_to_str(next_send_datetime)} "
+                    f"🚀 Следующее: {datetime_to_str(next_send_datetime)} "
                     f"(в UTC {datetime_to_str(next_send_datetime_utc)})"
                 )
 
