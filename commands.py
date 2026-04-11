@@ -19,7 +19,7 @@ from telegram.error import BadRequest
 
 from common import (
     log,
-    datetime_to_str,
+    datetimes_pair_to_str,
     prepare_text,
     get_int_from_match,
     convert_tz,
@@ -51,7 +51,6 @@ from regexp_patterns import (
 )
 from third_party.telegram_bot_pagination import InlineKeyboardPaginator
 from third_party.is_equal_inline_keyboards import is_equal_inline_keyboards
-
 
 INLINE_BUTTON_TEXT_DELETE: str = "❌ Удалить"
 INLINE_BUTTON_TEXT_YES: str = "✅ Да"
@@ -98,8 +97,7 @@ def _fill_repeat_before(
         )
 
         line: str = (
-            f"{time_unit.get_value()}: {prev_dt}"
-            f" (в UTC {datetime_to_str(prev_dt_utc)})"
+            f"{time_unit.get_value()}: {datetimes_pair_to_str(prev_dt, prev_dt_utc)}"
         )
         if prev_dt < now_dt:  # Зачеркнуть прошедшие даты
             line = f"<del>{line}</del>"
@@ -130,8 +128,8 @@ def send_reminder(
     lines: list[str] = [
         "Напоминание:",
         get_blockquote_html(reminder.target),
-        f"Установлено на {datetime_to_str(target_datetime)} (в UTC {datetime_to_str(target_datetime_utc)})",
-        f"Ближайшее: {datetime_to_str(next_send_datetime)} (в UTC {datetime_to_str(next_send_datetime_utc)})",
+        f"Установлено на {datetimes_pair_to_str(target_datetime, target_datetime_utc)}",
+        f"Ближайшее: {datetimes_pair_to_str(next_send_datetime, next_send_datetime_utc)}",
         f"Повтор: {repeat_every.get_value() if repeat_every else 'нет'}",
     ]
     lines += _fill_repeat_before(
@@ -145,10 +143,10 @@ def send_reminder(
     )
 
     lines.append("")
-    create_datetime_utc = reminder.create_datetime_utc
-    create_datetime = reminder.get_create_datetime()
+    create_datetime_utc: datetime = reminder.create_datetime_utc
+    create_datetime: datetime = reminder.get_create_datetime()
     lines.append(
-        f"Создано {datetime_to_str(create_datetime)} (в UTC {datetime_to_str(create_datetime_utc)})",
+        f"Создано {datetimes_pair_to_str(create_datetime, create_datetime_utc)}"
     )
 
     text: str = prepare_text("\n".join(lines))
@@ -279,15 +277,13 @@ def on_tz(update: Update, context: CallbackContext) -> None:
         from_tz=timezone.utc,
         to_tz=tz_chat,
     )
-    date_info: str = (
-        f"\nВремя: {datetime_to_str(dt)}\nВремя в UTC: {datetime_to_str(dt_utc)}"
-    )
+    date_info: str = f"Время: {datetimes_pair_to_str(dt, dt_utc)}"
 
     if is_set:
         if chat.tz == value:
             message.reply_markdown(
                 text=prepare_text(
-                    f"Часовой пояс `{value}` уже был установлен.\n{date_info}"
+                    f"Часовой пояс `{value}` уже был установлен.\n\n{date_info}"
                 ),
                 quote=True,
             )
@@ -297,13 +293,13 @@ def on_tz(update: Update, context: CallbackContext) -> None:
         chat.save()
 
         message.reply_markdown(
-            text=prepare_text(f"Установлен часовой пояс `{value}`.\n{date_info}"),
+            text=prepare_text(f"Установлен часовой пояс `{value}`.\n\n{date_info}"),
             quote=True,
         )
         return
 
     message.reply_markdown(
-        text=prepare_text(f"Часовой пояс `{value}`.\n{date_info}"),
+        text=prepare_text(f"Часовой пояс `{value}`.\n\n{date_info}"),
         quote=True,
     )
 
@@ -396,9 +392,8 @@ def add_reminder(command: str, update: Update) -> None:
 
     # TODO: Дублирует send_reminder
     lines: list[str] = [
-        f"Напоминание установлено на {datetime_to_str(target_datetime)}"
-        f" (в UTC {datetime_to_str(target_datetime_utc)})",
-        f"Ближайшее: {datetime_to_str(next_send_datetime)} (в UTC {datetime_to_str(next_send_datetime_utc)})",
+        f"Напоминание установлено на {datetimes_pair_to_str(target_datetime, target_datetime_utc)}",
+        f"Ближайшее: {datetimes_pair_to_str(next_send_datetime, next_send_datetime_utc)}",
         f"Повтор: {parse_result.repeat_every.get_value() if parse_result.repeat_every else 'нет'}",
     ]
     lines += _fill_repeat_before(
@@ -468,12 +463,12 @@ def on_reminder_ask_delete(update: Update, context: CallbackContext) -> None:
     lines: list[str] = [
         "Удалить напоминание?",
         "",
-        f"Установлено на {datetime_to_str(target_datetime)} (в UTC {datetime_to_str(target_datetime_utc)})",
+        f"Установлено на {datetimes_pair_to_str(target_datetime, target_datetime_utc)}",
         "",
         "Оригинальное сообщение:",
         get_blockquote_html(reminder.original_message_text),
         "",
-        f"Создано {datetime_to_str(create_datetime)} (в UTC {datetime_to_str(create_datetime_utc)})",
+        f"Создано {datetimes_pair_to_str(create_datetime, create_datetime_utc)}",
     ]
     text: str = prepare_text("\n".join(lines))
 

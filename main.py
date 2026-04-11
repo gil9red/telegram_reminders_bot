@@ -16,7 +16,7 @@ from telegram.ext import Updater, Defaults
 from telegram.error import BadRequest, Unauthorized
 
 import commands
-from common import datetime_to_str, prepare_text, log
+from common import datetimes_pair_to_str, prepare_text, log
 from config import TOKEN
 from db import Reminder
 
@@ -40,22 +40,20 @@ def process_check_reminders(bot: Bot):
         # Отправка уведомления
         # Планирование следующей отправки
         try:
+            target_datetime_str: str = datetimes_pair_to_str(
+                reminder.get_target_datetime(), reminder.target_datetime_utc
+            )
             lines: list[str] = [
                 f"🎯 {reminder.target}",
-                (
-                    f"📅 Целевая дата: {datetime_to_str(reminder.get_target_datetime())} "
-                    f"(в UTC {datetime_to_str(reminder.target_datetime_utc)})"
-                ),
+                f"📅 Целевая дата: {target_datetime_str}",
             ]
 
             has_next: bool = reminder.process_next_notify(now_utc)
             if has_next:
-                next_send_datetime_utc = reminder.next_send_datetime_utc
-                next_send_datetime = reminder.get_next_send_datetime()
-                lines.append(
-                    f"🚀 Следующее: {datetime_to_str(next_send_datetime)} "
-                    f"(в UTC {datetime_to_str(next_send_datetime_utc)})"
+                next_send_datetime_str: str = datetimes_pair_to_str(
+                    reminder.get_next_send_datetime(), reminder.next_send_datetime_utc
                 )
+                lines.append(f"🚀 Следующее: {next_send_datetime_str}")
 
             text: str = prepare_text("\n".join(lines))
 
