@@ -11,6 +11,7 @@ from unittest import TestCase
 
 from common import (
     datetime_to_str,
+    datetimes_pair_to_str,
     prepare_text,
     get_int_from_match,
     get_tz,
@@ -21,8 +22,6 @@ from common import (
 
 class TestCaseCommon(TestCase):
     def test_datetime_to_str(self) -> None:
-        now: datetime = datetime(year=2025, month=8, day=9, hour=22, minute=0, second=0)
-        self.assertEqual("09.08.2025 22:00", datetime_to_str(now))
         base_dt: datetime = datetime(
             year=2025, month=8, day=9, hour=22, minute=0, second=0
         )
@@ -74,8 +73,46 @@ class TestCaseCommon(TestCase):
             with self.subTest(msg=msg, dt=dt, other_dt=other_dt):
                 self.assertEqual(expected, datetime_to_str(dt, other_dt))
 
-        now = now.replace(second=10)
-        self.assertEqual("09.08.2025 22:00:10", datetime_to_str(now))
+    def test_datetimes_pair_to_str(self) -> None:
+        # Базовая дата для тестов (местное время и UTC в один день)
+        local_dt: datetime = datetime(2025, 8, 9, 22, 30, 0)
+        utc_dt: datetime = datetime(2025, 8, 9, 17, 30, 0)
+
+        # Формат: (dt, dt_utc, expected_result, название подтеста)
+        test_cases = [
+            # 1. Обычный случай: даты совпадают, секунд нет
+            (
+                local_dt,
+                utc_dt,
+                "09.08.2025 22:30 (17:30 UTC)",
+                "Совпадающие даты (без секунд)",
+            ),
+            # 2. Даты совпадают, но есть секунды
+            (
+                local_dt.replace(second=15),
+                utc_dt.replace(second=15),
+                "09.08.2025 22:30:15 (17:30:15 UTC)",
+                "Совпадающие даты (с секундами)",
+            ),
+            # 3. Разные даты (например, переход через полночь), секунд нет
+            (
+                datetime(2025, 8, 10, 2, 30, 0),  # Уже следующий день
+                datetime(2025, 8, 9, 21, 30, 0),  # Еще предыдущий день
+                "10.08.2025 02:30 (09.08.2025 21:30 UTC)",
+                "Разные даты (без секунд)",
+            ),
+            # 4. Разные даты, и есть секунды
+            (
+                datetime(2025, 8, 10, 2, 30, 45),
+                datetime(2025, 8, 9, 21, 30, 45),
+                "10.08.2025 02:30:45 (09.08.2025 21:30:45 UTC)",
+                "Разные даты (с секундами)",
+            ),
+        ]
+
+        for dt, dt_utc, expected, msg in test_cases:
+            with self.subTest(msg=msg, dt=dt, dt_utc=dt_utc):
+                self.assertEqual(expected, datetimes_pair_to_str(dt, dt_utc))
 
     def test_prepare_text(self) -> None:
         self.assertTrue(prepare_text("1234567890", max_length=6) == "123...")
