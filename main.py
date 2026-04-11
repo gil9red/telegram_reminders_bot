@@ -41,17 +41,23 @@ def process_check_reminders(bot: Bot):
         # Отправка уведомления
         # Планирование следующей отправки
         try:
+            lines: list[str] = [
+                f"🎯 {reminder.target}",
+                (
+                    f"📅 Целевая дата: {datetime_to_str(reminder.get_target_datetime())} "
+                    f"(в UTC {datetime_to_str(reminder.target_datetime_utc)})"
+                ),
+            ]
+
             has_next: bool = reminder.process_next_notify(now_utc)
-
-            next_send_datetime_utc = reminder.next_send_datetime_utc
-            next_send_datetime = reminder.get_next_send_datetime()
-
-            lines: list[str] = [f"⌛ {reminder.target}"]
             if has_next:
+                next_send_datetime_utc = reminder.next_send_datetime_utc
+                next_send_datetime = reminder.get_next_send_datetime()
                 lines.append(
                     f"Следующее: {datetime_to_str(next_send_datetime)} "
                     f"(в UTC {datetime_to_str(next_send_datetime_utc)})"
                 )
+
             text: str = prepare_text("\n".join(lines))
 
             reply_to_message_id: int | None = reminder.get_reply_to_message_id()
