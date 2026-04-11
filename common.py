@@ -49,6 +49,13 @@ def get_logger(file_name: str, dir_name: Path = config.DIR / "logs") -> logging.
 def datetime_to_str(dt: datetime) -> str:
     pattern: str = "%d.%m.%Y %H:%M:%S" if dt.second else "%d.%m.%Y %H:%M"
     return f"{dt:{pattern}}"
+def datetime_to_str(dt: datetime, other_dt: datetime | None = None) -> str:
+    pattern_time: str = "%H:%M:%S" if dt.second else "%H:%M"
+    if other_dt and other_dt.date() == dt.date():  # Если дни совпадают, то только время
+        pattern: str = pattern_time
+    else:
+        pattern: str = f"%d.%m.%Y {pattern_time}"
+    return dt.strftime(pattern)
 
 
 def prepare_text(text: str, max_length: int = config.MESS_MAX_LENGTH) -> str:

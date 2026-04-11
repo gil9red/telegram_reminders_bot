@@ -23,6 +23,56 @@ class TestCaseCommon(TestCase):
     def test_datetime_to_str(self) -> None:
         now: datetime = datetime(year=2025, month=8, day=9, hour=22, minute=0, second=0)
         self.assertEqual("09.08.2025 22:00", datetime_to_str(now))
+        base_dt: datetime = datetime(
+            year=2025, month=8, day=9, hour=22, minute=0, second=0
+        )
+
+        # Формат: (dt, other_dt, expected_result, название подтеста)
+        test_cases = [
+            # 1. Без other_dt
+            (
+                base_dt,
+                None,
+                "09.08.2025 22:00",
+                "Без other_dt (без секунд)",
+            ),
+            (
+                base_dt.replace(second=10),
+                None,
+                "09.08.2025 22:00:10",
+                "Без other_dt (с секундами)",
+            ),
+            # 2. С совпадающей датой
+            (
+                base_dt,
+                base_dt,
+                "22:00",
+                "Совпадающие даты (без секунд)",
+            ),
+            (
+                base_dt.replace(second=10),
+                base_dt.replace(second=10),
+                "22:00:10",
+                "Совпадающие даты (с секундами)",
+            ),
+            # 3. С несовпадающей датой
+            (
+                base_dt,
+                base_dt.replace(day=10),
+                "09.08.2025 22:00",
+                "Разные даты (без секунд)",
+            ),
+            (
+                base_dt.replace(second=10),
+                base_dt.replace(day=10),
+                "09.08.2025 22:00:10",
+                "Разные даты (с секундами)",
+            ),
+        ]
+
+        for dt, other_dt, expected, msg in test_cases:
+            with self.subTest(msg=msg, dt=dt, other_dt=other_dt):
+                self.assertEqual(expected, datetime_to_str(dt, other_dt))
 
         now = now.replace(second=10)
         self.assertEqual("09.08.2025 22:00:10", datetime_to_str(now))
