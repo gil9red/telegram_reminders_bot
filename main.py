@@ -45,6 +45,7 @@ def process_check_reminders(bot: Bot):
             )
             lines: list[str] = [
                 f"🎯 {reminder.target}",
+                "",
                 f"📅 Целевая дата: {target_datetime_str}",
             ]
 
