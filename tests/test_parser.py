@@ -7,7 +7,7 @@ __author__ = "ipetrash"
 import unittest
 from datetime import datetime, timedelta
 
-from parser import (
+from src.telegram_reminders_bot.parser import (
     TimeUnitEnum,
     TimeUnitWeekDayEnum,
     RepeatEvery,

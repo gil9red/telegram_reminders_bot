@@ -9,7 +9,7 @@ import re
 from datetime import datetime, tzinfo
 from unittest import TestCase
 
-from common import (
+from src.telegram_reminders_bot.common import (
     datetime_to_str,
     datetimes_pair_to_str,
     prepare_text,

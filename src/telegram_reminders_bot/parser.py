@@ -11,7 +11,7 @@ from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from typing import Any, Optional, Type
 
-from common import get_int_from_match
+from telegram_reminders_bot.common import get_int_from_match
 
 
 class ParserException(Exception):

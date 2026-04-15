@@ -15,10 +15,10 @@ from telegram import Bot, Message
 from telegram.ext import Updater, Defaults
 from telegram.error import BadRequest, Unauthorized
 
-import commands
-from common import datetimes_pair_to_str, prepare_text, log
-from config import TOKEN
-from db import Reminder
+from telegram_reminders_bot import commands
+from telegram_reminders_bot.common import datetimes_pair_to_str, prepare_text, log
+from telegram_reminders_bot.config import TOKEN
+from telegram_reminders_bot.db import Reminder
 
 DATA: dict[str, Any] = {
     "BOT": None,

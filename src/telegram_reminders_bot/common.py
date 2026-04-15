@@ -13,8 +13,8 @@ from logging.handlers import RotatingFileHandler
 from pathlib import Path
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
-import config
-from third_party.get_tz_from_offset__zoneinfo import get_tz as get_tz_from_offset
+from telegram_reminders_bot import config
+from telegram_reminders_bot.third_party.get_tz_from_offset__zoneinfo import get_tz as get_tz_from_offset
 
 
 def get_logger(file_name: str, dir_name: Path = config.DIR / "logs") -> logging.Logger:

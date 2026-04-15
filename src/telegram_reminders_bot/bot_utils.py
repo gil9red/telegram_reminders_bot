@@ -12,8 +12,8 @@ from zoneinfo import ZoneInfoNotFoundError
 from telegram import Update
 from telegram.ext import CallbackContext
 
-import db
-from common import prepare_text
+from telegram_reminders_bot import db
+from telegram_reminders_bot.common import prepare_text
 
 
 def log_func(log: logging.Logger):

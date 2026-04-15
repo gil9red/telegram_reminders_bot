@@ -21,9 +21,9 @@ from playhouse.sqliteq import SqliteQueueDatabase
 
 import telegram
 
-from common import convert_tz, get_tz
-from parser import TimeUnit, RepeatEvery, get_nearest_datetime
-from third_party.db_peewee_meta_model import MetaModel
+from telegram_reminders_bot.common import convert_tz, get_tz
+from telegram_reminders_bot.parser import TimeUnit, RepeatEvery, get_nearest_datetime
+from telegram_reminders_bot.third_party.db_peewee_meta_model import MetaModel
 
 
 DIR = Path(__file__).resolve().parent

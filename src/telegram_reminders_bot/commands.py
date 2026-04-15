@@ -17,7 +17,7 @@ from telegram.ext import (
 )
 from telegram.error import BadRequest
 
-from common import (
+from telegram_reminders_bot.common import (
     log,
     datetimes_pair_to_str,
     prepare_text,
@@ -25,10 +25,10 @@ from common import (
     convert_tz,
     get_tz,
 )
-from bot_utils import log_func, reply_error, get_blockquote_html
-from db import Reminder, Chat, User
+from telegram_reminders_bot.bot_utils import log_func, reply_error, get_blockquote_html
+from telegram_reminders_bot.db import Reminder, Chat, User
 
-from parser import (
+from telegram_reminders_bot.parser import (
     TimeUnit,
     ParseResult,
     Defaults,
@@ -36,7 +36,7 @@ from parser import (
     parse_command,
     get_nearest_datetime,
 )
-from regexp_patterns import (
+from telegram_reminders_bot.regexp_patterns import (
     COMMAND_START,
     COMMAND_HELP,
     COMMAND_ADD,
@@ -49,8 +49,8 @@ from regexp_patterns import (
     PATTERN_DELETE_MESSAGE,
     fill_string_pattern,
 )
-from third_party.telegram_bot_pagination import InlineKeyboardPaginator
-from third_party.is_equal_inline_keyboards import is_equal_inline_keyboards
+from telegram_reminders_bot.third_party.telegram_bot_pagination import InlineKeyboardPaginator
+from telegram_reminders_bot.third_party.is_equal_inline_keyboards import is_equal_inline_keyboards
 
 INLINE_BUTTON_TEXT_DELETE: str = "❌ Удалить"
 INLINE_BUTTON_TEXT_YES: str = "✅ Да"

@@ -5,7 +5,7 @@ __author__ = "ipetrash"
 
 
 import re
-from third_party.regexp import fill_string_pattern
+from telegram_reminders_bot.third_party.regexp import fill_string_pattern
 
 
 PATTERN_REMINDER_PAGE: re.Pattern = re.compile(r"^reminder page=(?P<page>\d+)$")

@@ -5,14 +5,12 @@ __author__ = "ipetrash"
 
 
 import unittest
-from datetime import datetime, timedelta
 
 from peewee import SqliteDatabase
 
-from db import (
+from src.telegram_reminders_bot.db import (
     BaseModel,
     # TODO:
-    Reminder,
     db,
 )
 
