@@ -3,7 +3,7 @@
 
 Зависимости:
 * Python 3.10
-* [requirements.txt](requirements.txt)
+* [pyproject.toml](pyproject.toml)
 
 Токен:
 * Задавать в переменной окружения `TOKEN`
