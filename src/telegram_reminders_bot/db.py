@@ -25,7 +25,6 @@ from telegram_reminders_bot.common import convert_tz, get_tz
 from telegram_reminders_bot.parser import TimeUnit, RepeatEvery, get_nearest_datetime
 from telegram_reminders_bot.third_party.db_peewee_meta_model import MetaModel
 
-
 DIR = Path(__file__).resolve().parent
 DB_DIR_NAME = DIR / "database"
 DB_FILE_NAME = str(DB_DIR_NAME / "database.sqlite")
@@ -225,9 +224,7 @@ class Reminder(BaseModel):
         if now_utc >= target_datetime_utc:
             repeat_every: RepeatEvery | None = self.get_repeat_every()
             if repeat_every:
-                target_datetime_utc = repeat_every.get_next_datetime(
-                    target_datetime_utc
-                )
+                target_datetime_utc = repeat_every.get_next_datetime(now_utc)
             else:
                 self.delete_instance()
                 return False
