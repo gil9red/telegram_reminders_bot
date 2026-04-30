@@ -7,7 +7,6 @@ __author__ = "ipetrash"
 import os
 import time
 
-from datetime import datetime
 from threading import Thread
 from typing import Any
 
@@ -16,7 +15,12 @@ from telegram.ext import Updater, Defaults
 from telegram.error import BadRequest, Unauthorized
 
 from telegram_reminders_bot import commands
-from telegram_reminders_bot.common import datetimes_pair_to_str, prepare_text, log
+from telegram_reminders_bot.common import (
+    datetimes_pair_to_str,
+    prepare_text,
+    log,
+    get_utc_naive_now,
+)
 from telegram_reminders_bot.config import TOKEN
 from telegram_reminders_bot.db import Reminder
 
@@ -26,7 +30,7 @@ DATA: dict[str, Any] = {
 
 
 def process_check_reminders(bot: Bot):
-    now_utc = datetime.utcnow()
+    now_utc = get_utc_naive_now()
 
     query = (
         Reminder.select()
@@ -67,7 +71,7 @@ def process_check_reminders(bot: Bot):
                         reply_to_message_id=reply_to_message_id,
                     )
                     reminder.last_send_message_id = rs.message_id
-                    reminder.last_send_datetime_utc = datetime.utcnow()
+                    reminder.last_send_datetime_utc = get_utc_naive_now()
                     reminder.save()
 
                     break

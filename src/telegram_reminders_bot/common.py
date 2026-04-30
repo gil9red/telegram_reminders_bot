@@ -8,7 +8,7 @@ import logging
 import re
 import sys
 
-from datetime import datetime, tzinfo
+from datetime import datetime, tzinfo, timezone
 from logging.handlers import RotatingFileHandler
 from pathlib import Path
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
@@ -86,6 +86,10 @@ def convert_tz(dt: datetime, from_tz: tzinfo, to_tz: tzinfo) -> datetime:
         .astimezone(to_tz)  # Изменение времени и часового пояса (дата изменилась)
         .replace(tzinfo=None)  # Удаление часового пояса (дата не меняется)
     )
+
+
+def get_utc_naive_now() -> datetime:
+    return datetime.now(timezone.utc).replace(tzinfo=None)
 
 
 def get_tz(value: str) -> tzinfo:

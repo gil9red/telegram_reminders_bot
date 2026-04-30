@@ -21,7 +21,7 @@ from playhouse.sqliteq import SqliteQueueDatabase
 
 import telegram
 
-from telegram_reminders_bot.common import convert_tz, get_tz
+from telegram_reminders_bot.common import convert_tz, get_tz, get_utc_naive_now
 from telegram_reminders_bot.parser import TimeUnit, RepeatEvery, get_nearest_datetime
 from telegram_reminders_bot.third_party.db_peewee_meta_model import MetaModel
 
@@ -122,11 +122,11 @@ class Chat(BaseModel):
 
 
 class Reminder(BaseModel):
-    create_datetime_utc: datetime = DateTimeField(default=datetime.utcnow)
+    create_datetime_utc: datetime = DateTimeField(default=get_utc_naive_now)
     original_message_text: str = TextField()
     original_message_id: int = IntegerField()
     target: str = TextField()
-    target_datetime_utc: datetime = DateTimeField(default=datetime.utcnow)
+    target_datetime_utc: datetime = DateTimeField(default=get_utc_naive_now)
     next_send_datetime_utc: datetime = DateTimeField()
     repeat_every: str = TextField(null=True)
     repeat_before: str = TextField(null=True)

@@ -24,6 +24,7 @@ from telegram_reminders_bot.common import (
     get_int_from_match,
     convert_tz,
     get_tz,
+    get_utc_naive_now,
 )
 from telegram_reminders_bot.bot_utils import log_func, reply_error, get_blockquote_html
 from telegram_reminders_bot.db import Reminder, Chat, User
@@ -270,7 +271,7 @@ def on_tz(update: Update, context: CallbackContext) -> None:
     # Получение и проверка часового пояса
     tz_chat: tzinfo = get_tz(value)
 
-    dt_utc: datetime = datetime.utcnow()
+    dt_utc: datetime = get_utc_naive_now()
     dt: datetime = convert_tz(
         dt=dt_utc,
         from_tz=timezone.utc,
@@ -322,7 +323,7 @@ def add_reminder(command: str, update: Update) -> None:
     chat = Chat.get_from(update.effective_chat)
     tz_chat: tzinfo = get_tz(chat.tz)
 
-    now_utc: datetime = datetime.utcnow()
+    now_utc: datetime = get_utc_naive_now()
 
     # Время в часовом поясе пользователя
     now_dt_chat: datetime = convert_tz(
