@@ -22,7 +22,13 @@ from playhouse.sqliteq import SqliteQueueDatabase
 import telegram
 
 from telegram_reminders_bot.common import convert_tz, get_tz, get_utc_naive_now
-from telegram_reminders_bot.parser import TimeUnit, RepeatEvery, get_nearest_datetime
+from telegram_reminders_bot.parser import (
+    TimeUnit,
+    RepeatEvery,
+    ParseResult,
+    get_nearest_datetime,
+    parse_command,
+)
 from telegram_reminders_bot.third_party.db_peewee_meta_model import MetaModel
 
 DIR = Path(__file__).resolve().parent
@@ -223,13 +229,26 @@ class Reminder(BaseModel):
 
         if now_utc >= target_datetime_utc:
             repeat_every: RepeatEvery | None = self.get_repeat_every()
-            if repeat_every:
-                target_datetime_utc = repeat_every.get_next_datetime(now_utc)
-            else:
+            if repeat_every is None:
                 self.delete_instance()
                 return False
 
-        self.target_datetime_utc = target_datetime_utc
+            while target_datetime_utc < now_utc:
+                target_datetime_utc = repeat_every.get_next_datetime(
+                    target_datetime_utc
+                )
+
+            command: str = self.original_message_text
+            parse_result: ParseResult = parse_command(command, dt=now_utc)
+            parse_target_dt: datetime = parse_result.target_datetime
+
+            target_datetime_utc = target_datetime_utc.replace(
+                minute=parse_target_dt.minute,
+                second=parse_target_dt.second,
+                microsecond=0,
+            )
+
+            self.target_datetime_utc = target_datetime_utc
 
         # Следующая дата отправки
         self.next_send_datetime_utc = get_nearest_datetime(
