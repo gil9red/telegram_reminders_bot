@@ -332,12 +332,8 @@ def add_reminder(command: str, update: Update) -> None:
         to_tz=tz_chat,
     )
 
-    defaults = Defaults(hours=10, minutes=0)
-
     try:
-        parse_result: ParseResult = parse_command(
-            command, dt=now_dt_chat, defaults=defaults
-        )
+        parse_result: ParseResult = parse_command(command, dt=now_dt_chat)
     except Exception as e:
         log.exception("Error on parse_command:")
         message.reply_html(

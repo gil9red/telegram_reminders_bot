@@ -345,7 +345,7 @@ def parse_month(month_value: str) -> int | None:
 def parse_command(
     command: str,
     dt: datetime,
-    defaults: Defaults,
+    defaults: Defaults = Defaults(hours=10, minutes=0),
 ) -> ParseResult:
     command: str = command.strip()
 
