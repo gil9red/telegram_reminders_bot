@@ -50,8 +50,12 @@ from telegram_reminders_bot.regexp_patterns import (
     PATTERN_DELETE_MESSAGE,
     fill_string_pattern,
 )
-from telegram_reminders_bot.third_party.telegram_bot_pagination import InlineKeyboardPaginator
-from telegram_reminders_bot.third_party.is_equal_inline_keyboards import is_equal_inline_keyboards
+from telegram_reminders_bot.third_party.telegram_bot_pagination import (
+    InlineKeyboardPaginator,
+)
+from telegram_reminders_bot.third_party.is_equal_inline_keyboards import (
+    is_equal_inline_keyboards,
+)
 
 INLINE_BUTTON_TEXT_DELETE: str = "❌ Удалить"
 INLINE_BUTTON_TEXT_YES: str = "✅ Да"
